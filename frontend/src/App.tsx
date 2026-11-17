@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+// MapLibre runs tile parsing in a Web Worker loaded from a separate file. Vite bundles the main
+// library into /assets/index-*.js, so the default worker URL points to a file that does not exist
+// (nginx then returns index.html and the map stays blank). Emit the worker as an asset and use it.
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
+
+maplibregl.setWorkerUrl(workerUrl)
 
 // Ulaanbaatar city centre (Sükhbaatar Square)
 const UB_CENTER: [number, number] = [106.9177, 47.9186]
