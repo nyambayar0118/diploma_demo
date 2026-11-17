@@ -1,0 +1,54 @@
+# Whole system on one machine (СНШ08). Run from the repo root:
+#   docker compose -f infra/docker-compose.yml --env-file .env up --build
+name: routeplanner
+
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    environment:
+      POSTGRES_DB: ${DB_NAME:-routeplanner}
+      POSTGRES_USER: ${DB_USER:-routeplanner}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-routeplanner}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"   # only reachable from this computer (for IntelliJ / DBeaver)
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  ml:
+    build: ../ml
+    expose:
+      - "8000"
+
+  backend:
+    build: ../backend
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-routeplanner}
+      DB_USER: ${DB_USER:-routeplanner}
+      DB_PASSWORD: ${DB_PASSWORD:-routeplanner}
+      ML_URL: http://ml:8000
+    depends_on:
+      db:
+        condition: service_healthy
+      ml:
+        condition: service_started
+    expose:
+      - "8080"
+
+  web:
+    build:
+      context: ..
+      dockerfile: infra/nginx/Dockerfile
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    volumes:
+      - ../data/tiles:/srv/tiles:ro
+    depends_on:
+      - backend
+
+volumes:
+  db-data:

@@ -1,0 +1,21 @@
+.env
+# Java
+backend/target/
+*.class
+# Node
+frontend/node_modules/
+frontend/dist/
+# Python
+__pycache__/
+*.pyc
+.venv/
+ml/models/
+# Data (large downloads and generated files)
+data/raw/
+data/tiles/*.pmtiles
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
