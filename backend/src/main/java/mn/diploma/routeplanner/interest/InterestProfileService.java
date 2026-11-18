@@ -9,12 +9,17 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import mn.diploma.routeplanner.auth.ConsentDataType;
 import mn.diploma.routeplanner.auth.ConsentService;
 import mn.diploma.routeplanner.common.ApiException;
+import mn.diploma.routeplanner.interaction.InteractionLoggedEvent;
+import mn.diploma.routeplanner.interaction.InteractionType;
 import mn.diploma.routeplanner.place.CategoryLookup;
 import mn.diploma.routeplanner.place.CategoryLookup.Subcategory;
 
@@ -100,6 +105,40 @@ public class InterestProfileService {
             }
         }
         return new OnboardingStatus(true, categoryCodes.stream().sorted().toList());
+    }
+
+    /**
+     * Signal strength s of each interaction (positive = more interest, negative = less).
+     * The weight moves toward the target t (1 for positive, 0 for negative):  w <- (1 - eta*|s|) * w + eta*|s| * t
+     */
+    static final double LEARNING_RATE = 0.1;
+    static final Map<InteractionType, Double> SIGNALS = Map.of(
+            InteractionType.VIEW, 0.1,
+            InteractionType.ACCEPT, 0.4,
+            InteractionType.REJECT, -0.3,
+            InteractionType.SAVE, 0.6,
+            InteractionType.UNSAVE, -0.3,
+            InteractionType.HIDE, -0.8,
+            InteractionType.UNHIDE, 0.3,
+            InteractionType.OPEN_IN_MAPS, 0.8,
+            InteractionType.VISIT, 1.0);
+
+    /** Updates the weight of the place's category after each interaction (ДШ03), off the request thread. */
+    @Async
+    @TransactionalEventListener(fallbackExecution = true)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void onInteraction(InteractionLoggedEvent event) {
+        Double s = SIGNALS.get(event.type());
+        if (s == null || event.placeId() == null || !consents.isGranted(event.userId(), ConsentDataType.INTERESTS)) {
+            return;
+        }
+        categories.categoryIdOfPlace(event.placeId()).ifPresent(categoryId -> {
+            InterestWeight row = weights.findByUserIdAndCategoryId(event.userId(), categoryId)
+                    .orElseGet(() -> weights.save(new InterestWeight(event.userId(), categoryId, WEIGHT_OTHER)));
+            double step = LEARNING_RATE * Math.abs(s);
+            double target = s > 0 ? 1.0 : 0.0;
+            row.setWeight((1 - step) * row.getWeight() + step * target);
+        });
     }
 
     @Transactional(readOnly = true)

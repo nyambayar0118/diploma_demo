@@ -19,6 +19,12 @@ public class CategoryLookup {
         this.jdbc = jdbc;
     }
 
+    /** Category id of an active place, if the place exists. */
+    public java.util.Optional<Long> categoryIdOfPlace(long placeId) {
+        return jdbc.query("SELECT category_id FROM places WHERE id = ? AND is_active",
+                (rs, i) -> rs.getLong(1), placeId).stream().findFirst();
+    }
+
     public List<Subcategory> recommendableSubcategories() {
         return jdbc.query("""
                 SELECT c.id, c.code, m.id AS main_id, m.code AS main_code
