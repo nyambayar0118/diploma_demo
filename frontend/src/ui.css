@@ -1,0 +1,88 @@
+:root {
+  --c-bg: #f6f7f9;
+  --c-surface: #ffffff;
+  --c-text: #1d2433;
+  --c-muted: #5f6b7a;
+  --c-border: #dde2e8;
+  --c-primary: #1f6feb;
+  --c-primary-dark: #1858c0;
+  --c-danger: #c92a2a;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(16, 24, 40, 0.12), 0 1px 2px rgba(16, 24, 40, 0.06);
+  color: var(--c-text);
+}
+
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; height: 100%; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+body { background: var(--c-bg); }
+a { color: var(--c-primary); }
+
+/* ---------- Page layout (auth, onboarding, profile) ---------- */
+.page { min-height: 100%; display: flex; justify-content: center; padding: 32px 16px; }
+.card {
+  width: 100%; max-width: 440px; background: var(--c-surface); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 28px 24px; align-self: flex-start;
+}
+.card.wide { max-width: 720px; }
+.card h1 { margin: 0 0 4px; font-size: 22px; }
+.card .lead { margin: 0 0 20px; color: var(--c-muted); font-size: 14px; }
+.card h2 { font-size: 16px; margin: 24px 0 8px; }
+
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; font-size: 14px; }
+.field label { font-weight: 600; }
+.field input, .field select {
+  font: inherit; padding: 10px 12px; border: 1px solid var(--c-border); border-radius: 8px; background: white;
+}
+.field input:focus, .field select:focus { outline: 2px solid var(--c-primary); outline-offset: -1px; }
+.field .hint { color: var(--c-muted); font-size: 12px; }
+
+.btn {
+  font: inherit; font-weight: 600; border: none; border-radius: 8px; padding: 10px 16px; cursor: pointer;
+  background: var(--c-primary); color: white;
+}
+.btn:hover { background: var(--c-primary-dark); }
+.btn:disabled { opacity: 0.55; cursor: default; }
+.btn.block { width: 100%; }
+.btn.secondary { background: #eef2f7; color: var(--c-text); }
+.btn.secondary:hover { background: #e2e8f0; }
+.btn.danger { background: transparent; color: var(--c-danger); border: 1px solid #f1c0c0; }
+
+.error { background: #fff0f0; color: var(--c-danger); border-radius: 8px; padding: 10px 12px; font-size: 14px; margin-bottom: 14px; }
+.success { background: #ebfbee; color: #2b8a3e; border-radius: 8px; padding: 10px 12px; font-size: 14px; margin-bottom: 14px; }
+.muted { color: var(--c-muted); font-size: 14px; }
+.row { display: flex; gap: 12px; align-items: center; justify-content: space-between; }
+
+/* ---------- Category chips (onboarding) ---------- */
+.group { margin-bottom: 16px; }
+.group-title { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; margin-bottom: 8px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  font: inherit; font-size: 14px; padding: 7px 12px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--c-border); background: white; color: var(--c-text);
+}
+.chip.on { background: var(--c-primary); border-color: var(--c-primary); color: white; }
+
+/* ---------- Toggles (consents) ---------- */
+.toggle { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--c-border); }
+.toggle:first-of-type { border-top: none; }
+.toggle input { width: 18px; height: 18px; margin-top: 2px; flex: none; }
+.toggle .t-title { font-weight: 600; font-size: 14px; }
+.toggle .t-desc { color: var(--c-muted); font-size: 13px; }
+
+.steps { display: flex; gap: 6px; margin-bottom: 18px; }
+.steps span { height: 4px; flex: 1; border-radius: 4px; background: var(--c-border); }
+.steps span.done { background: var(--c-primary); }
+
+/* ---------- Map page ---------- */
+.map { position: absolute; inset: 0; }
+.topbar {
+  position: absolute; top: 10px; left: 10px; right: 56px; display: flex; justify-content: space-between;
+  align-items: center; gap: 8px; pointer-events: none;
+}
+.topbar > * { pointer-events: auto; }
+.brand { background: white; border-radius: 10px; padding: 8px 12px; box-shadow: var(--shadow); font-weight: 700; font-size: 15px; }
+.avatar {
+  width: 38px; height: 38px; border-radius: 50%; background: var(--c-primary); color: white; display: grid;
+  place-items: center; font-weight: 700; text-decoration: none; box-shadow: var(--shadow);
+}

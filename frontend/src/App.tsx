@@ -1,70 +1,31 @@
-import { useEffect, useRef, useState } from 'react'
-import * as maplibregl from 'maplibre-gl'
-import 'maplibre-gl/dist/maplibre-gl.css'
-import { addPlacesLayer } from './places'
-import { basemapStyle } from './basemap'
-// MapLibre runs tile parsing in a Web Worker loaded from a separate file. Vite bundles the main
-// library into /assets/index-*.js, so the default worker URL points to a file that does not exist
-// (nginx then returns index.html and the map stays blank). Emit the worker as an asset and use it.
-import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
+import type { ReactNode } from 'react'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
+import { AuthProvider, useAuth } from './auth'
+import MapPage from './pages/MapPage'
+import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
+import OnboardingPage from './pages/OnboardingPage'
+import ProfilePage from './pages/ProfilePage'
 
-maplibregl.setWorkerUrl(workerUrl)
-
-// Ulaanbaatar city centre (Sükhbaatar Square)
-const UB_CENTER: [number, number] = [106.9177, 47.9186]
-
-type Health = { status: string; database?: string; postgis?: string; ml?: string }
+function RequireAuth({ children }: { children: ReactNode }) {
+  const { user, loading } = useAuth()
+  if (loading) return null
+  return user ? children : <Navigate to="/login" replace />
+}
 
 export default function App() {
-  const mapContainer = useRef<HTMLDivElement>(null)
-  const [health, setHealth] = useState<Health | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!mapContainer.current) return
-    let map: maplibregl.Map | null = null
-    let cancelled = false
-    basemapStyle().then((style) => {
-      if (cancelled || !mapContainer.current) return
-      map = new maplibregl.Map({ container: mapContainer.current, style, center: UB_CENTER, zoom: 12 })
-      map.addControl(new maplibregl.NavigationControl(), 'top-right')
-      map.addControl(new maplibregl.GeolocateControl({ trackUserLocation: false }), 'top-right')
-      const m = map
-      m.on('load', () => addPlacesLayer(m))
-    })
-    return () => {
-      cancelled = true
-      map?.remove()
-    }
-  }, [])
-
-  useEffect(() => {
-    fetch('/api/health')
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
-      .then(setHealth)
-      .catch((e: Error) => setError(e.message))
-  }, [])
-
   return (
-    <>
-      <div ref={mapContainer} style={{ position: 'absolute', inset: 0 }} />
-      <div
-        style={{
-          position: 'absolute', top: 10, left: 10, padding: '8px 12px', borderRadius: 8,
-          background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,.3)', fontSize: 14,
-        }}
-      >
-        <strong>Системийн төлөв</strong>
-        <div>
-          {error && <span style={{ color: '#c00' }}>Сервертэй холбогдсонгүй ({error})</span>}
-          {!error && !health && 'Шалгаж байна…'}
-          {health && (
-            <>
-              API: {health.status} · DB: {health.database ?? '-'} · ML: {health.ml ?? '-'}
-            </>
-          )}
-        </div>
-      </div>
-    </>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<MapPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/onboarding" element={<RequireAuth><OnboardingPage /></RequireAuth>} />
+          <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
