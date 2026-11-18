@@ -7,6 +7,10 @@ spring:
     password: ${DB_PASSWORD:routeplanner}
   flyway:
     enabled: true
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate   # Flyway owns the schema; Hibernate only checks that entities match it
 
 server:
   port: 8080
@@ -15,6 +19,10 @@ server:
 app:
   ml:
     base-url: ${ML_URL:http://localhost:8000}
+  jwt:
+    # At least 32 characters. Set JWT_SECRET in .env for anything other than local development.
+    secret: ${JWT_SECRET:dev-only-secret-change-me-0123456789abcdef}
+    ttl: ${JWT_TTL:P7D}
 
 management:
   endpoints:
