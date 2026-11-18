@@ -5,9 +5,15 @@ import { useAuth } from '../auth'
 import { describeOpeningHours, type OpeningInfo } from '../openingHours'
 import { MAIN_CATEGORY_COLORS } from '../places'
 
-type Props = { placeId: number; recommendationId?: number; onClose: () => void }
+type Props = {
+  placeId: number
+  recommendationId?: number
+  /** "Маршрутад нэмэх" while a planned route can still take more stops (АШ15). */
+  onAddToRoute?: () => void
+  onClose: () => void
+}
 
-export default function PlaceSheet({ placeId, recommendationId, onClose }: Props) {
+export default function PlaceSheet({ placeId, recommendationId, onAddToRoute, onClose }: Props) {
   const { user } = useAuth()
   const [place, setPlace] = useState<PlaceDetails | null>(null)
   const [mark, setMark] = useState<MarkType | null>(null)
@@ -93,6 +99,7 @@ export default function PlaceSheet({ placeId, recommendationId, onClose }: Props
 
           <div className="sheet-actions">
             <button className="btn" onClick={openInMaps}>Google Maps-ээр очих</button>
+            {onAddToRoute && <button className="btn secondary" onClick={onAddToRoute}>＋ Маршрутад нэмэх</button>}
             {user ? (
               <>
                 <button className={`btn ${mark === 'SAVED' ? '' : 'secondary'}`} onClick={() => toggleMark('SAVED')}>

@@ -2,13 +2,17 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { api, type Category, type PlaceSummary, type RecommendationItem } from '../api'
-import { addPlacesLayer, filterPlacesLayer, onRecommendationClick, showRecommendations } from '../places'
+import { api, ApiError, isActiveRoute, type Category, type PlaceSummary, type RecommendationItem, type RouteView,
+  type VisitResult } from '../api'
+import { addPlacesLayer, filterPlacesLayer, onRecommendationClick, onRouteStopClick, showRecommendations,
+  showRoute } from '../places'
 import { basemapStyle } from '../basemap'
 import { useAuth } from '../auth'
 import SearchBox from '../components/SearchBox'
 import PlaceSheet from '../components/PlaceSheet'
 import RecommendationPanel from '../components/RecommendationPanel'
+import RoutePanel from '../components/RoutePanel'
+import VisitPrompt from '../components/VisitPrompt'
 // MapLibre runs tile parsing in a Web Worker loaded from a separate file. Vite bundles the main
 // library into /assets/index-*.js, so the default worker URL points to a file that does not exist
 // (nginx then returns index.html and the map stays blank). Emit the worker as an asset and use it.
@@ -28,6 +32,9 @@ export default function MapPage() {
   const [category, setCategory] = useState('')
   const [showRecs, setShowRecs] = useState(false)
   const [recItems, setRecItems] = useState<RecommendationItem[]>([])
+  const [route, setRoute] = useState<RouteView | null>(null)
+  const [showRoutePanel, setShowRoutePanel] = useState(false)
+  const [mapReady, setMapReady] = useState(false)
   const selectedId = params.get('place') ? Number(params.get('place')) : null
 
   // The selected place lives in the URL (?place=123), so it can be linked to and survives reloads
@@ -59,6 +66,8 @@ export default function MapPage() {
       m.on('load', () => {
         addPlacesLayer(m, (id) => !picking.current && selectRef.current(id))
         onRecommendationClick(m, (id) => !picking.current && selectRef.current(id))
+        onRouteStopClick(m, (id) => !picking.current && selectRef.current(id))
+        setMapReady(true)
       })
     })
     return () => {
@@ -67,6 +76,63 @@ export default function MapPage() {
       mapRef.current = null
     }
   }, [])
+
+  // An unfinished route from an earlier visit (e.g. the user went to Google Maps and came back)
+  useEffect(() => {
+    if (!user) {
+      setRoute(null)
+      return
+    }
+    api<RouteView[]>('/api/routes')
+      .then((routes) => setRoute(routes.find((r) => isActiveRoute(r)) ?? null))
+      .catch(() => undefined)
+  }, [user])
+
+  // Draw the route while its panel is open
+  const fitRoute = useRef(true)
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !mapReady) return
+    showRoute(map, showRoutePanel ? route : null, fitRoute.current)
+    fitRoute.current = false
+  }, [route, showRoutePanel, mapReady])
+
+  const openRoute = (r: RouteView) => {
+    fitRoute.current = true
+    setRoute(r)
+    setShowRoutePanel(true)
+  }
+
+  const routeCreated = (r: RouteView) => {
+    setShowRecs(false)
+    updateRecs([])
+    select(null)
+    openRoute(r)
+  }
+
+  const visitAnswered = (result: VisitResult) => {
+    api<RouteView>(`/api/routes/${result.routeId}`).then((r) => {
+      // When the last stop is answered the route is completed: show it so the user can rate it
+      if (r.status === 'COMPLETED') openRoute(r)
+      else setRoute(r)
+    }).catch(() => undefined)
+  }
+
+  const routeHasPlace = route?.stops.some((s) => s.placeId === selectedId) ?? false
+  const canAddToRoute = route?.status === 'CREATED' && route.stops.length < 4 && !routeHasPlace
+  const addToRoute = async () => {
+    if (!route || selectedId == null) return
+    try {
+      const r = await api<RouteView>(`/api/routes/${route.id}/stops`, {
+        method: 'PATCH',
+        body: { op: 'ADD', placeId: selectedId, recommendationId: recItems.find((i) => i.placeId === selectedId)?.recommendationId },
+      })
+      select(null)
+      openRoute(r)
+    } catch (err) {
+      window.alert(err instanceof ApiError ? err.message : 'Сервертэй холбогдсонгүй')
+    }
+  }
 
   const changeCategory = (code: string) => {
     setCategory(code)
@@ -117,6 +183,15 @@ export default function MapPage() {
     if (mapRef.current) showRecommendations(mapRef.current, items)
   }
 
+  const routeChanged = (r: RouteView | null) => {
+    setRoute(r)
+  }
+
+  const closeRoutePanel = () => {
+    setShowRoutePanel(false)
+    if (!isActiveRoute(route)) setRoute(null)
+  }
+
   const closeRecs = () => {
     setShowRecs(false)
     updateRecs([])
@@ -143,18 +218,30 @@ export default function MapPage() {
           <Link className="btn" to="/login">Нэвтрэх</Link>
         )}
       </div>
+      {user && <VisitPrompt onAnswered={visitAnswered} />}
       {showRecs && (
         <RecommendationPanel mapCenter={center} showOrigin={showOrigin} pickOnMap={pickOnMap}
-                             onResults={updateRecs} onClose={closeRecs}
+                             onResults={updateRecs} onClose={closeRecs} onRoute={routeCreated}
                              onOpen={(it) => select(it.placeId)} />
       )}
-      {!showRecs && selectedId == null && (
-        user
-          ? <button className="btn fab" onClick={() => setShowRecs(true)}>✨ Санал болгох</button>
-          : <Link className="btn fab" to="/login">✨ Санал авахын тулд нэвтрэх</Link>
+      {showRoutePanel && route && !showRecs && (
+        <RoutePanel route={route} onChange={routeChanged} onSelectPlace={(id) => select(id)} onClose={closeRoutePanel} />
+      )}
+      {!showRecs && !showRoutePanel && selectedId == null && (
+        user ? (
+          <div className="fabs">
+            {isActiveRoute(route) && (
+              <button className="btn secondary" onClick={() => openRoute(route)}>🗺 Миний маршрут</button>
+            )}
+            <button className="btn" onClick={() => setShowRecs(true)}>✨ Санал болгох</button>
+          </div>
+        ) : (
+          <Link className="btn fab" to="/login">✨ Санал авахын тулд нэвтрэх</Link>
+        )
       )}
       {selectedId != null && (
         <PlaceSheet placeId={selectedId} onClose={() => select(null)}
+                    onAddToRoute={canAddToRoute ? addToRoute : undefined}
                     recommendationId={recItems.find((r) => r.placeId === selectedId)?.recommendationId} />
       )}
     </>

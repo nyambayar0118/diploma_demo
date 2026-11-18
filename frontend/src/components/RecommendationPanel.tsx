@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api, ApiError, logInteraction, type Preferences, type RecommendationBatch, type RecommendationItem,
-  type TransportMode } from '../api'
+  type RouteView, type TransportMode } from '../api'
 import { TRANSPORT_LABELS } from '../categoryLabels'
 import { MAIN_CATEGORY_COLORS } from '../places'
 
@@ -14,8 +14,11 @@ type Props = {
   pickOnMap: () => Promise<LatLng>
   onResults: (items: RecommendationItem[]) => void
   onOpen: (item: RecommendationItem) => void
+  onRoute: (route: RouteView) => void
   onClose: () => void
 }
+
+const MAX_STOPS = 4
 
 const DURATIONS = [60, 120, 180, 240, 360]
 
@@ -40,7 +43,7 @@ function distanceText(m: number) {
   return m < 1000 ? `${m} м` : `${(m / 1000).toFixed(1)} км`
 }
 
-export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, onResults, onOpen, onClose }: Props) {
+export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, onResults, onOpen, onRoute, onClose }: Props) {
   const [minutes, setMinutes] = useState(180)
   const [mode, setMode] = useState<TransportMode>('WALKING')
   const [batch, setBatch] = useState<RecommendationBatch | null>(null)
@@ -49,6 +52,8 @@ export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, 
   const [picking, setPicking] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  // Places picked for a route (recommendation ids, in the order picked)
+  const [picked, setPicked] = useState<number[]>([])
 
   useEffect(() => {
     api<Preferences>('/api/users/me/preferences').then((p) => {
@@ -101,6 +106,7 @@ export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, 
       })
       setBatch(b)
       setItems(b.items)
+      setPicked([])
       onResults(b.items)
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Сервертэй холбогдсонгүй')
@@ -109,7 +115,36 @@ export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, 
     }
   }
 
+  const togglePick = (item: RecommendationItem) => {
+    setPicked((p) => p.includes(item.recommendationId)
+      ? p.filter((id) => id !== item.recommendationId)
+      : p.length < MAX_STOPS ? [...p, item.recommendationId] : p)
+  }
+
+  /** With no picked places the server chooses 2-3 itself (automatic route). */
+  const createRoute = async (auto: boolean) => {
+    if (!origin) return
+    setBusy(true)
+    setError(null)
+    try {
+      const stops = auto ? [] : picked
+        .map((id) => items.find((i) => i.recommendationId === id))
+        .filter((i): i is RecommendationItem => !!i)
+        .map((i) => ({ placeId: i.placeId, recommendationId: i.recommendationId }))
+      const route = await api<RouteView>('/api/routes', {
+        method: 'POST',
+        body: { lat: origin.lat, lng: origin.lng, transportMode: mode, timeBudgetMinutes: minutes, stops },
+      })
+      onRoute(route)
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Сервертэй холбогдсонгүй')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const reject = (item: RecommendationItem) => {
+    setPicked((p) => p.filter((id) => id !== item.recommendationId))
     logInteraction(item.placeId, 'REJECT', item.recommendationId)
     const rest = items.filter((i) => i.recommendationId !== item.recommendationId)
     setItems(rest)
@@ -174,10 +209,31 @@ export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, 
                     <span className={`rec-reason ${it.exploration ? 'explore' : ''}`}>{it.reason}</span>
                   </span>
                 </button>
+                <button type="button" className={`rec-add ${picked.includes(it.recommendationId) ? 'on' : ''}`}
+                        title={picked.includes(it.recommendationId) ? 'Маршрутаас хасах' : 'Маршрутад нэмэх'}
+                        disabled={!picked.includes(it.recommendationId) && picked.length >= MAX_STOPS}
+                        onClick={() => togglePick(it)}>
+                  {picked.includes(it.recommendationId) ? picked.indexOf(it.recommendationId) + 1 : '+'}
+                </button>
                 <button type="button" className="rec-x" title="Сонирхохгүй" onClick={() => reject(it)}>✕</button>
               </li>
             ))}
           </ol>
+          {items.length > 0 && (
+            <div className="route-bar">
+              <span className="muted" style={{ fontSize: 12 }}>
+                {picked.length === 0
+                  ? '“+” дарж маршрутад 1–4 газар сонгох, эсвэл автоматаар гаргах'
+                  : `${picked.length} газар сонгосон (дээд тал нь ${MAX_STOPS})`}
+              </span>
+              <div className="row">
+                <button className="btn secondary" disabled={busy} onClick={() => createRoute(true)}>Автомат маршрут</button>
+                <button className="btn" disabled={busy || picked.length === 0} onClick={() => createRoute(false)}>
+                  Маршрут үүсгэх{picked.length > 0 ? ` (${picked.length})` : ''}
+                </button>
+              </div>
+            </div>
+          )}
         </>
       )}
     </aside>

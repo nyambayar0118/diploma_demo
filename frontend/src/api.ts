@@ -165,3 +165,69 @@ export type RecommendationBatch = {
   transportMode: TransportMode
   items: RecommendationItem[]
 }
+
+// ---- Routes ----
+export type RouteStatus = 'CREATED' | 'OPENED_IN_MAPS' | 'COMPLETED' | 'CANCELLED'
+export type MapsLink = { url: string; mode: TransportMode; legIndex: number }
+
+export type RouteStop = {
+  stopId: number
+  order: number
+  placeId: number
+  name: string
+  nameLatin?: string | null
+  category: string
+  categoryName: string
+  mainCategory: string
+  lat: number
+  lng: number
+  travelMinutes: number
+  estimatedArrival: string
+  stayMinutes: number
+  openAtArrival: 'OPEN' | 'CLOSED' | 'UNKNOWN'
+  visited: boolean
+  skipped: boolean
+}
+
+export type RouteView = {
+  id: number
+  status: RouteStatus
+  transportMode: TransportMode
+  startLat: number
+  startLng: number
+  plannedStart: string
+  timeBudgetMinutes: number
+  estimatedDurationMinutes: number
+  overBudget: boolean
+  createdAt: string
+  stops: RouteStop[]
+  mapsLinks: MapsLink[]
+  feedbackGiven: boolean
+}
+
+export type PendingVisit = {
+  stopId: number
+  routeId: number
+  stopOrder: number
+  stopCount: number
+  placeId: number
+  name: string
+  nearby: boolean
+}
+
+export type VisitResult = { stopId: number; visited: boolean; routeId: number; routeStatus: RouteStatus }
+
+export function isActiveRoute(r: RouteView | null | undefined): r is RouteView {
+  return !!r && (r.status === 'CREATED' || r.status === 'OPENED_IN_MAPS')
+}
+
+/** "2026-11-18T15:30:00" -> "15:30" */
+export function clockTime(localDateTime: string) {
+  return localDateTime.slice(11, 16)
+}
+
+export function durationText(minutes: number) {
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return h === 0 ? `${m} мин` : m === 0 ? `${h} цаг` : `${h} цаг ${m} мин`
+}

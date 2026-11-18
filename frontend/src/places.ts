@@ -118,3 +118,93 @@ export function onRecommendationClick(map: maplibregl.Map, onSelect: (placeId: n
     if (id != null) onSelect(Number(id))
   })
 }
+
+const ROUTE_SOURCE = 'route'
+const ROUTE_LINE_SOURCE = 'route-line'
+
+type RouteLike = {
+  startLat: number
+  startLng: number
+  stops: { placeId: number; order: number; lat: number; lng: number; mainCategory: string; visited: boolean; skipped: boolean }[]
+}
+
+/**
+ * The route on the map (ХХШ05): start point, numbered stops and straight dashed lines between them in visiting
+ * order. The real path is drawn by Google Maps, so the lines only show the order. null removes the route.
+ */
+export function showRoute(map: maplibregl.Map, route: RouteLike | null, fit = true) {
+  const stops = route ? [...route.stops].sort((a, b) => a.order - b.order) : []
+  const points = {
+    type: 'FeatureCollection' as const,
+    features: route ? [
+      {
+        type: 'Feature' as const,
+        geometry: { type: 'Point' as const, coordinates: [route.startLng, route.startLat] },
+        properties: { kind: 'start', n: '', mainCategory: '', done: false },
+      },
+      ...stops.map((s) => ({
+        type: 'Feature' as const,
+        geometry: { type: 'Point' as const, coordinates: [s.lng, s.lat] },
+        properties: { kind: 'stop', id: s.placeId, n: s.visited ? '✓' : String(s.order), mainCategory: s.mainCategory,
+          done: s.visited || s.skipped },
+      })),
+    ] : [],
+  }
+  const line = {
+    type: 'FeatureCollection' as const,
+    features: route && stops.length > 0 ? [{
+      type: 'Feature' as const,
+      geometry: {
+        type: 'LineString' as const,
+        coordinates: [[route.startLng, route.startLat], ...stops.map((s) => [s.lng, s.lat])],
+      },
+      properties: {},
+    }] : [],
+  }
+
+  const pointSource = map.getSource(ROUTE_SOURCE) as maplibregl.GeoJSONSource | undefined
+  if (pointSource) {
+    pointSource.setData(points)
+    ;(map.getSource(ROUTE_LINE_SOURCE) as maplibregl.GeoJSONSource).setData(line)
+  } else {
+    map.addSource(ROUTE_LINE_SOURCE, { type: 'geojson', data: line })
+    map.addSource(ROUTE_SOURCE, { type: 'geojson', data: points })
+    map.addLayer({
+      id: 'route-line', type: 'line', source: ROUTE_LINE_SOURCE,
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': '#1f6feb', 'line-width': 4, 'line-opacity': 0.8, 'line-dasharray': [1.5, 1.5] },
+    })
+    map.addLayer({
+      id: 'route-start', type: 'circle', source: ROUTE_SOURCE, filter: ['==', ['get', 'kind'], 'start'],
+      paint: { 'circle-radius': 7, 'circle-color': '#1f6feb', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 3 },
+    })
+    map.addLayer({
+      id: 'route-stops', type: 'circle', source: ROUTE_SOURCE, filter: ['==', ['get', 'kind'], 'stop'],
+      paint: {
+        'circle-radius': 13,
+        'circle-color': ['case', ['get', 'done'], '#adb5bd',
+          ['match', ['get', 'mainCategory'], ...Object.entries(MAIN_CATEGORY_COLORS).flat(), '#495057']] as unknown as maplibregl.ExpressionSpecification,
+        'circle-stroke-color': '#ffffff',
+        'circle-stroke-width': 3,
+      },
+    })
+    map.addLayer({
+      id: 'route-labels', type: 'symbol', source: ROUTE_SOURCE, filter: ['==', ['get', 'kind'], 'stop'],
+      layout: { 'text-field': ['get', 'n'], 'text-font': ['Noto Sans Regular'], 'text-size': 13, 'text-allow-overlap': true },
+      paint: { 'text-color': '#ffffff' },
+    })
+  }
+  if (route && fit) {
+    const bounds = new maplibregl.LngLatBounds()
+    bounds.extend([route.startLng, route.startLat])
+    stops.forEach((s) => bounds.extend([s.lng, s.lat]))
+    map.fitBounds(bounds, { padding: { top: 90, bottom: 90, left: window.innerWidth > 640 ? 420 : 40, right: 60 }, maxZoom: 16 })
+  }
+}
+
+export function onRouteStopClick(map: maplibregl.Map, onSelect: (placeId: number) => void) {
+  map.on('click', 'route-stops', (e) => {
+    const id = e.features?.[0]?.properties?.id
+    if (id != null) onSelect(Number(id))
+  })
+}
