@@ -1,10 +1,13 @@
-import { useEffect, useRef } from 'react'
-import { Link } from 'react-router'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Link, useSearchParams } from 'react-router'
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { addPlacesLayer } from '../places'
+import { api, type Category, type PlaceSummary } from '../api'
+import { addPlacesLayer, filterPlacesLayer } from '../places'
 import { basemapStyle } from '../basemap'
 import { useAuth } from '../auth'
+import SearchBox from '../components/SearchBox'
+import PlaceSheet from '../components/PlaceSheet'
 // MapLibre runs tile parsing in a Web Worker loaded from a separate file. Vite bundles the main
 // library into /assets/index-*.js, so the default worker URL points to a file that does not exist
 // (nginx then returns index.html and the map stays blank). Emit the worker as an asset and use it.
@@ -18,6 +21,20 @@ const UB_CENTER: [number, number] = [106.9177, 47.9186]
 export default function MapPage() {
   const { user } = useAuth()
   const mapContainer = useRef<HTMLDivElement>(null)
+  const mapRef = useRef<maplibregl.Map | null>(null)
+  const [params, setParams] = useSearchParams()
+  const [categories, setCategories] = useState<Category[]>([])
+  const [category, setCategory] = useState('')
+  const selectedId = params.get('place') ? Number(params.get('place')) : null
+
+  // The selected place lives in the URL (?place=123), so it can be linked to and survives reloads
+  const select = useCallback((id: number | null) => {
+    setParams(id == null ? {} : { place: String(id) })
+  }, [setParams])
+
+  useEffect(() => {
+    api<Category[]>('/api/categories').then(setCategories).catch(() => setCategories([]))
+  }, [])
 
   useEffect(() => {
     if (!mapContainer.current) return
@@ -29,13 +46,30 @@ export default function MapPage() {
       map.addControl(new maplibregl.NavigationControl(), 'top-right')
       map.addControl(new maplibregl.GeolocateControl({ trackUserLocation: false }), 'top-right')
       const m = map
-      m.on('load', () => addPlacesLayer(m))
+      mapRef.current = m
+      m.on('load', () => addPlacesLayer(m, (id) => select(id)))
     })
     return () => {
       cancelled = true
       map?.remove()
+      mapRef.current = null
     }
+  }, [select])
+
+  const changeCategory = (code: string) => {
+    setCategory(code)
+    if (mapRef.current) filterPlacesLayer(mapRef.current, code)
+  }
+
+  const center = useCallback(() => {
+    const c = mapRef.current?.getCenter()
+    return c ? { lat: c.lat, lng: c.lng } : { lat: UB_CENTER[1], lng: UB_CENTER[0] }
   }, [])
+
+  const showResult = (p: PlaceSummary) => {
+    mapRef.current?.flyTo({ center: [p.lng, p.lat], zoom: Math.max(mapRef.current.getZoom(), 16) })
+    select(p.id)
+  }
 
   return (
     <>
@@ -43,7 +77,8 @@ export default function MapPage() {
           element, which would override a class and collapse the map to zero height. */}
       <div ref={mapContainer} style={{ position: 'absolute', inset: 0 }} />
       <div className="topbar">
-        <div className="brand">Ухаалаг маршрут</div>
+        <SearchBox categories={categories} category={category} onCategoryChange={changeCategory}
+                   center={center} onSelect={showResult} />
         {user ? (
           <Link className="avatar" to="/profile" title={user.displayName}>
             {user.displayName.trim().charAt(0).toUpperCase()}
@@ -52,6 +87,7 @@ export default function MapPage() {
           <Link className="btn" to="/login">Нэвтрэх</Link>
         )}
       </div>
+      {selectedId != null && <PlaceSheet placeId={selectedId} onClose={() => select(null)} />}
     </>
   )
 }

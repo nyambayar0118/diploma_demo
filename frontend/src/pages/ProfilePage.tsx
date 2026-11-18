@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { api, ApiError, type Category, type Consent, type InterestWeight, type Preferences, type TransportMode } from '../api'
+import { api, ApiError, type Category, type Consent, type InterestWeight, type PlaceSummary, type Preferences, type TransportMode } from '../api'
 import { useAuth } from '../auth'
 import { BUDGET_LABELS, CONSENT_LABELS, TRANSPORT_LABELS } from '../categoryLabels'
 
@@ -14,6 +14,7 @@ export default function ProfilePage() {
   const [interests, setInterests] = useState<InterestWeight[]>([])
   const [names, setNames] = useState<Record<string, string>>({})
   const [health, setHealth] = useState<Health | null>(null)
+  const [saved, setSaved] = useState<PlaceSummary[]>([])
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null)
 
   useEffect(() => {
@@ -26,6 +27,7 @@ export default function ProfilePage() {
       setNames(map)
     })
     api<Health>('/api/health').then(setHealth).catch(() => setHealth(null))
+    api<PlaceSummary[]>('/api/users/me/saved').then(setSaved)
   }, [])
 
   const savePrefs = async () => {
@@ -111,6 +113,14 @@ export default function ProfilePage() {
           ))}
         </div>
         <p className="muted"><Link to="/onboarding">Сонирхлоо дахин сонгох</Link></p>
+
+        <h2>Хадгалсан газрууд</h2>
+        {saved.length === 0 && <p className="muted">Газрын мэдээллээс “Хадгалах” дарж нэмнэ.</p>}
+        <div className="chips">
+          {saved.map((p) => (
+            <Link key={p.id} className="chip" to={`/?place=${p.id}`}>{p.name}</Link>
+          ))}
+        </div>
 
         <h2>Хувийн мэдээллийн зөвшөөрөл</h2>
         {consents.map((c) => (

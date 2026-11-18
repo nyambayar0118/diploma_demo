@@ -97,3 +97,43 @@ export type Preferences = {
 
 export type OnboardingStatus = { completed: boolean; categoryCodes: string[] }
 export type InterestWeight = { category: string; mainCategory: string; weight: number }
+
+export type PlaceSummary = {
+  id: number
+  name: string
+  nameLatin?: string | null
+  category: string
+  categoryName: string
+  mainCategory: string
+  lat: number
+  lng: number
+  distanceM?: number | null
+}
+
+export type PlaceDetails = PlaceSummary & {
+  nameTraditional?: string | null
+  mainCategoryName: string
+  recommendable: boolean
+  address?: string | null
+  building?: string | null
+  phone?: string | null
+  website?: string | null
+  facebook?: string | null
+  instagram?: string | null
+  openingHours?: string | null
+  priceLevel?: PriceLevel | null
+  averageRating: number
+  reviewCount: number
+}
+
+export type MarkType = 'SAVED' | 'HIDDEN'
+
+export function googleMapsUrl(lat: number, lng: number) {
+  return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
+}
+
+/** Fire-and-forget interaction log (only for logged-in users). */
+export function logInteraction(placeId: number, type: 'VIEW' | 'OPEN_IN_MAPS' | 'ACCEPT' | 'REJECT') {
+  if (!getToken()) return
+  api('/api/interactions', { method: 'POST', body: { placeId, type } }).catch(() => undefined)
+}

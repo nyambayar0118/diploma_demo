@@ -58,7 +58,7 @@ public class PlaceQueryRepository {
                   JOIN place_categories m ON m.id = c.parent_id
                   CROSS JOIN q
                   WHERE p.is_active
-                    AND (? IS NULL OR m.code = ?)
+                    AND (?::text IS NULL OR m.code = ?::text)
                     AND (lower(p.name_cyrillic) LIKE '%' || q.q || '%'
                          OR lower(coalesce(p.name_latin, '')) LIKE '%' || q.q || '%'
                          OR p.name_translit LIKE '%' || q.ql || '%'

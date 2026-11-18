@@ -18,7 +18,7 @@ export const MIN_PLACES_ZOOM = 13
 const SOURCE_ID = 'places'
 
 /** Adds the "places" GeoJSON layer and keeps it in sync with the visible map area. */
-export function addPlacesLayer(map: maplibregl.Map) {
+export function addPlacesLayer(map: maplibregl.Map, onSelect: (placeId: number) => void) {
   map.addSource(SOURCE_ID, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
 
   const colorByCategory: maplibregl.ExpressionSpecification = [
@@ -59,18 +59,15 @@ export function addPlacesLayer(map: maplibregl.Map) {
   refresh()
 
   map.on('click', 'places-circles', (e) => {
-    const f = e.features?.[0]
-    if (!f) return
-    const p = f.properties as { name: string; nameLatin?: string; category: string }
-    const coords = (f.geometry as { coordinates: [number, number] }).coordinates
-    const title = document.createElement('strong')
-    title.textContent = p.name
-    const sub = document.createElement('div')
-    sub.textContent = [p.nameLatin, p.category].filter(Boolean).join(' · ')
-    const box = document.createElement('div')
-    box.append(title, sub)
-    new maplibregl.Popup({ offset: 8 }).setLngLat(coords).setDOMContent(box).addTo(map)
+    const id = e.features?.[0]?.properties?.id
+    if (id != null) onSelect(Number(id))
   })
   map.on('mouseenter', 'places-circles', () => (map.getCanvas().style.cursor = 'pointer'))
   map.on('mouseleave', 'places-circles', () => (map.getCanvas().style.cursor = ''))
+}
+
+/** Shows only one main category on the map ('' = all). */
+export function filterPlacesLayer(map: maplibregl.Map, mainCategory: string) {
+  if (!map.getLayer('places-circles')) return
+  map.setFilter('places-circles', mainCategory ? ['==', ['get', 'mainCategory'], mainCategory] : null)
 }

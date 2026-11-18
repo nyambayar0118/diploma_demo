@@ -42,7 +42,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/health", "/actuator/health/**", "/api/auth/**").permitAll()
+                // "/error": let Spring show the real error status instead of turning it into 401
+                .requestMatchers("/error", "/api/health", "/actuator/health/**", "/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/places/**", "/api/categories").permitAll()
                 .requestMatchers("/api/moderation/**").hasAnyRole("MODERATOR", "ADMIN")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
