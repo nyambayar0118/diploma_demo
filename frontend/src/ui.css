@@ -162,3 +162,12 @@ a { color: var(--c-primary); }
 .rec-reason.explore { color: #9c36b5; }
 .rec-x { border: none; background: none; color: var(--c-muted); cursor: pointer; padding: 0 8px; font-size: 14px; }
 .rec-x:hover { color: var(--c-danger); }
+.origin { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.origin-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+button.link { font: inherit; font-size: 13px; background: none; border: none; padding: 0; color: var(--c-primary); cursor: pointer; text-decoration: underline; }
+button.link:disabled { color: var(--c-muted); text-decoration: none; }
+.hint.warn { color: #b35c00; }
+.origin-marker {
+  width: 18px; height: 18px; border-radius: 50%; background: #1f6feb; border: 3px solid white;
+  box-shadow: 0 0 0 6px rgba(31, 111, 235, 0.25), 0 1px 4px rgba(0, 0, 0, 0.4); cursor: grab;
+}

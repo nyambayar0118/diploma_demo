@@ -57,8 +57,8 @@ export default function MapPage() {
       const m = map
       mapRef.current = m
       m.on('load', () => {
-        addPlacesLayer(m, (id) => selectRef.current(id))
-        onRecommendationClick(m, (id) => selectRef.current(id))
+        addPlacesLayer(m, (id) => !picking.current && selectRef.current(id))
+        onRecommendationClick(m, (id) => !picking.current && selectRef.current(id))
       })
     })
     return () => {
@@ -77,6 +77,40 @@ export default function MapPage() {
     const c = mapRef.current?.getCenter()
     return c ? { lat: c.lat, lng: c.lng } : { lat: UB_CENTER[1], lng: UB_CENTER[0] }
   }, [])
+
+  const originMarker = useRef<maplibregl.Marker | null>(null)
+  // While the user picks a start point, a tap on a place dot must not open that place
+  const picking = useRef(false)
+
+  const showOrigin = useCallback((p: { lat: number; lng: number } | null,
+                                  onMove: (p: { lat: number; lng: number }) => void) => {
+    originMarker.current?.remove()
+    originMarker.current = null
+    const map = mapRef.current
+    if (!p || !map) return
+    const el = document.createElement('div')
+    el.className = 'origin-marker'
+    el.title = 'Эхлэх цэг (чирж зөөнө)'
+    const marker = new maplibregl.Marker({ element: el, draggable: true }).setLngLat([p.lng, p.lat]).addTo(map)
+    marker.on('dragend', () => {
+      const ll = marker.getLngLat()
+      onMove({ lat: ll.lat, lng: ll.lng })
+    })
+    originMarker.current = marker
+    map.easeTo({ center: [p.lng, p.lat], zoom: Math.max(map.getZoom(), 14) })
+  }, [])
+
+  const pickOnMap = useCallback(() => new Promise<{ lat: number; lng: number }>((resolve) => {
+    const map = mapRef.current
+    if (!map) return resolve(center())
+    map.getCanvas().style.cursor = 'crosshair'
+    picking.current = true
+    map.once('click', (e) => {
+      map.getCanvas().style.cursor = ''
+      setTimeout(() => (picking.current = false), 0)
+      resolve({ lat: e.lngLat.lat, lng: e.lngLat.lng })
+    })
+  }), [center])
 
   const updateRecs = (items: RecommendationItem[]) => {
     setRecItems(items)
@@ -110,7 +144,8 @@ export default function MapPage() {
         )}
       </div>
       {showRecs && (
-        <RecommendationPanel mapCenter={center} onResults={updateRecs} onClose={closeRecs}
+        <RecommendationPanel mapCenter={center} showOrigin={showOrigin} pickOnMap={pickOnMap}
+                             onResults={updateRecs} onClose={closeRecs}
                              onOpen={(it) => select(it.placeId)} />
       )}
       {!showRecs && selectedId == null && (
