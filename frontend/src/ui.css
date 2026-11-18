@@ -38,7 +38,7 @@ a { color: var(--c-primary); }
 
 .btn {
   font: inherit; font-weight: 600; border: none; border-radius: 8px; padding: 10px 16px; cursor: pointer;
-  background: var(--c-primary); color: white;
+  background: var(--c-primary); color: white; text-decoration: none; display: inline-block;
 }
 .btn:hover { background: var(--c-primary-dark); }
 .btn:disabled { opacity: 0.55; cursor: default; }
@@ -75,7 +75,6 @@ a { color: var(--c-primary); }
 .steps span.done { background: var(--c-primary); }
 
 /* ---------- Map page ---------- */
-.map { position: absolute; inset: 0; }
 .topbar {
   position: absolute; top: 10px; left: 10px; right: 56px; display: flex; justify-content: space-between;
   align-items: center; gap: 8px; pointer-events: none;

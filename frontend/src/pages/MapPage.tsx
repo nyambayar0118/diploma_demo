@@ -39,7 +39,9 @@ export default function MapPage() {
 
   return (
     <>
-      <div ref={mapContainer} className="map" />
+      {/* Inline style on purpose: maplibre-gl.css sets ".maplibregl-map { position: relative }" on this
+          element, which would override a class and collapse the map to zero height. */}
+      <div ref={mapContainer} style={{ position: 'absolute', inset: 0 }} />
       <div className="topbar">
         <div className="brand">Ухаалаг маршрут</div>
         {user ? (
