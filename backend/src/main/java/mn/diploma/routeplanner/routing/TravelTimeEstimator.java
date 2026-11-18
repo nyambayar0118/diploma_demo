@@ -37,6 +37,22 @@ public class TravelTimeEstimator {
         return (int) Math.ceil(minutes);
     }
 
+    /** Travel minutes between every pair of points. */
+    public TravelTimeMatrix estimate(java.util.List<LatLng> points, TransportMode mode) {
+        int n = points.size();
+        int[][] m = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i != j) {
+                    LatLng a = points.get(i);
+                    LatLng b = points.get(j);
+                    m[i][j] = minutesBetween(a.lat(), a.lng(), b.lat(), b.lng(), mode);
+                }
+            }
+        }
+        return new TravelTimeMatrix(m);
+    }
+
     public static double haversineMeters(double lat1, double lng1, double lat2, double lng2) {
         double dLat = Math.toRadians(lat2 - lat1);
         double dLng = Math.toRadians(lng2 - lng1);

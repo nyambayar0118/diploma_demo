@@ -3,6 +3,7 @@ package mn.diploma.routeplanner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Core server of the system (design chapter 3.1): a modular monolith.
@@ -13,6 +14,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
  */
 @SpringBootApplication
 @EnableAsync
+@EnableScheduling
 public class RoutePlannerApplication {
 
     public static void main(String[] args) {
