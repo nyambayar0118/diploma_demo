@@ -42,8 +42,19 @@ then maps OSM tags to our categories and fills `places` / `buildings` (`data/sql
 It prints a summary per category. Run it again any time to refresh; delete
 `data/raw/mongolia-latest.osm.pbf` first to download newer data.
 
-Categories and their OSM tags live in `data/categories.py` (it generates the Flyway migration
-`V3__seed_categories.sql`). Places appear on the map from zoom level 13.
+Categories and their OSM tags: `data/categories.py` (generated `V3__seed_categories.sql`, now frozen)
+plus later migrations such as `V4__more_category_mappings.sql`. Places appear on the map from zoom level 13.
+
+## Generate our own basemap (Ulaanbaatar vector tiles)
+
+```powershell
+docker compose -f infra/docker-compose.yml run --rm --build tiles
+```
+
+Cuts Ulaanbaatar out of the latest [Protomaps](https://protomaps.com) daily OpenStreetMap
+basemap into `data/tiles/ulaanbaatar.pmtiles` (served by nginx at `/tiles/`). Reload the app
+(Ctrl+Shift+R): labels are shown in Mongolian. Without this file the app falls back to the
+public OpenFreeMap style.
 
 ## Develop one part with hot reload
 

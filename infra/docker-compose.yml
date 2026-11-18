@@ -55,6 +55,7 @@ services:
   osm-import:
     build: ../data
     profiles: ["tools"]
+    command: ["/data/import.sh"]
     environment:
       PGHOST: db
       PGDATABASE: ${DB_NAME:-routeplanner}
@@ -65,6 +66,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  # Our own basemap: cut Ulaanbaatar vector tiles (data milestone, part 2). Run with:
+  #   docker compose -f infra/docker-compose.yml run --rm --build tiles
+  tiles:
+    build: ../data
+    profiles: ["tools"]
+    command: ["/data/tiles.sh"]
+    volumes:
+      - ../data:/data
 
 volumes:
   db-data:

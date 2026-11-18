@@ -2,8 +2,10 @@
 
 Run `python data/categories.py` to regenerate
 backend/src/main/resources/db/migration/V3__seed_categories.sql.
-NOTE: once V3 has been applied to a database, do not edit it; add a new
-migration (V<n>__...) for later category changes instead.
+NOTE: V3 is already applied to databases, so this list is FROZEN (editing it would
+change V3's checksum and Flyway would refuse to start). Later changes are separate migrations:
+  V4__more_category_mappings.sql  tourism=artwork -> historic; new non-recommendable
+                                  "beauty" (shop=beauty, shop=hairdresser) under wellness
 """
 from pathlib import Path
 

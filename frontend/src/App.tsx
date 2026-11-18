@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { addPlacesLayer } from './places'
+import { basemapStyle } from './basemap'
 // MapLibre runs tile parsing in a Web Worker loaded from a separate file. Vite bundles the main
 // library into /assets/index-*.js, so the default worker URL points to a file that does not exist
 // (nginx then returns index.html and the map stays blank). Emit the worker as an asset and use it.
@@ -12,9 +13,6 @@ maplibregl.setWorkerUrl(workerUrl)
 // Ulaanbaatar city centre (Sükhbaatar Square)
 const UB_CENTER: [number, number] = [106.9177, 47.9186]
 
-// Temporary public basemap for the skeleton. Replaced by our own PMTiles in the data milestone.
-const BASEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty'
-
 type Health = { status: string; database?: string; postgis?: string; ml?: string }
 
 export default function App() {
@@ -24,16 +22,20 @@ export default function App() {
 
   useEffect(() => {
     if (!mapContainer.current) return
-    const map = new maplibregl.Map({
-      container: mapContainer.current,
-      style: BASEMAP_STYLE,
-      center: UB_CENTER,
-      zoom: 12,
+    let map: maplibregl.Map | null = null
+    let cancelled = false
+    basemapStyle().then((style) => {
+      if (cancelled || !mapContainer.current) return
+      map = new maplibregl.Map({ container: mapContainer.current, style, center: UB_CENTER, zoom: 12 })
+      map.addControl(new maplibregl.NavigationControl(), 'top-right')
+      map.addControl(new maplibregl.GeolocateControl({ trackUserLocation: false }), 'top-right')
+      const m = map
+      m.on('load', () => addPlacesLayer(m))
     })
-    map.addControl(new maplibregl.NavigationControl(), 'top-right')
-    map.addControl(new maplibregl.GeolocateControl({ trackUserLocation: false }), 'top-right')
-    map.on('load', () => addPlacesLayer(map))
-    return () => map.remove()
+    return () => {
+      cancelled = true
+      map?.remove()
+    }
   }, [])
 
   useEffect(() => {
