@@ -31,6 +31,12 @@ export default function MapPage() {
   const select = useCallback((id: number | null) => {
     setParams(id == null ? {} : { place: String(id) })
   }, [setParams])
+  // react-router gives setParams a new identity on every URL change. The map must be created only once,
+  // so its click handler reads the latest `select` through a ref instead of depending on it.
+  const selectRef = useRef(select)
+  useEffect(() => {
+    selectRef.current = select
+  }, [select])
 
   useEffect(() => {
     api<Category[]>('/api/categories').then(setCategories).catch(() => setCategories([]))
@@ -47,14 +53,14 @@ export default function MapPage() {
       map.addControl(new maplibregl.GeolocateControl({ trackUserLocation: false }), 'top-right')
       const m = map
       mapRef.current = m
-      m.on('load', () => addPlacesLayer(m, (id) => select(id)))
+      m.on('load', () => addPlacesLayer(m, (id) => selectRef.current(id)))
     })
     return () => {
       cancelled = true
       map?.remove()
       mapRef.current = null
     }
-  }, [select])
+  }, [])
 
   const changeCategory = (code: string) => {
     setCategory(code)
