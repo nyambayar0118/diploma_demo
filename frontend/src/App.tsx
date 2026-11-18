@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import { addPlacesLayer } from './places'
 // MapLibre runs tile parsing in a Web Worker loaded from a separate file. Vite bundles the main
 // library into /assets/index-*.js, so the default worker URL points to a file that does not exist
 // (nginx then returns index.html and the map stays blank). Emit the worker as an asset and use it.
@@ -31,6 +32,7 @@ export default function App() {
     })
     map.addControl(new maplibregl.NavigationControl(), 'top-right')
     map.addControl(new maplibregl.GeolocateControl({ trackUserLocation: false }), 'top-right')
+    map.on('load', () => addPlacesLayer(map))
     return () => map.remove()
   }, [])
 

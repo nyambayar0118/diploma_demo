@@ -27,6 +27,24 @@ showing `API: UP · DB: UP · ML: UP`.
 Stop with `Ctrl+C`; remove containers with
 `docker compose -f infra/docker-compose.yml down` (add `-v` to also delete the database).
 
+## Import OpenStreetMap places (Ulaanbaatar)
+
+The system's places and buildings come from OpenStreetMap. With the system running
+(`up` above, so Flyway has created the tables), in a second terminal:
+
+```powershell
+docker compose -f infra/docker-compose.yml --env-file .env run --rm --build osm-import
+```
+
+This downloads the Mongolia extract from Geofabrik once (about 100 MB, kept in `data/raw/`),
+loads objects inside the Ulaanbaatar bounding box with osm2pgsql (`data/osm/places.lua`),
+then maps OSM tags to our categories and fills `places` / `buildings` (`data/sql/load_places.sql`).
+It prints a summary per category. Run it again any time to refresh; delete
+`data/raw/mongolia-latest.osm.pbf` first to download newer data.
+
+Categories and their OSM tags live in `data/categories.py` (it generates the Flyway migration
+`V3__seed_categories.sql`). Places appear on the map from zoom level 13.
+
 ## Develop one part with hot reload
 
 Keep the database (and ML service) in Docker, run the part you are working on locally:

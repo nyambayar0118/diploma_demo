@@ -50,5 +50,21 @@ services:
     depends_on:
       - backend
 
+  # One-off OSM import (data milestone). Run with:
+  #   docker compose -f infra/docker-compose.yml --env-file .env run --rm osm-import
+  osm-import:
+    build: ../data
+    profiles: ["tools"]
+    environment:
+      PGHOST: db
+      PGDATABASE: ${DB_NAME:-routeplanner}
+      PGUSER: ${DB_USER:-routeplanner}
+      PGPASSWORD: ${DB_PASSWORD:-routeplanner}
+    volumes:
+      - ../data:/data
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   db-data:
