@@ -134,3 +134,31 @@ a { color: var(--c-primary); }
   writing-mode: vertical-lr; font-family: 'Mongolian Baiti', 'Noto Sans Mongolian', sans-serif;
   font-size: 20px; max-height: 140px; line-height: 1.4; color: var(--c-text);
 }
+
+/* ---------- Recommendation panel ---------- */
+.panel {
+  position: absolute; z-index: 1; background: white; box-shadow: 0 4px 24px rgba(16, 24, 40, 0.18);
+  padding: 20px; overflow: auto; top: 64px; left: 10px; bottom: 10px; width: 380px; border-radius: 14px;
+}
+@media (max-width: 640px) {
+  .panel { top: auto; left: 0; right: 0; bottom: 0; width: auto; max-height: 65vh; border-radius: 16px 16px 0 0; }
+}
+.fab {
+  position: absolute; z-index: 1; left: 50%; bottom: 28px; transform: translateX(-50%);
+  box-shadow: 0 4px 14px rgba(31, 111, 235, 0.45); border-radius: 999px; padding: 12px 22px; font-size: 15px;
+}
+.rec-list { list-style: none; margin: 12px 0 0; padding: 0; }
+.rec-list li { display: flex; align-items: stretch; border-top: 1px solid var(--c-border); }
+.rec-main {
+  flex: 1; display: flex; gap: 10px; align-items: flex-start; text-align: left; font: inherit; background: none;
+  border: none; padding: 10px 4px; cursor: pointer; min-width: 0;
+}
+.rec-main:hover { background: #f6f8fb; }
+.rec-num {
+  flex: none; width: 24px; height: 24px; border-radius: 50%; color: white; font-size: 13px; font-weight: 700;
+  display: grid; place-items: center;
+}
+.rec-reason { font-size: 12px; color: var(--c-primary); margin-top: 2px; }
+.rec-reason.explore { color: #9c36b5; }
+.rec-x { border: none; background: none; color: var(--c-muted); cursor: pointer; padding: 0 8px; font-size: 14px; }
+.rec-x:hover { color: var(--c-danger); }

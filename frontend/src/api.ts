@@ -133,7 +133,35 @@ export function googleMapsUrl(lat: number, lng: number) {
 }
 
 /** Fire-and-forget interaction log (only for logged-in users). */
-export function logInteraction(placeId: number, type: 'VIEW' | 'OPEN_IN_MAPS' | 'ACCEPT' | 'REJECT') {
+export function logInteraction(placeId: number, type: 'VIEW' | 'OPEN_IN_MAPS' | 'ACCEPT' | 'REJECT',
+                               recommendationId?: number) {
   if (!getToken()) return
-  api('/api/interactions', { method: 'POST', body: { placeId, type } }).catch(() => undefined)
+  api('/api/interactions', { method: 'POST', body: { placeId, type, recommendationId } }).catch(() => undefined)
+}
+
+export type RecommendationItem = {
+  recommendationId: number
+  rank: number
+  placeId: number
+  name: string
+  nameLatin?: string | null
+  category: string
+  categoryName: string
+  mainCategory: string
+  lat: number
+  lng: number
+  distanceM: number
+  travelMinutes: number
+  score: number
+  exploration: boolean
+  reason: string
+}
+
+export type RecommendationBatch = {
+  batchId: number
+  ranker: string
+  at: string
+  availableMinutes: number
+  transportMode: TransportMode
+  items: RecommendationItem[]
 }

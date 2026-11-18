@@ -71,3 +71,50 @@ export function filterPlacesLayer(map: maplibregl.Map, mainCategory: string) {
   if (!map.getLayer('places-circles')) return
   map.setFilter('places-circles', mainCategory ? ['==', ['get', 'mainCategory'], mainCategory] : null)
 }
+
+const RECS_SOURCE = 'recommendations'
+
+/** Numbered markers for the current recommendation list; fits the map to them. */
+export function showRecommendations(map: maplibregl.Map,
+                                    items: { placeId: number; lat: number; lng: number; mainCategory: string }[]) {
+  const data = {
+    type: 'FeatureCollection' as const,
+    features: items.map((it, i) => ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [it.lng, it.lat] },
+      properties: { id: it.placeId, n: String(i + 1), mainCategory: it.mainCategory },
+    })),
+  }
+  const source = map.getSource(RECS_SOURCE) as maplibregl.GeoJSONSource | undefined
+  if (source) {
+    source.setData(data)
+  } else {
+    map.addSource(RECS_SOURCE, { type: 'geojson', data })
+    map.addLayer({
+      id: 'recs-circles', type: 'circle', source: RECS_SOURCE,
+      paint: {
+        'circle-radius': 12,
+        'circle-color': ['match', ['get', 'mainCategory'], ...Object.entries(MAIN_CATEGORY_COLORS).flat(), '#495057'] as unknown as maplibregl.ExpressionSpecification,
+        'circle-stroke-color': '#ffffff',
+        'circle-stroke-width': 2.5,
+      },
+    })
+    map.addLayer({
+      id: 'recs-labels', type: 'symbol', source: RECS_SOURCE,
+      layout: { 'text-field': ['get', 'n'], 'text-font': ['Noto Sans Regular'], 'text-size': 12, 'text-allow-overlap': true },
+      paint: { 'text-color': '#ffffff' },
+    })
+  }
+  if (items.length > 0) {
+    const bounds = new maplibregl.LngLatBounds()
+    items.forEach((it) => bounds.extend([it.lng, it.lat]))
+    map.fitBounds(bounds, { padding: { top: 80, bottom: 80, left: window.innerWidth > 640 ? 420 : 40, right: 60 }, maxZoom: 16 })
+  }
+}
+
+export function onRecommendationClick(map: maplibregl.Map, onSelect: (placeId: number) => void) {
+  map.on('click', 'recs-circles', (e) => {
+    const id = e.features?.[0]?.properties?.id
+    if (id != null) onSelect(Number(id))
+  })
+}

@@ -2,12 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { api, type Category, type PlaceSummary } from '../api'
-import { addPlacesLayer, filterPlacesLayer } from '../places'
+import { api, type Category, type PlaceSummary, type RecommendationItem } from '../api'
+import { addPlacesLayer, filterPlacesLayer, onRecommendationClick, showRecommendations } from '../places'
 import { basemapStyle } from '../basemap'
 import { useAuth } from '../auth'
 import SearchBox from '../components/SearchBox'
 import PlaceSheet from '../components/PlaceSheet'
+import RecommendationPanel from '../components/RecommendationPanel'
 // MapLibre runs tile parsing in a Web Worker loaded from a separate file. Vite bundles the main
 // library into /assets/index-*.js, so the default worker URL points to a file that does not exist
 // (nginx then returns index.html and the map stays blank). Emit the worker as an asset and use it.
@@ -25,6 +26,8 @@ export default function MapPage() {
   const [params, setParams] = useSearchParams()
   const [categories, setCategories] = useState<Category[]>([])
   const [category, setCategory] = useState('')
+  const [showRecs, setShowRecs] = useState(false)
+  const [recItems, setRecItems] = useState<RecommendationItem[]>([])
   const selectedId = params.get('place') ? Number(params.get('place')) : null
 
   // The selected place lives in the URL (?place=123), so it can be linked to and survives reloads
@@ -53,7 +56,10 @@ export default function MapPage() {
       map.addControl(new maplibregl.GeolocateControl({ trackUserLocation: false }), 'top-right')
       const m = map
       mapRef.current = m
-      m.on('load', () => addPlacesLayer(m, (id) => selectRef.current(id)))
+      m.on('load', () => {
+        addPlacesLayer(m, (id) => selectRef.current(id))
+        onRecommendationClick(m, (id) => selectRef.current(id))
+      })
     })
     return () => {
       cancelled = true
@@ -71,6 +77,16 @@ export default function MapPage() {
     const c = mapRef.current?.getCenter()
     return c ? { lat: c.lat, lng: c.lng } : { lat: UB_CENTER[1], lng: UB_CENTER[0] }
   }, [])
+
+  const updateRecs = (items: RecommendationItem[]) => {
+    setRecItems(items)
+    if (mapRef.current) showRecommendations(mapRef.current, items)
+  }
+
+  const closeRecs = () => {
+    setShowRecs(false)
+    updateRecs([])
+  }
 
   const showResult = (p: PlaceSummary) => {
     mapRef.current?.flyTo({ center: [p.lng, p.lat], zoom: Math.max(mapRef.current.getZoom(), 16) })
@@ -93,7 +109,19 @@ export default function MapPage() {
           <Link className="btn" to="/login">Нэвтрэх</Link>
         )}
       </div>
-      {selectedId != null && <PlaceSheet placeId={selectedId} onClose={() => select(null)} />}
+      {showRecs && (
+        <RecommendationPanel mapCenter={center} onResults={updateRecs} onClose={closeRecs}
+                             onOpen={(it) => select(it.placeId)} />
+      )}
+      {!showRecs && selectedId == null && (
+        user
+          ? <button className="btn fab" onClick={() => setShowRecs(true)}>✨ Санал болгох</button>
+          : <Link className="btn fab" to="/login">✨ Санал авахын тулд нэвтрэх</Link>
+      )}
+      {selectedId != null && (
+        <PlaceSheet placeId={selectedId} onClose={() => select(null)}
+                    recommendationId={recItems.find((r) => r.placeId === selectedId)?.recommendationId} />
+      )}
     </>
   )
 }

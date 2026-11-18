@@ -5,9 +5,9 @@ import { useAuth } from '../auth'
 import { describeOpeningHours, type OpeningInfo } from '../openingHours'
 import { MAIN_CATEGORY_COLORS } from '../places'
 
-type Props = { placeId: number; onClose: () => void }
+type Props = { placeId: number; recommendationId?: number; onClose: () => void }
 
-export default function PlaceSheet({ placeId, onClose }: Props) {
+export default function PlaceSheet({ placeId, recommendationId, onClose }: Props) {
   const { user } = useAuth()
   const [place, setPlace] = useState<PlaceDetails | null>(null)
   const [mark, setMark] = useState<MarkType | null>(null)
@@ -44,7 +44,7 @@ export default function PlaceSheet({ placeId, onClose }: Props) {
 
   const openInMaps = () => {
     if (!place) return
-    logInteraction(place.id, 'OPEN_IN_MAPS')
+    logInteraction(place.id, 'OPEN_IN_MAPS', recommendationId)
     window.open(googleMapsUrl(place.lat, place.lng), '_blank', 'noopener')
   }
 
