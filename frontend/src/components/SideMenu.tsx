@@ -4,6 +4,7 @@ import { api, clockTime, type PlaceSummary, type Rewards, type RouteView } from 
 import { useAuth } from '../auth'
 import { MAIN_CATEGORY_COLORS } from '../places'
 import Icon from './Icon'
+import { useTheme } from '../theme'
 
 type View = 'menu' | 'saved' | 'hidden' | 'routes'
 
@@ -24,6 +25,7 @@ export default function SideMenu({ open, onClose, onSelectPlace, onOpenRoute, on
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [view, setView] = useState<View>('menu')
+  const [theme, setTheme] = useTheme()
   const [saved, setSaved] = useState<PlaceSummary[] | null>(null)
   const [hidden, setHidden] = useState<PlaceSummary[] | null>(null)
   const [routes, setRoutes] = useState<RouteView[] | null>(null)
@@ -119,7 +121,15 @@ export default function SideMenu({ open, onClose, onSelectPlace, onOpenRoute, on
                 </div>
               </>
             )}
-            <div className="drawer-foot">Газрын мэдээлэл © OpenStreetMap-ийн хувь нэмэрлэгчид</div>
+            <div className="drawer-foot">
+              <label className="theme-toggle">
+                <span className="drawer-icon"><Icon name={theme === 'dark' ? 'moon' : 'sun'} /></span>
+                <span className="drawer-label">Харанхуй горим</span>
+                <input type="checkbox" className="switch" checked={theme === 'dark'}
+                       onChange={(e) => setTheme(e.target.checked ? 'dark' : 'light')} />
+              </label>
+              <div className="drawer-credit">Газрын мэдээлэл © OpenStreetMap-ийн хувь нэмэрлэгчид</div>
+            </div>
           </>
         ) : (
           <>

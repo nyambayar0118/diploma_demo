@@ -9,12 +9,12 @@ const FALLBACK_STYLE = 'https://tiles.openfreemap.org/styles/liberty'
 
 let protocolAdded = false
 
-function ownStyle(): maplibregl.StyleSpecification {
+function ownStyle(theme: 'light' | 'dark'): maplibregl.StyleSpecification {
   return {
     version: 8,
     // Fonts and icons of the Protomaps basemap (public CDN; can be self-hosted later)
     glyphs: 'https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf',
-    sprite: 'https://protomaps.github.io/basemaps-assets/sprites/v4/light',
+    sprite: `https://protomaps.github.io/basemaps-assets/sprites/v4/${theme}`,
     sources: {
       protomaps: {
         type: 'vector',
@@ -23,12 +23,12 @@ function ownStyle(): maplibregl.StyleSpecification {
       },
     },
     // Labels prefer name:mn and fall back to the default name
-    layers: layers('protomaps', namedFlavor('light'), { lang: 'mn' }),
+    layers: layers('protomaps', namedFlavor(theme), { lang: 'mn' }),
   }
 }
 
 /** Returns our own basemap style if the PMTiles file exists, otherwise the public fallback. */
-export async function basemapStyle(): Promise<maplibregl.StyleSpecification | string> {
+export async function basemapStyle(theme: 'light' | 'dark' = 'light'): Promise<maplibregl.StyleSpecification | string> {
   try {
     const res = await fetch(PMTILES_PATH, { method: 'HEAD' })
     if (!res.ok) return FALLBACK_STYLE
@@ -39,5 +39,5 @@ export async function basemapStyle(): Promise<maplibregl.StyleSpecification | st
     maplibregl.addProtocol('pmtiles', new Protocol().tile)
     protocolAdded = true
   }
-  return ownStyle()
+  return ownStyle(theme)
 }

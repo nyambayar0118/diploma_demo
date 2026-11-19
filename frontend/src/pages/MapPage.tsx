@@ -18,6 +18,7 @@ import SideMenu from '../components/SideMenu'
 import Icon from '../components/Icon'
 import { MAIN_CATEGORY_COLORS } from '../places'
 import { useLocationSharing } from '../locationSharing'
+import { currentTheme, useTheme } from '../theme'
 // MapLibre runs tile parsing in a Web Worker loaded from a separate file. Vite bundles the main
 // library into /assets/index-*.js, so the default worker URL points to a file that does not exist
 // (nginx then returns index.html and the map stays blank). Emit the worker as an asset and use it.
@@ -68,7 +69,7 @@ export default function MapPage() {
     if (!mapContainer.current) return
     let map: maplibregl.Map | null = null
     let cancelled = false
-    basemapStyle().then((style) => {
+    basemapStyle(currentTheme()).then((style) => {
       if (cancelled || !mapContainer.current) return
       // Phones: pinch to zoom, so no zoom buttons; the locate button sits low, within thumb reach
       const phone = window.matchMedia('(max-width: 640px)').matches
@@ -93,6 +94,29 @@ export default function MapPage() {
       mapRef.current = null
     }
   }, [])
+
+  // Dark / light basemap. Our own sources and layers (places, recommendations, route) are carried over.
+  const [theme] = useTheme()
+  const shownTheme = useRef(currentTheme())
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !mapReady || shownTheme.current === theme) return
+    shownTheme.current = theme
+    basemapStyle(theme).then((style) => {
+      if (typeof style === 'string') return // public fallback style has no dark variant
+      map.setStyle(style, {
+        transformStyle: (previous, next) => {
+          if (!previous) return next
+          const own = Object.fromEntries(Object.entries(previous.sources).filter(([id]) => !(id in next.sources)))
+          return {
+            ...next,
+            sources: { ...next.sources, ...own },
+            layers: [...next.layers, ...previous.layers.filter((l) => 'source' in l && (l.source as string) in own)],
+          }
+        },
+      })
+    })
+  }, [theme, mapReady])
 
   // Location sharing (sends my position while the app is open) and friends' shared positions (АШ21)
   useLocationSharing(!!user)
