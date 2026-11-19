@@ -5,6 +5,7 @@ import { useAuth } from '../auth'
 import { describeOpeningHours, type OpeningInfo } from '../openingHours'
 import { MAIN_CATEGORY_COLORS } from '../places'
 import Reviews from './Reviews'
+import ContributionForm from './ContributionForm'
 
 type Props = {
   placeId: number
@@ -20,9 +21,13 @@ export default function PlaceSheet({ placeId, recommendationId, onAddToRoute, on
   const [mark, setMark] = useState<MarkType | null>(null)
   const [hours, setHours] = useState<OpeningInfo | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [contributing, setContributing] = useState(false)
+  const [thanks, setThanks] = useState<string | null>(null)
 
   useEffect(() => {
     setPlace(null)
+    setContributing(false)
+    setThanks(null)
     setHours(null)
     setError(null)
     api<PlaceDetails>(`/api/places/${placeId}`)
@@ -94,6 +99,13 @@ export default function PlaceSheet({ placeId, recommendationId, onAddToRoute, on
               {place.instagram && <a href={place.instagram} target="_blank" rel="noopener noreferrer">Instagram</a>}
             </div>
           )}
+          {place.links && place.links.length > 0 && (
+            <div className="sheet-row links" style={{ flexWrap: 'wrap' }}>
+              {place.links.map((l) => (
+                <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer nofollow">{l.title || l.platform || 'Холбоос'}</a>
+              ))}
+            </div>
+          )}
 
           <div className="sheet-actions">
             <button className="btn" onClick={openInMaps}>Google Maps-ээр очих</button>
@@ -112,6 +124,15 @@ export default function PlaceSheet({ placeId, recommendationId, onAddToRoute, on
               <Link className="btn secondary" to="/login">Хадгалахын тулд нэвтрэх</Link>
             )}
           </div>
+          {thanks && <div className="success" style={{ marginTop: 14 }}>{thanks}</div>}
+          {user && !contributing && (
+            <p className="muted small"><button className="link" onClick={() => { setThanks(null); setContributing(true) }}>
+              Мэдээлэл буруу эсвэл дутуу юу? Засвар санал болгох</button></p>
+          )}
+          {contributing && (
+            <ContributionForm place={place} onCancel={() => setContributing(false)}
+                              onDone={(m) => { setContributing(false); setThanks(m) }} />
+          )}
           <Reviews placeId={place.id} user={user} />
           <p className="muted small">© OpenStreetMap-ийн хувь нэмэрлэгчид</p>
         </>

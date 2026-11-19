@@ -124,6 +124,7 @@ export type PlaceDetails = PlaceSummary & {
   priceLevel?: PriceLevel | null
   averageRating: number
   reviewCount: number
+  links?: { url: string; type: string; title: string | null; platform: string | null }[]
 }
 
 export type MarkType = 'SAVED' | 'HIDDEN'
@@ -311,4 +312,51 @@ export function currentPosition(timeout = 10000) {
       { enableHighAccuracy: true, timeout, maximumAge: 30000 },
     )
   })
+}
+
+// ---- Contributions ----
+export type RequestType = 'CREATE_PLACE' | 'UPDATE_PLACE' | 'ADD_LINK'
+export type LinkType = 'WEBSITE' | 'FACEBOOK' | 'INSTAGRAM' | 'REVIEW_ARTICLE' | 'OTHER'
+export type ProposedData = Partial<{
+  nameCyrillic: string
+  nameLatin: string
+  categoryCode: string
+  lat: number
+  lng: number
+  phone: string
+  openingHours: string
+  street: string
+  priceLevel: PriceLevel
+  permanentlyClosed: boolean
+  url: string
+  linkType: LinkType
+  linkTitle: string
+}>
+export type PlaceSnapshot = {
+  id: number; name: string; nameLatin: string | null; category: string; categoryName: string; lat: number; lng: number
+  phone: string | null; openingHours: string | null; street: string | null; priceLevel: string | null; active: boolean
+}
+export type ChangeRequest = {
+  id: number
+  type: RequestType
+  status: 'PENDING' | 'APPROVED' | 'REJECTED'
+  data: ProposedData
+  target: PlaceSnapshot | null
+  submitterId: number | null
+  submitterName: string | null
+  moderatorComment: string | null
+  submittedAt: string
+  reviewedAt: string | null
+  pointsGranted: number | null
+}
+export type Rewards = { total: number; items: { id: number; points: number; reason: string; grantedAt: string }[] }
+
+export const LINK_TYPE_LABELS: Record<LinkType, string> = {
+  WEBSITE: 'Вэбсайт', FACEBOOK: 'Facebook', INSTAGRAM: 'Instagram', REVIEW_ARTICLE: 'Сэтгэгдлийн нийтлэл', OTHER: 'Бусад',
+}
+export const REQUEST_TYPE_LABELS: Record<RequestType, string> = {
+  CREATE_PLACE: 'Шинэ газар', UPDATE_PLACE: 'Мэдээлэл засах', ADD_LINK: 'Холбоос нэмэх',
+}
+export const REQUEST_STATUS_LABELS: Record<string, string> = {
+  PENDING: 'Хянагдаж байна', APPROVED: 'Батлагдсан', REJECTED: 'Татгалзсан',
 }

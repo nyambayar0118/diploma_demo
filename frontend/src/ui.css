@@ -248,3 +248,14 @@ button.link:disabled { color: var(--c-muted); text-decoration: none; }
 .meeting { background: #f6f8fb; border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; }
 .friend-list select { font: inherit; font-size: 13px; border: 1px solid var(--c-border); border-radius: 6px; padding: 4px 6px; }
 a.link { font-size: 13px; color: var(--c-primary); }
+
+/* ---------- Contributions / moderation ---------- */
+.contribution { margin-top: 16px; border-top: 1px solid var(--c-border); padding-top: 12px; }
+.contribution h3 { font-size: 15px; margin: 0 0 10px; }
+.request { border: 1px solid var(--c-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; font-size: 14px; }
+.diff { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 13px; }
+.diff th { text-align: left; color: var(--c-muted); font-weight: 600; width: 110px; padding: 4px 8px 4px 0; vertical-align: top; }
+.diff td { padding: 4px 8px; vertical-align: top; overflow-wrap: anywhere; }
+.diff td.old { color: var(--c-muted); text-decoration: line-through; }
+.diff td.new { background: #ebfbee; border-radius: 4px; }
+.request input.comment { flex: 1; min-width: 180px; font: inherit; font-size: 14px; border: 1px solid var(--c-border); border-radius: 8px; padding: 8px 10px; }

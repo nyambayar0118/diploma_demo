@@ -11,6 +11,7 @@ import FriendInvitePage from './pages/FriendInvitePage'
 import GroupsPage from './pages/GroupsPage'
 import GroupPage from './pages/GroupPage'
 import JoinPage from './pages/JoinPage'
+import ModerationPage from './pages/ModerationPage'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth()
@@ -34,6 +35,7 @@ export default function App() {
           <Route path="/groups" element={<RequireAuth><GroupsPage /></RequireAuth>} />
           <Route path="/groups/:id" element={<RequireAuth><GroupPage /></RequireAuth>} />
           <Route path="/join/:token" element={<JoinPage />} />
+          <Route path="/moderation" element={<RequireAuth><ModerationPage /></RequireAuth>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

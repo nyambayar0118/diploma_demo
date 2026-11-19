@@ -13,6 +13,7 @@ import PlaceSheet from '../components/PlaceSheet'
 import RecommendationPanel from '../components/RecommendationPanel'
 import RoutePanel from '../components/RoutePanel'
 import VisitPrompt from '../components/VisitPrompt'
+import ContributionForm from '../components/ContributionForm'
 import { useLocationSharing } from '../locationSharing'
 // MapLibre runs tile parsing in a Web Worker loaded from a separate file. Vite bundles the main
 // library into /assets/index-*.js, so the default worker URL points to a file that does not exist
@@ -36,6 +37,10 @@ export default function MapPage() {
   const [route, setRoute] = useState<RouteView | null>(null)
   const [showRoutePanel, setShowRoutePanel] = useState(false)
   const [mapReady, setMapReady] = useState(false)
+  // Adding a missing place (АШ03): pick the point, then fill the form
+  const [newPlaceAt, setNewPlaceAt] = useState<{ lat: number; lng: number } | null>(null)
+  const [pickingNew, setPickingNew] = useState(false)
+  const [notice, setNotice] = useState<string | null>(null)
   const selectedId = params.get('place') ? Number(params.get('place')) : null
 
   // The selected place lives in the URL (?place=123), so it can be linked to and survives reloads
@@ -249,6 +254,19 @@ export default function MapPage() {
         )}
       </div>
       {user && <VisitPrompt onAnswered={visitAnswered} />}
+      {pickingNew && <div className="visit-card"><div className="visit-place">Шинэ газрын байршлыг газрын зураг дээр дарж сонгоно уу</div></div>}
+      {notice && (
+        <div className="visit-card" onClick={() => setNotice(null)}>
+          <div className="success" style={{ margin: 0 }}>{notice}</div>
+        </div>
+      )}
+      {newPlaceAt && (
+        <aside className="sheet">
+          <button className="sheet-close" onClick={() => setNewPlaceAt(null)} aria-label="Хаах">×</button>
+          <ContributionForm position={newPlaceAt} onCancel={() => setNewPlaceAt(null)}
+                            onDone={(m) => { setNewPlaceAt(null); setNotice(m) }} />
+        </aside>
+      )}
       {showRecs && (
         <RecommendationPanel mapCenter={center} showOrigin={showOrigin} pickOnMap={pickOnMap}
                              onResults={updateRecs} onClose={closeRecs} onRoute={routeCreated}
@@ -263,6 +281,13 @@ export default function MapPage() {
             {isActiveRoute(route) && (
               <button className="btn secondary" onClick={() => openRoute(route)}>🗺 Миний маршрут</button>
             )}
+            <button className="btn secondary" title="Газрын зураг дээр байхгүй газар нэмэх" disabled={pickingNew}
+                    onClick={async () => {
+                      setPickingNew(true)
+                      const p = await pickOnMap()
+                      setPickingNew(false)
+                      setNewPlaceAt(p)
+                    }}>＋</button>
             <Link className="btn secondary" to="/groups" title="Найзуудтайгаа уулзах газар сонгох">👥</Link>
             <button className="btn" onClick={() => setShowRecs(true)}>✨ Санал болгох</button>
           </div>

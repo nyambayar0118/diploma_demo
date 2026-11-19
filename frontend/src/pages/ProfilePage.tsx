@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { api, ApiError, type Category, type Consent, type InterestWeight, type PlaceSummary, type Preferences, type TransportMode } from '../api'
+import { api, ApiError, REQUEST_STATUS_LABELS, REQUEST_TYPE_LABELS, type ChangeRequest, type Rewards, type Category, type Consent, type InterestWeight, type PlaceSummary, type Preferences, type TransportMode } from '../api'
 import { useAuth } from '../auth'
 import { BUDGET_LABELS, CONSENT_LABELS, TRANSPORT_LABELS } from '../categoryLabels'
 
@@ -21,6 +21,12 @@ export default function ProfilePage() {
     }
   }
   const [prefs, setPrefs] = useState<Preferences | null>(null)
+  const [requests, setRequests] = useState<ChangeRequest[]>([])
+  const [rewards, setRewards] = useState<Rewards | null>(null)
+  useEffect(() => {
+    api<ChangeRequest[]>('/api/users/me/change-requests').then(setRequests).catch(() => undefined)
+    api<Rewards>('/api/users/me/rewards').then(setRewards).catch(() => undefined)
+  }, [])
   const [consents, setConsents] = useState<Consent[]>([])
   const [interests, setInterests] = useState<InterestWeight[]>([])
   const [names, setNames] = useState<Record<string, string>>({})
@@ -136,6 +142,29 @@ export default function ProfilePage() {
             <Link key={p.id} className="chip" to={`/?place=${p.id}`}>{p.name}</Link>
           ))}
         </div>
+
+        <h2>Миний хувь нэмэр {rewards ? `· ${rewards.total} оноо` : ''}</h2>
+        {requests.length === 0 ? (
+          <p className="muted">Газрын зураг дээр “＋” дарж шинэ газар нэмэх, эсвэл газрын мэдээлэл дээр “Засвар санал болгох” дарж
+            оноо цуглуулаарай.</p>
+        ) : (
+          <ul className="friend-list">
+            {requests.map((r) => (
+              <li key={r.id}>
+                <span className="r-main">
+                  <span className="r-name">{REQUEST_TYPE_LABELS[r.type]}: {r.target?.name ?? r.data.nameCyrillic ?? ''}</span>
+                  <span className="r-sub">
+                    {REQUEST_STATUS_LABELS[r.status]}{r.pointsGranted ? ` · +${r.pointsGranted} оноо` : ''}
+                    {r.moderatorComment ? ` · ${r.moderatorComment}` : ''}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+        {(user?.role === 'MODERATOR' || user?.role === 'ADMIN') && (
+          <p><Link className="btn secondary" to="/moderation">Хүсэлт хянах (модератор)</Link></p>
+        )}
 
         <h2>Хувийн мэдээллийн зөвшөөрөл</h2>
         {consents.map((c) => (
