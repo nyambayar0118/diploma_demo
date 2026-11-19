@@ -34,6 +34,11 @@ services:
       JWT_SECRET: ${JWT_SECRET:-dev-only-secret-change-me-0123456789abcdef}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      ALERT_EMAIL: ${ALERT_EMAIL:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
     depends_on:
       db:
         condition: service_healthy
