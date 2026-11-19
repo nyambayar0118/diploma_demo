@@ -17,5 +17,7 @@ public record RecommendationContext(
         int radiusM,
         int k,
         boolean useInterests,
-        boolean storeLocation) {
+        boolean storeLocation,
+        /** Main or subcategory codes to limit the list to; empty = all categories. */
+        java.util.List<String> categories) {
 }

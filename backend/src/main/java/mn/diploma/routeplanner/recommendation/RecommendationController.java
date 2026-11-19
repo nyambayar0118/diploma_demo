@@ -1,6 +1,7 @@
 package mn.diploma.routeplanner.recommendation;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
@@ -31,7 +32,9 @@ public class RecommendationController {
             PriceLevel budgetLevel,
             TransportMode transportMode,
             @Min(1) @Max(30) Integer k,
-            LocalDateTime at) {
+            LocalDateTime at,
+            /** Main or subcategory codes ("food", "museum"); empty or missing = all. */
+            @jakarta.validation.constraints.Size(max = 40) List<@jakarta.validation.constraints.Size(max = 40) String> categories) {
     }
 
     private final RecommendationService recommendations;
@@ -44,6 +47,6 @@ public class RecommendationController {
     public Batch recommend(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody RecommendationRequest req) {
         return recommendations.recommend(JwtService.userId(jwt), new RecommendationService.Request(
                 req.lat(), req.lng(), req.availableMinutes(), req.budgetLevel(), req.transportMode(), req.k(),
-                req.at()));
+                req.at(), req.categories()));
     }
 }

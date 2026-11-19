@@ -34,13 +34,19 @@ public final class RoutingDtos {
             TransportMode transportMode,
             @Min(30) @Max(720) Integer timeBudgetMinutes,
             LocalDateTime startAt,
-            @Size(max = RoutingService.MAX_STOPS) List<@Valid StopRequest> stops) {
+            @Size(max = RoutingService.MAX_STOPS) List<@Valid StopRequest> stops,
+            /** Automatic route only: limit the picked places to these main or subcategory codes. */
+            @Size(max = 40) List<@Size(max = 40) String> categories) {
     }
 
-    public enum StopOperation { ADD, REMOVE, REPLACE }
+    public enum StopOperation { ADD, REMOVE, REPLACE, REORDER, OPTIMIZE }
 
-    /** ADD: placeId (+ recommendationId); REMOVE: stopId; REPLACE: stopId and the new placeId. */
-    public record ModifyStopsRequest(@NotNull StopOperation op, Long stopId, Long placeId, Long recommendationId) {
+    /**
+     * ADD: placeId (+ recommendationId); REMOVE: stopId; REPLACE: stopId and the new placeId;
+     * REORDER: stopIds in the order the user wants (kept as given); OPTIMIZE: back to the shortest order.
+     */
+    public record ModifyStopsRequest(@NotNull StopOperation op, Long stopId, Long placeId, Long recommendationId,
+                                     @Size(max = RoutingService.MAX_STOPS) List<Long> stopIds) {
     }
 
     public record FeedbackRequest(@NotNull @Min(1) @Max(5) Integer relevance,

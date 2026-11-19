@@ -23,7 +23,7 @@ public class RecommendationService {
     public static final ZoneId ZONE = ZoneId.of("Asia/Ulaanbaatar");
 
     public record Request(double lat, double lng, Integer availableMinutes, PriceLevel budgetLevel,
-                          TransportMode transportMode, Integer k, LocalDateTime at) {
+                          TransportMode transportMode, Integer k, LocalDateTime at, List<String> categories) {
     }
 
     public record Item(long recommendationId, int rank, long placeId, String name, String nameLatin,
@@ -83,17 +83,19 @@ public class RecommendationService {
         return new RecommendationContext(userId, req.lat(), req.lng(), at, minutes, budget, mode,
                 prefs.searchRadiusM(), k,
                 consents.isGranted(userId, ConsentDataType.INTERESTS),
-                consents.isGranted(userId, ConsentDataType.LOCATION));
+                consents.isGranted(userId, ConsentDataType.LOCATION),
+                req.categories() == null ? List.of() : req.categories().stream().distinct().limit(40).toList());
     }
 
     private long logBatch(RecommendationContext ctx, List<Candidate> chosen) {
         Long batchId = jdbc.queryForObject("""
                 INSERT INTO recommendation_batches (user_id, user_location, available_minutes, budget_level,
-                                                    transport_mode, ranker_name, model_version)
-                VALUES (?, CASE WHEN ? THEN ST_SetSRID(ST_MakePoint(?, ?), 4326) END, ?, ?, ?, ?, ?)
+                                                    transport_mode, ranker_name, model_version, category_filter)
+                VALUES (?, CASE WHEN ? THEN ST_SetSRID(ST_MakePoint(?, ?), 4326) END, ?, ?, ?, ?, ?, ?)
                 RETURNING id
                 """, Long.class, ctx.userId(), ctx.storeLocation(), ctx.lng(), ctx.lat(), ctx.availableMinutes(),
-                ctx.budgetLevel().name(), ctx.transportMode().name(), ranker.name(), ranker.modelVersion());
+                ctx.budgetLevel().name(), ctx.transportMode().name(), ranker.name(), ranker.modelVersion(),
+                ctx.categories().toArray(String[]::new));
         for (int i = 0; i < chosen.size(); i++) {
             Candidate c = chosen.get(i);
             jdbc.update("INSERT INTO recommendations (batch_id, place_id, score, rank, is_exploration) VALUES (?, ?, ?, ?, ?)",

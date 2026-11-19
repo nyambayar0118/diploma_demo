@@ -84,6 +84,35 @@ class RouteFlowTest {
         assertEquals(400, http.send("PATCH", "/api/routes/" + routeId + "/stops",
                 "{\"op\":\"ADD\",\"placeId\":" + near + "}", token).statusCode());
 
+        // Manual order is kept as given (and arrivals follow it); OPTIMIZE goes back to the shortest order
+        String reorder = "{\"op\":\"REORDER\",\"stopIds\":[%d,%d,%d]}"
+                .formatted(stopId(route, far), stopId(route, near), stopId(route, extra));
+        route = json(http.send("PATCH", "/api/routes/" + routeId + "/stops", reorder, token), 200);
+        assertEquals(List.of(far, near, extra), placeIds(route));
+        assertTrue(route.get("stops").get(0).get("estimatedArrival").asString()
+                .compareTo(route.get("stops").get(1).get("estimatedArrival").asString()) < 0);
+        assertEquals(400, http.send("PATCH", "/api/routes/" + routeId + "/stops",
+                "{\"op\":\"REORDER\",\"stopIds\":[%d]}".formatted(stopId(route, far)), token).statusCode());
+        // Removing a stop keeps the manual order of the rest
+        long extraStop = stopId(route, extra);
+        route = json(http.send("PATCH", "/api/routes/" + routeId + "/stops",
+                "{\"op\":\"REMOVE\",\"stopId\":" + extraStop + "}", token), 200);
+        assertEquals(List.of(far, near), placeIds(route));
+        route = json(http.send("PATCH", "/api/routes/" + routeId + "/stops", "{\"op\":\"ADD\",\"placeId\":" + extra + "}",
+                token), 200);
+        assertEquals(List.of(far, near, extra), placeIds(route));
+        route = json(http.send("PATCH", "/api/routes/" + routeId + "/stops", "{\"op\":\"OPTIMIZE\"}", token), 200);
+        assertEquals(List.of(near, extra, far), placeIds(route));
+
+        // Recommendations limited to chosen categories
+        JsonNode onlyCafes = json(http.send("POST", "/api/recommendations",
+                "{\"lat\":%s,\"lng\":%s,\"k\":10,\"categories\":[\"cafe\"]}".formatted(LAT, LNG), token), 200);
+        for (JsonNode item : onlyCafes.get("items")) {
+            assertEquals("cafe", item.get("category").asString(), onlyCafes.toString());
+        }
+        assertEquals("{cafe}", jdbc.queryForObject("SELECT category_filter::text FROM recommendation_batches WHERE id = ?",
+                String.class, onlyCafes.get("batchId").asLong()));
+
         // Other users cannot see it
         assertEquals(404, http.send("GET", "/api/routes/" + routeId, null, http.registerUser()).statusCode());
 

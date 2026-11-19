@@ -45,6 +45,7 @@ public class CandidateGenerator {
                    OR array_position(ARRAY['FREE', 'LOW', 'MEDIUM', 'HIGH'], p.price_level::text)
                       <= array_position(ARRAY['FREE', 'LOW', 'MEDIUM', 'HIGH'], ?::text))
               AND coalesce(t.suitability, 0.5) > 0
+              AND (cardinality(?::text[]) = 0 OR m.code = ANY (?::text[]) OR c.code = ANY (?::text[]))
             ORDER BY distance_m
             LIMIT ?
             """;
@@ -60,6 +61,7 @@ public class CandidateGenerator {
     public List<Candidate> generate(RecommendationContext ctx) {
         double defaultWeight = ctx.useInterests() ? DEFAULT_WEIGHT : NEUTRAL_WEIGHT;
         long weightsUserId = ctx.useInterests() ? ctx.userId() : -1L;
+        String[] categories = ctx.categories().toArray(String[]::new);
         List<Candidate> rows = jdbc.query(SQL, (rs, i) -> {
                     Candidate c = new Candidate(rs.getLong("id"), rs.getString("name_cyrillic"),
                             rs.getString("name_latin"), rs.getLong("category_id"), rs.getString("code"),
@@ -70,7 +72,8 @@ public class CandidateGenerator {
                 },
                 ctx.lng(), ctx.lat(), defaultWeight, weightsUserId,
                 TimeOfDay.of(ctx.at()).name(), TimeOfDay.dayType(ctx.at()),
-                ctx.lng(), ctx.lat(), ctx.radiusM(), ctx.userId(), ctx.budgetLevel().name(), MAX_CANDIDATES)
+                ctx.lng(), ctx.lat(), ctx.radiusM(), ctx.userId(), ctx.budgetLevel().name(),
+                categories, categories, categories, MAX_CANDIDATES)
                 .stream()
                 .filter(row -> OpeningHours.possiblyOpenFor((String) row[1], ctx.at(), MIN_OPEN_MINUTES))
                 .map(row -> (Candidate) row[0])

@@ -79,7 +79,7 @@ public class RoutingService {
         LatLng start = new LatLng(req.lat(), req.lng());
 
         List<StopRequest> requested = req.stops() == null || req.stops().isEmpty()
-                ? autoSelect(userId, start, mode, budget, startAt)
+                ? autoSelect(userId, start, mode, budget, startAt, req.categories())
                 : req.stops();
         Set<Long> distinct = new HashSet<>();
         for (StopRequest s : requested) {
@@ -141,6 +141,8 @@ public class RoutingService {
             throw new ApiException(HttpStatus.CONFLICT, "ROUTE_LOCKED", "Google Maps-ээр нээсэн маршрутыг өөрчлөх боломжгүй");
         }
         List<Long> changedPlaces = new ArrayList<>();
+        // A route the user put in their own order keeps that order when stops are added or removed
+        boolean optimize = isShortestOrder(route);
         switch (req.op()) {
             case ADD -> {
                 if (route.stops.size() >= MAX_STOPS) {
@@ -162,14 +164,24 @@ public class RoutingService {
             }
             case REPLACE -> {
                 RouteStop old = requireStop(route, req.stopId());
-                route.stops.remove(old);
                 RouteStop added = newStop(userId, requirePlace(route, req.placeId()), req.placeId(), req.recommendationId());
-                route.stops.add(added);
+                route.stops.set(route.stops.indexOf(old), added);
                 changedPlaces.add(old.place.id());
                 changedPlaces.add(added.place.id());
             }
+            case REORDER -> {
+                List<Long> ids = req.stopIds() == null ? List.of() : req.stopIds();
+                if (ids.size() != route.stops.size() || ids.stream().distinct().count() != ids.size()) {
+                    throw new ApiException(HttpStatus.BAD_REQUEST, "INVALID_ORDER", "Бүх зогсоолыг нэг удаа дурдана уу");
+                }
+                List<RouteStop> reordered = new ArrayList<>();
+                for (Long id : ids) reordered.add(requireStop(route, id));
+                route.stops = reordered;
+                optimize = false;
+            }
+            case OPTIMIZE -> optimize = true;
         }
-        rebuild(route);
+        rebuild(route, optimize);
         routes.replaceStops(route);
         routes.update(route);
         changedPlaces.forEach(p -> interactions.log(userId, p, InteractionType.ROUTE_MODIFY, null, route.id, null, null));
@@ -217,13 +229,23 @@ public class RoutingService {
         routes.update(route);
     }
 
-    /** Orders the stops (ДШ05) and recomputes arrival times and the total duration. */
+    /** Orders the stops by the shortest travel time (ДШ05) and recomputes arrival times and the total duration. */
     void rebuild(Route route) {
+        rebuild(route, true);
+    }
+
+    /** With {@code optimize = false} the current order is kept (the user reordered the stops by hand). */
+    void rebuild(Route route, boolean optimize) {
         List<LatLng> points = new ArrayList<>();
         points.add(route.start);
         route.stops.forEach(s -> points.add(s.location()));
         TravelTimeMatrix matrix = travelTimes.estimate(points, route.transportMode);
-        List<Integer> order = optimizer.optimizeOrder(matrix, 0);
+        List<Integer> order = new ArrayList<>();
+        if (optimize) {
+            order = optimizer.optimizeOrder(matrix, 0);
+        } else {
+            for (int i = 1; i <= route.stops.size(); i++) order.add(i);
+        }
 
         List<RouteStop> ordered = new ArrayList<>();
         LocalDateTime t = route.plannedStart;
@@ -239,6 +261,20 @@ public class RoutingService {
         }
         route.stops = ordered;
         route.estimatedDurationMinutes = (int) Duration.between(route.plannedStart, t).toMinutes();
+    }
+
+    /** Whether the stops are currently in a shortest-travel order (false after a manual reorder). */
+    boolean isShortestOrder(Route route) {
+        if (route.stops.size() < 2) return true;
+        List<RouteStop> current = route.stops.stream().sorted(Comparator.comparingInt(s -> s.stopOrder)).toList();
+        List<LatLng> points = new ArrayList<>();
+        points.add(route.start);
+        current.forEach(s -> points.add(s.location()));
+        TravelTimeMatrix matrix = travelTimes.estimate(points, route.transportMode);
+        List<Integer> asIs = new ArrayList<>();
+        for (int i = 1; i <= current.size(); i++) asIs.add(i);
+        return RouteOrderOptimizer.travelMinutes(matrix, 0, asIs)
+                <= RouteOrderOptimizer.travelMinutes(matrix, 0, optimizer.optimizeOrder(matrix, 0));
     }
 
     RouteView view(Route route) {
@@ -264,9 +300,10 @@ public class RoutingService {
                 Boolean.TRUE.equals(feedback), route.groupSessionId);
     }
 
-    private List<StopRequest> autoSelect(long userId, LatLng start, TransportMode mode, int budget, LocalDateTime at) {
+    private List<StopRequest> autoSelect(long userId, LatLng start, TransportMode mode, int budget, LocalDateTime at,
+                                         List<String> categories) {
         RecommendationService.Batch batch = recommendations.recommend(userId, new RecommendationService.Request(
-                start.lat(), start.lng(), budget, null, mode, AUTO_CANDIDATES, at));
+                start.lat(), start.lng(), budget, null, mode, AUTO_CANDIDATES, at, categories));
         List<StopSelector.ScoredPlace> candidates = batch.items().stream()
                 .map(i -> new StopSelector.ScoredPlace(i.placeId(), i.recommendationId(), i.category(), i.lat(), i.lng()))
                 .toList();
