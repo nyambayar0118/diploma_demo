@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     api<AuthResponse>('/api/auth/register', { method: 'POST', body: data }).then(accept)
 
   const loginWithGoogle = (credential: string) =>
-    api<AuthResponse>('/api/auth/google', { method: 'POST', body: { credential } }).then(accept)
+    api<AuthResponse>('/api/auth/oauth', { method: 'POST', body: { provider: 'GOOGLE', token: credential } }).then(accept)
 
   return (
     <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, logout }}>

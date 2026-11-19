@@ -9,6 +9,17 @@ type Health = { status: string; database?: string; ml?: string }
 export default function ProfilePage() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+
+  const deleteAccount = async () => {
+    if (!window.confirm('Бүртгэлээ бүрмөсөн устгах уу? Энэ үйлдлийг буцаах боломжгүй.')) return
+    try {
+      await api('/api/users/me', { method: 'DELETE' })
+      logout()
+      navigate('/', { replace: true })
+    } catch (err) {
+      window.alert(err instanceof ApiError ? err.message : 'Сервертэй холбогдсонгүй')
+    }
+  }
   const [prefs, setPrefs] = useState<Preferences | null>(null)
   const [consents, setConsents] = useState<Consent[]>([])
   const [interests, setInterests] = useState<InterestWeight[]>([])
@@ -139,6 +150,13 @@ export default function ProfilePage() {
           </span>
           <button className="btn danger" onClick={() => { logout(); navigate('/', { replace: true }) }}>Гарах</button>
         </div>
+
+        <h2>Бүртгэл устгах</h2>
+        <p className="muted">
+          Таны имэйл, нэр, сонирхол, хадгалсан газар, зөвшөөрөл, маршрутын эхлэх цэгүүд устгагдана. Үйлдлийн түүх
+          хэнийх болох нь мэдэгдэхгүй болж зөвхөн судалгааны нэргүй өгөгдөл болон үлдэнэ.
+        </p>
+        <button className="btn danger" onClick={deleteAccount}>Бүртгэлээ бүрмөсөн устгах</button>
       </div>
     </div>
   )

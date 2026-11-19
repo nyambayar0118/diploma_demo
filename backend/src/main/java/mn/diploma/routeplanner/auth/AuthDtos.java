@@ -41,8 +41,11 @@ public final class AuthDtos {
     public record AuthResponse(String token, UserDto user) {
     }
 
-    /** {@code credential} = the Google ID token from Google Identity Services. */
-    public record GoogleLoginRequest(@NotBlank String credential) {
+    /** {@code token} = for GOOGLE the ID token ("credential") from Google Identity Services. */
+    public record OAuthLoginRequest(@NotNull AuthProvider provider, @NotBlank String token) {
+    }
+
+    public record RoleRequest(@NotNull Role role) {
     }
 
     /** Public client configuration (the Google client id is not a secret). */

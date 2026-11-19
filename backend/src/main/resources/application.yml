@@ -19,6 +19,8 @@ server:
 app:
   ml:
     base-url: ${ML_URL:http://localhost:8000}
+  # Comma-separated e-mails that become ADMIN at their next login (e.g. your own account)
+  admin-emails: ${ADMIN_EMAILS:}
   google:
     # OAuth client id from Google Cloud Console ("Web application"); empty = Google login hidden
     client-id: ${GOOGLE_CLIENT_ID:}

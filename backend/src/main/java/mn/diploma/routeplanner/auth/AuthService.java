@@ -1,6 +1,14 @@
 package mn.diploma.routeplanner.auth;
 
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,14 +31,32 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final GoogleTokenVerifier google;
+    private final ApplicationEventPublisher events;
+    private final JdbcTemplate jdbc;
+    /** E-mails that get the ADMIN role when they register or log in (env ADMIN_EMAILS, comma-separated). */
+    private final Set<String> adminEmails;
 
     public AuthService(UserRepository users, UserPreferencesRepository preferences,
-                       PasswordEncoder passwordEncoder, JwtService jwtService, GoogleTokenVerifier google) {
+                       PasswordEncoder passwordEncoder, JwtService jwtService, GoogleTokenVerifier google,
+                       ApplicationEventPublisher events, JdbcTemplate jdbc,
+                       @Value("${app.admin-emails:}") String adminEmails) {
         this.users = users;
         this.preferences = preferences;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.google = google;
+        this.events = events;
+        this.jdbc = jdbc;
+        this.adminEmails = Arrays.stream(adminEmails.split(",")).map(e -> e.trim().toLowerCase(Locale.ROOT))
+                .filter(e -> !e.isEmpty()).collect(Collectors.toSet());
+    }
+
+    private AuthResponse issue(User user) {
+        if (user.getRole() != Role.ADMIN && adminEmails.contains(user.getEmail().toLowerCase(Locale.ROOT))) {
+            user.setRole(Role.ADMIN);
+            users.save(user);
+        }
+        return new AuthResponse(jwtService.issue(user), UserDto.of(user));
     }
 
     @Transactional
@@ -46,17 +72,17 @@ public class AuthService {
         User user = users.save(User.withEmail(email, passwordEncoder.encode(req.password()),
                 req.displayName().trim(), username));
         preferences.save(UserPreferences.defaultsFor(user.getId()));
-        return new AuthResponse(jwtService.issue(user), UserDto.of(user));
+        return issue(user);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public AuthResponse login(LoginRequest req) {
         User user = users.findByEmailIgnoreCaseAndDeletedAtIsNull(req.email().trim())
                 .filter(u -> u.getAuthProvider() == AuthProvider.EMAIL)
                 .filter(u -> passwordEncoder.matches(req.password(), u.getPasswordHash()))
                 .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS",
                         "Имэйл эсвэл нууц үг буруу байна"));
-        return new AuthResponse(jwtService.issue(user), UserDto.of(user));
+        return issue(user);
     }
 
     /**
@@ -76,7 +102,7 @@ public class AuthService {
         }
         User user = users.findByAuthProviderAndProviderUserIdAndDeletedAtIsNull(AuthProvider.GOOGLE, g.subject())
                 .orElseGet(() -> createGoogleUser(g));
-        return new AuthResponse(jwtService.issue(user), UserDto.of(user));
+        return issue(user);
     }
 
     private User createGoogleUser(GoogleUser g) {
@@ -106,6 +132,26 @@ public class AuthService {
 
     public AuthDtos.AuthConfig config() {
         return new AuthDtos.AuthConfig(google.isEnabled() ? google.clientId() : null);
+    }
+
+    /** ХШ08: deletes the account's personal data in every module, keeps anonymous history. */
+    @Transactional
+    public void deleteAccount(Long userId) {
+        User user = activeUser(userId);
+        events.publishEvent(new UserDeletedEvent(userId));
+        jdbc.update("DELETE FROM privacy_consents WHERE user_id = ?", userId);
+        jdbc.update("DELETE FROM user_preferences WHERE user_id = ?", userId);
+        jdbc.update("UPDATE users SET home_location = NULL, reward_points = 0 WHERE id = ?", userId);
+        user.anonymise(Instant.now());
+        users.save(user);
+    }
+
+    /** Admin: give or take the moderator role. */
+    @Transactional
+    public UserDto changeRole(Long userId, Role role) {
+        User user = activeUser(userId);
+        user.setRole(role);
+        return UserDto.of(users.save(user));
     }
 
     @Transactional(readOnly = true)

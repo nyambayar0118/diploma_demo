@@ -74,6 +74,21 @@ public class User {
         return u;
     }
 
+    /** ХШ08: personal data is removed; the row stays so anonymous history keeps its foreign keys. */
+    void anonymise(Instant now) {
+        email = "deleted-" + id + "@deleted.invalid";
+        passwordHash = null;
+        displayName = "Устгасан хэрэглэгч";
+        username = "deleted_" + id;
+        providerUserId = null;
+        role = Role.USER;
+        deletedAt = now;
+    }
+
+    void setRole(Role role) {
+        this.role = role;
+    }
+
     public Long getId() { return id; }
     public String getEmail() { return email; }
     public String getPasswordHash() { return passwordHash; }

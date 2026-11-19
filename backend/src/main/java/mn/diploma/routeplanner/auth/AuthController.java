@@ -45,9 +45,25 @@ public class AuthController {
         return auth.login(req);
     }
 
-    @PostMapping("/api/auth/google")
-    public AuthResponse google(@Valid @RequestBody AuthDtos.GoogleLoginRequest req) {
-        return auth.loginWithGoogle(req.credential());
+    /** Social login (АШ07). Only GOOGLE is implemented; FACEBOOK answers 400. */
+    @PostMapping("/api/auth/oauth")
+    public AuthResponse oauth(@Valid @RequestBody AuthDtos.OAuthLoginRequest req) {
+        if (req.provider() != AuthProvider.GOOGLE) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "PROVIDER_NOT_SUPPORTED", req.provider() + " login is not available");
+        }
+        return auth.loginWithGoogle(req.token());
+    }
+
+    /** ХШ08: delete my account and personal data. */
+    @DeleteMapping("/api/users/me")
+    public ResponseEntity<Void> deleteMe(@AuthenticationPrincipal Jwt jwt) {
+        auth.deleteAccount(JwtService.userId(jwt));
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/api/admin/users/{id}/role")
+    public UserDto changeRole(@PathVariable Long id, @Valid @RequestBody AuthDtos.RoleRequest req) {
+        return auth.changeRole(id, req.role());
     }
 
     /** Public settings the login page needs (Google client id, or null when Google login is off). */
