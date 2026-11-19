@@ -28,19 +28,20 @@ SELECT osm_type, osm_id, 'OSM', TRUE,
        left(tags ->> 'opening_hours', 500), tags, TRUE, now()
 FROM matched
 ON CONFLICT ON CONSTRAINT places_osm_unique DO UPDATE SET
-    name_cyrillic     = EXCLUDED.name_cyrillic,
-    name_latin        = EXCLUDED.name_latin,
-    category_id       = EXCLUDED.category_id,
-    phone             = EXCLUDED.phone,
-    location          = EXCLUDED.location,
+    -- СНШ10: a field a moderator approved a user edit for keeps the user's value
+    name_cyrillic     = CASE WHEN 'name_cyrillic' = ANY (places.user_edited_fields) THEN places.name_cyrillic ELSE EXCLUDED.name_cyrillic END,
+    name_latin        = CASE WHEN 'name_latin' = ANY (places.user_edited_fields) THEN places.name_latin ELSE EXCLUDED.name_latin END,
+    category_id       = CASE WHEN 'category_id' = ANY (places.user_edited_fields) THEN places.category_id ELSE EXCLUDED.category_id END,
+    phone             = CASE WHEN 'phone' = ANY (places.user_edited_fields) THEN places.phone ELSE EXCLUDED.phone END,
+    location          = CASE WHEN 'location' = ANY (places.user_edited_fields) THEN places.location ELSE EXCLUDED.location END,
     area              = EXCLUDED.area,
     city_or_aimag     = EXCLUDED.city_or_aimag,
     district_or_sum   = EXCLUDED.district_or_sum,
     khoroo_or_bag     = EXCLUDED.khoroo_or_bag,
-    street            = EXCLUDED.street,
-    opening_hours_raw = EXCLUDED.opening_hours_raw,
+    street            = CASE WHEN 'street' = ANY (places.user_edited_fields) THEN places.street ELSE EXCLUDED.street END,
+    opening_hours_raw = CASE WHEN 'opening_hours_raw' = ANY (places.user_edited_fields) THEN places.opening_hours_raw ELSE EXCLUDED.opening_hours_raw END,
     osm_tags          = EXCLUDED.osm_tags,
-    is_active         = TRUE,
+    is_active         = CASE WHEN 'is_active' = ANY (places.user_edited_fields) THEN places.is_active ELSE TRUE END,
     last_synced_at    = EXCLUDED.last_synced_at;
 
 UPDATE places p SET is_active = FALSE

@@ -81,9 +81,19 @@ public class PlaceQueryRepository {
                 'address', nullif(concat_ws(', ', p.street, p.khoroo_or_bag, p.district_or_sum, p.city_or_aimag), ''),
                 'building', b.name,
                 'phone', p.phone,
-                'website', coalesce(p.osm_tags ->> 'website', p.osm_tags ->> 'contact:website'),
-                'facebook', coalesce(p.osm_tags ->> 'contact:facebook', p.osm_tags ->> 'facebook'),
-                'instagram', coalesce(p.osm_tags ->> 'contact:instagram', p.osm_tags ->> 'instagram'),
+                'website', coalesce((SELECT e.url FROM external_links e WHERE e.place_id = p.id AND e.is_verified
+                                     AND e.type = 'WEBSITE' ORDER BY e.id DESC LIMIT 1),
+                                    p.osm_tags ->> 'website', p.osm_tags ->> 'contact:website'),
+                'facebook', coalesce((SELECT e.url FROM external_links e WHERE e.place_id = p.id AND e.is_verified
+                                      AND e.type = 'FACEBOOK' ORDER BY e.id DESC LIMIT 1),
+                                     p.osm_tags ->> 'contact:facebook', p.osm_tags ->> 'facebook'),
+                'instagram', coalesce((SELECT e.url FROM external_links e WHERE e.place_id = p.id AND e.is_verified
+                                       AND e.type = 'INSTAGRAM' ORDER BY e.id DESC LIMIT 1),
+                                      p.osm_tags ->> 'contact:instagram', p.osm_tags ->> 'instagram'),
+                'links', (SELECT coalesce(json_agg(json_build_object('url', e.url, 'type', e.type, 'title', e.title,
+                                                                     'platform', e.platform) ORDER BY e.id), '[]'::json)
+                          FROM external_links e WHERE e.place_id = p.id AND e.is_verified
+                            AND e.type IN ('REVIEW_ARTICLE', 'OTHER')),
                 'openingHours', p.opening_hours_raw,
                 'priceLevel', p.price_level,
                 'averageRating', p.average_rating, 'reviewCount', p.review_count,
