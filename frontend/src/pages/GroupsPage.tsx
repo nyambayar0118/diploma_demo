@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
+import PageHeader from '../components/PageHeader'
 import { api, ApiError, currentPosition, type Friendship, type GroupView, type TransportMode } from '../api'
 import { TRANSPORT_LABELS } from '../categoryLabels'
 
@@ -50,11 +51,8 @@ export default function GroupsPage() {
 
   return (
     <div className="page">
+      <PageHeader title="Бүлгээр төлөвлөх" back="/" />
       <div className="card wide">
-        <div className="row">
-          <h1>Бүлгээр төлөвлөх</h1>
-          <Link className="btn secondary" to="/">Газрын зураг</Link>
-        </div>
         <p className="lead">Найзуудаа сонгоход бүгдийн сонирхолд нийцсэн, бүгд ойролцоо хугацаанд хүрэх уулзах газрыг санал болгоно.</p>
         {error && <div className="error">{error}</div>}
 

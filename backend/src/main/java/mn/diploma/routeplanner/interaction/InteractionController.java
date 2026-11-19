@@ -63,6 +63,12 @@ public class InteractionController {
         return ResponseEntity.ok(marks.savedPlacesAsJson(JwtService.userId(jwt)));
     }
 
+    /** Places the user hid from recommendations (so they can be shown again). */
+    @GetMapping(value = "/api/users/me/hidden", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> hidden(@AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(marks.hiddenPlacesAsJson(JwtService.userId(jwt)));
+    }
+
     /** Client-reported interaction (VIEW, OPEN_IN_MAPS, ACCEPT, REJECT); returns 202 (СГШ08). */
     @PostMapping("/api/interactions")
     public ResponseEntity<Void> log(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody InteractionRequest req) {

@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { api, type Category, type PlaceSummary } from '../api'
+import { api, type PlaceSummary } from '../api'
 import { MAIN_CATEGORY_COLORS } from '../places'
 
 type Props = {
-  categories: Category[]
   category: string
-  onCategoryChange: (code: string) => void
   center: () => { lat: number; lng: number }
   onSelect: (place: PlaceSummary) => void
 }
@@ -15,7 +13,7 @@ function formatDistance(m?: number | null) {
   return m < 1000 ? `${Math.round(m)} м` : `${(m / 1000).toFixed(1)} км`
 }
 
-export default function SearchBox({ categories, category, onCategoryChange, center, onSelect }: Props) {
+export default function SearchBox({ category, center, onSelect }: Props) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<PlaceSummary[]>([])
   const [open, setOpen] = useState(false)
@@ -49,10 +47,6 @@ export default function SearchBox({ categories, category, onCategoryChange, cent
           onChange={(e) => setQuery(e.target.value)} onFocus={() => setOpen(true)}
           onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
         />
-        <select value={category} onChange={(e) => onCategoryChange(e.target.value)} title="Ангилал">
-          <option value="">Бүх ангилал</option>
-          {categories.map((c) => <option key={c.code} value={c.code}>{c.nameMn}</option>)}
-        </select>
       </div>
       {open && query.trim().length >= 2 && (
         <ul className="search-results">

@@ -61,4 +61,9 @@ public class PlaceMarkService {
     public String savedPlacesAsJson(Long userId) {
         return places.summariesAsJson(placeIds(userId, MarkType.SAVED));
     }
+
+    @Transactional(readOnly = true)
+    public String hiddenPlacesAsJson(Long userId) {
+        return places.summariesAsJson(placeIds(userId, MarkType.HIDDEN));
+    }
 }

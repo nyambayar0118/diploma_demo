@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router'
+import PageHeader from '../components/PageHeader'
 import { api, ApiError, LINK_TYPE_LABELS, REQUEST_STATUS_LABELS, REQUEST_TYPE_LABELS, type ChangeRequest,
   type ProposedData } from '../api'
 
@@ -47,11 +48,8 @@ export default function ModerationPage() {
 
   return (
     <div className="page">
+      <PageHeader title="Хүсэлт хянах" back="/" />
       <div className="card wide">
-        <div className="row">
-          <h1>Хүсэлт хянах</h1>
-          <Link className="btn secondary" to="/">Газрын зураг</Link>
-        </div>
         <div className="chips" style={{ margin: '12px 0' }}>
           {(['PENDING', 'APPROVED', 'REJECTED'] as const).map((s) => (
             <button key={s} className={`chip ${status === s ? 'on' : ''}`} onClick={() => setStatus(s)}>{REQUEST_STATUS_LABELS[s]}</button>

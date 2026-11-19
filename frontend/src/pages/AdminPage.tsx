@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router'
+import PageHeader from '../components/PageHeader'
 import { api, ApiError } from '../api'
 
 type Component = { name: string; up: boolean; latencyMs: number | null; detail: string }
@@ -67,11 +67,8 @@ export default function AdminPage() {
   const u = metrics?.usage
   return (
     <div className="page">
+      <PageHeader title="Хяналтын самбар" back="/" />
       <div className="card wide admin">
-        <div className="row">
-          <h1>Хяналтын самбар</h1>
-          <Link className="btn secondary" to="/">Газрын зураг</Link>
-        </div>
         {error && <div className="error">{error}</div>}
 
         <h2>Бүрэлдэхүүн хэсгүүд</h2>

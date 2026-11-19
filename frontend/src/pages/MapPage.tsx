@@ -14,6 +14,9 @@ import RecommendationPanel from '../components/RecommendationPanel'
 import RoutePanel from '../components/RoutePanel'
 import VisitPrompt from '../components/VisitPrompt'
 import ContributionForm from '../components/ContributionForm'
+import SideMenu from '../components/SideMenu'
+import Icon from '../components/Icon'
+import { MAIN_CATEGORY_COLORS } from '../places'
 import { useLocationSharing } from '../locationSharing'
 // MapLibre runs tile parsing in a Web Worker loaded from a separate file. Vite bundles the main
 // library into /assets/index-*.js, so the default worker URL points to a file that does not exist
@@ -41,6 +44,8 @@ export default function MapPage() {
   const [newPlaceAt, setNewPlaceAt] = useState<{ lat: number; lng: number } | null>(null)
   const [pickingNew, setPickingNew] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const closeMenu = useCallback(() => setMenuOpen(false), [])
   const selectedId = params.get('place') ? Number(params.get('place')) : null
 
   // The selected place lives in the URL (?place=123), so it can be linked to and survives reloads
@@ -64,9 +69,14 @@ export default function MapPage() {
     let cancelled = false
     basemapStyle().then((style) => {
       if (cancelled || !mapContainer.current) return
-      map = new maplibregl.Map({ container: mapContainer.current, style, center: UB_CENTER, zoom: 13 })
-      map.addControl(new maplibregl.NavigationControl(), 'top-right')
-      map.addControl(new maplibregl.GeolocateControl({ trackUserLocation: false }), 'top-right')
+      // Phones: pinch to zoom, so no zoom buttons; the locate button sits low, within thumb reach
+      const phone = window.matchMedia('(max-width: 640px)').matches
+      map = new maplibregl.Map({
+        container: mapContainer.current, style, center: UB_CENTER, zoom: 13, attributionControl: false,
+      })
+      map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right')
+      if (!phone) map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right')
+      map.addControl(new maplibregl.GeolocateControl({ trackUserLocation: false }), 'bottom-right')
       const m = map
       mapRef.current = m
       m.on('load', () => {
@@ -232,6 +242,13 @@ export default function MapPage() {
     updateRecs([])
   }
 
+  const startAddPlace = async () => {
+    setPickingNew(true)
+    const p = await pickOnMap()
+    setPickingNew(false)
+    setNewPlaceAt(p)
+  }
+
   const showResult = (p: PlaceSummary) => {
     mapRef.current?.flyTo({ center: [p.lng, p.lat], zoom: Math.max(mapRef.current.getZoom(), 16) })
     select(p.id)
@@ -243,22 +260,29 @@ export default function MapPage() {
           element, which would override a class and collapse the map to zero height. */}
       <div ref={mapContainer} style={{ position: 'absolute', inset: 0 }} />
       <div className="topbar">
-        <SearchBox categories={categories} category={category} onCategoryChange={changeCategory}
-                   center={center} onSelect={showResult} />
-        {user ? (
-          <Link className="avatar" to="/profile" title={user.displayName}>
-            {user.displayName.trim().charAt(0).toUpperCase()}
-          </Link>
-        ) : (
-          <Link className="btn" to="/login">Нэвтрэх</Link>
-        )}
-      </div>
-      {user && <VisitPrompt onAnswered={visitAnswered} />}
-      {pickingNew && <div className="visit-card"><div className="visit-place">Шинэ газрын байршлыг газрын зураг дээр дарж сонгоно уу</div></div>}
-      {notice && (
-        <div className="visit-card" onClick={() => setNotice(null)}>
-          <div className="success" style={{ margin: 0 }}>{notice}</div>
+        <div className="topbar-row">
+          <button className="menu-btn" onClick={() => setMenuOpen(true)} aria-label="Цэс">
+            <span /><span /><span />
+          </button>
+          <SearchBox category={category} center={center} onSelect={showResult} />
         </div>
+        <div className="cat-chips" role="toolbar" aria-label="Ангилал">
+          <button className={`cat-chip ${category === '' ? 'on' : ''}`} onClick={() => changeCategory('')}>Бүгд</button>
+          {categories.map((c) => (
+            <button key={c.code} className={`cat-chip ${category === c.code ? 'on' : ''}`}
+                    onClick={() => changeCategory(category === c.code ? '' : c.code)}>
+              <span className="dot" style={{ background: MAIN_CATEGORY_COLORS[c.code] ?? '#888' }} />
+              {c.nameMn}
+            </button>
+          ))}
+        </div>
+      </div>
+      <SideMenu open={menuOpen} onClose={closeMenu} onSelectPlace={showResult} onOpenRoute={openRoute}
+                onAddPlace={startAddPlace} />
+      {user && <VisitPrompt onAnswered={visitAnswered} />}
+      {pickingNew && <div className="toast">Шинэ газрын байршлыг газрын зураг дээр дарж сонгоно уу</div>}
+      {notice && (
+        <div className="toast ok" onClick={() => setNotice(null)}>{notice}</div>
       )}
       {newPlaceAt && (
         <aside className="sheet">
@@ -279,17 +303,9 @@ export default function MapPage() {
         user ? (
           <div className="fabs">
             {isActiveRoute(route) && (
-              <button className="btn secondary" onClick={() => openRoute(route)}>🗺 Миний маршрут</button>
+              <button className="btn secondary" onClick={() => openRoute(route)}><Icon name="route" size={18} /> Маршрут</button>
             )}
-            <button className="btn secondary" title="Газрын зураг дээр байхгүй газар нэмэх" disabled={pickingNew}
-                    onClick={async () => {
-                      setPickingNew(true)
-                      const p = await pickOnMap()
-                      setPickingNew(false)
-                      setNewPlaceAt(p)
-                    }}>＋</button>
-            <Link className="btn secondary" to="/groups" title="Найзуудтайгаа уулзах газар сонгох">👥</Link>
-            <button className="btn" onClick={() => setShowRecs(true)}>✨ Санал болгох</button>
+            <button className="btn" disabled={pickingNew} onClick={() => setShowRecs(true)}><Icon name="sparkles" size={18} /> Санал болгох</button>
           </div>
         ) : (
           <Link className="btn fab" to="/login">✨ Санал авахын тулд нэвтрэх</Link>

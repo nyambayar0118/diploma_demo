@@ -31,6 +31,8 @@ export default function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/onboarding" element={<RequireAuth><OnboardingPage /></RequireAuth>} />
           <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
+
+          <Route path="/settings" element={<RequireAuth><ProfilePage /></RequireAuth>} />
           <Route path="/friends" element={<RequireAuth><FriendsPage /></RequireAuth>} />
           <Route path="/invite/friend/:token" element={<FriendInvitePage />} />
           <Route path="/groups" element={<RequireAuth><GroupsPage /></RequireAuth>} />

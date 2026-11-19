@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
+import PageHeader from '../components/PageHeader'
 import { api, ApiError, type GroupMember, type GroupOptions, type GroupView, type TransportMode } from '../api'
 import { TRANSPORT_LABELS } from '../categoryLabels'
 import { MAIN_CATEGORY_COLORS } from '../places'
@@ -83,11 +84,8 @@ export default function GroupPage() {
 
   return (
     <div className="page">
+      <PageHeader title="Бүлгийн төлөвлөгөө" back="/groups" />
       <div className="card wide">
-        <div className="row">
-          <h1>Бүлгийн төлөвлөгөө</h1>
-          <Link className="btn secondary" to="/groups">Бүх төлөвлөгөө</Link>
-        </div>
         <p className="lead">{GROUP_STATUS[group.status]} · {group.timeBudgetMinutes / 60} цаг</p>
         {error && <div className="error">{error}</div>}
 

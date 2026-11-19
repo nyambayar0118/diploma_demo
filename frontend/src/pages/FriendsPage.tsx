@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link } from 'react-router'
+import PageHeader from '../components/PageHeader'
 import { agoText, api, ApiError, type Consent, type Friendship, type MyLocation } from '../api'
 import { useAuth } from '../auth'
 import { SHARING_CHANGED } from '../locationSharing'
@@ -85,11 +85,8 @@ export default function FriendsPage() {
 
   return (
     <div className="page">
+      <PageHeader title="Найзууд" back="/" />
       <div className="card wide">
-        <div className="row">
-          <h1>Найзууд</h1>
-          <Link className="btn secondary" to="/">Газрын зураг</Link>
-        </div>
         <p className="lead">Таны хэрэглэгчийн нэр: <strong>@{user?.username}</strong></p>
         {error && <div className="error">{error}</div>}
         {message && <div className="success">{message}</div>}
