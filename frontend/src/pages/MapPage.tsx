@@ -22,6 +22,7 @@ import { useLocationSharing } from '../locationSharing'
 // library into /assets/index-*.js, so the default worker URL points to a file that does not exist
 // (nginx then returns index.html and the map stays blank). Emit the worker as an asset and use it.
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
+import BottomSheet from '../components/BottomSheet'
 
 maplibregl.setWorkerUrl(workerUrl)
 
@@ -285,11 +286,11 @@ export default function MapPage() {
         <div className="toast ok" onClick={() => setNotice(null)}>{notice}</div>
       )}
       {newPlaceAt && (
-        <aside className="sheet">
+        <BottomSheet className="sheet">
           <button className="sheet-close" onClick={() => setNewPlaceAt(null)} aria-label="Хаах">×</button>
           <ContributionForm position={newPlaceAt} onCancel={() => setNewPlaceAt(null)}
                             onDone={(m) => { setNewPlaceAt(null); setNotice(m) }} />
-        </aside>
+        </BottomSheet>
       )}
       {showRecs && (
         <RecommendationPanel mapCenter={center} showOrigin={showOrigin} pickOnMap={pickOnMap}

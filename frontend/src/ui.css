@@ -483,3 +483,25 @@ input.switch:checked::after, .toggle input[type='checkbox']:checked::after { tra
   /* Locate button above the floating buttons */
   .maplibregl-ctrl-bottom-right { margin-bottom: calc(84px + var(--safe-bottom)); }
 }
+
+/* ---------- Draggable bottom sheets (phones) and full-width chips (desktop) ---------- */
+.topbar { max-width: none; }
+.topbar-row { max-width: 560px; width: 100%; }
+.cat-chips { margin-right: 60px; } /* keep clear of the map's corner controls */
+.sheet-body { min-height: 0; }
+@media (max-width: 640px) {
+  .cat-chips { margin-right: -2px; }
+  .sheet.is-sheet, .panel.is-sheet {
+    z-index: 6; max-height: none; display: flex; flex-direction: column; overflow: hidden; padding: 0;
+  }
+  .sheet.is-sheet::before, .panel.is-sheet::before { display: none; }
+  .is-sheet .sheet-grip {
+    flex: none; height: 28px; display: grid; place-items: center; touch-action: none; cursor: grab;
+  }
+  .is-sheet .sheet-grip span { width: 44px; height: 5px; border-radius: 5px; background: #c5ccd6; }
+  .is-sheet .sheet-body {
+    flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 0 16px calc(16px + var(--safe-bottom));
+  }
+  .is-sheet .sheet-close { top: 4px; right: 14px; }
+  .is-sheet .route-bar { bottom: calc(-16px - var(--safe-bottom)); }
+}

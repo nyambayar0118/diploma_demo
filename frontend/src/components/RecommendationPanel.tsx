@@ -3,6 +3,7 @@ import { api, ApiError, logInteraction, type Preferences, type RecommendationBat
   type RouteView, type TransportMode } from '../api'
 import { TRANSPORT_LABELS } from '../categoryLabels'
 import { MAIN_CATEGORY_COLORS } from '../places'
+import BottomSheet from './BottomSheet'
 
 type LatLng = { lat: number; lng: number }
 
@@ -157,7 +158,7 @@ export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, 
   }
 
   return (
-    <aside className="panel">
+    <BottomSheet className="panel">
       <button className="sheet-close" onClick={onClose} aria-label="Хаах">×</button>
       <h2 className="sheet-title">Санал болгох</h2>
       <div className="field">
@@ -236,6 +237,6 @@ export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, 
           )}
         </>
       )}
-    </aside>
+    </BottomSheet>
   )
 }

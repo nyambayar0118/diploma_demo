@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { api, ApiError, clockTime, durationText, type MapsLink, type RouteView } from '../api'
 import { TRANSPORT_LABELS } from '../categoryLabels'
 import { MAIN_CATEGORY_COLORS } from '../places'
+import BottomSheet from './BottomSheet'
 
 type Props = {
   route: RouteView
@@ -61,7 +62,7 @@ export default function RoutePanel({ route, onChange, onSelectPlace, onClose }: 
   const legName = (i: number) => (i === 0 ? 'Эхлэх цэг' : route.stops[i - 1]?.name)
 
   return (
-    <aside className="panel">
+    <BottomSheet className="panel">
       <button className="sheet-close" onClick={onClose} aria-label="Хаах">×</button>
       <div className="sheet-cat">
         <span className={`badge status-${route.status.toLowerCase()}`}>{STATUS_LABELS[route.status]}</span>
@@ -143,7 +144,7 @@ export default function RoutePanel({ route, onChange, onSelectPlace, onClose }: 
           ? <div className="success" style={{ marginTop: 14 }}>Үнэлгээ өгсөнд баярлалаа!</div>
           : <FeedbackForm routeId={route.id} onDone={() => onChange({ ...route, feedbackGiven: true })} />
       )}
-    </aside>
+    </BottomSheet>
   )
 }
 

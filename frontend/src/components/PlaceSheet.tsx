@@ -6,6 +6,7 @@ import { describeOpeningHours, type OpeningInfo } from '../openingHours'
 import { MAIN_CATEGORY_COLORS } from '../places'
 import Reviews from './Reviews'
 import ContributionForm from './ContributionForm'
+import BottomSheet from './BottomSheet'
 
 type Props = {
   placeId: number
@@ -61,7 +62,7 @@ export default function PlaceSheet({ placeId, recommendationId, onAddToRoute, on
   }
 
   return (
-    <aside className="sheet">
+    <BottomSheet className="sheet">
       <button className="sheet-close" onClick={onClose} aria-label="Хаах">×</button>
       {error && <div className="error">{error}</div>}
       {!place && !error && <p className="muted">Ачаалж байна…</p>}
@@ -137,6 +138,6 @@ export default function PlaceSheet({ placeId, recommendationId, onAddToRoute, on
           <p className="muted small">© OpenStreetMap-ийн хувь нэмэрлэгчид</p>
         </>
       )}
-    </aside>
+    </BottomSheet>
   )
 }
