@@ -19,3 +19,6 @@ data/tiles/*.pmtiles
 *.iml
 .DS_Store
 Thumbs.db
+
+# Database backups (docker-compose.prod.yml)
+backups/

@@ -27,6 +27,10 @@ showing `API: UP · DB: UP · ML: UP`.
 Stop with `Ctrl+C`; remove containers with
 `docker compose -f infra/docker-compose.yml down` (add `-v` to also delete the database).
 
+## Deploy with HTTPS
+
+VPS or home server with a free DuckDNS name and automatic Let's Encrypt certificates: see [docs/DEPLOY.md](docs/DEPLOY.md).
+
 ## Import OpenStreetMap places (Ulaanbaatar)
 
 The system's places and buildings come from OpenStreetMap. With the system running

@@ -1,0 +1,77 @@
+# Production overrides: HTTPS through Caddy (automatic Let's Encrypt certificates), restarts, daily backups.
+# Used together with the base file, from the repo root:
+#   docker compose -f infra/docker-compose.yml -f infra/docker-compose.prod.yml --env-file .env up -d --build
+# See docs/DEPLOY.md.
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in .env, e.g. myplanner.duckdns.org}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data        # certificates: keep this volume, Let's Encrypt limits re-issuing
+      - caddy-config:/config
+    depends_on:
+      - web
+
+  web:
+    restart: unless-stopped
+    ports: !reset []          # only Caddy is reachable from outside
+
+  backend:
+    restart: unless-stopped
+    environment:
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      JAVA_TOOL_OPTIONS: ${JAVA_OPTS:--Xmx512m}
+
+  ml:
+    restart: unless-stopped
+
+  db:
+    restart: unless-stopped
+    ports: !reset []
+
+  # Daily pg_dump into ./backups (kept for BACKUP_KEEP_DAYS days)
+  backup:
+    image: postgis/postgis:17-3.5
+    restart: unless-stopped
+    entrypoint: ["sh", "/backup/backup.sh"]
+    environment:
+      PGHOST: db
+      PGDATABASE: ${DB_NAME:-routeplanner}
+      PGUSER: ${DB_USER:-routeplanner}
+      PGPASSWORD: ${DB_PASSWORD:-routeplanner}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+    volumes:
+      - ./backup:/backup:ro
+      - ../backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Keeps <subdomain>.duckdns.org pointing at this machine's public IP (home server only):
+  #   ... up -d --build --profile duckdns   (or set COMPOSE_PROFILES=duckdns in .env)
+  duckdns:
+    image: curlimages/curl:8.11.1
+    profiles: ["duckdns"]
+    restart: unless-stopped
+    environment:
+      DUCKDNS_SUBDOMAIN: ${DUCKDNS_SUBDOMAIN:-}
+      DUCKDNS_TOKEN: ${DUCKDNS_TOKEN:-}
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        while true; do
+          echo "$$(date) duckdns: $$(curl -fsS "https://www.duckdns.org/update?domains=$${DUCKDNS_SUBDOMAIN}&token=$${DUCKDNS_TOKEN}&ip=")"
+          sleep 300
+        done
+
+volumes:
+  caddy-data:
+  caddy-config:
