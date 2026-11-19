@@ -231,3 +231,28 @@ export function durationText(minutes: number) {
   const m = minutes % 60
   return h === 0 ? `${m} мин` : m === 0 ? `${h} цаг` : `${h} цаг ${m} мин`
 }
+
+// ---- Friends and location sharing ----
+export type UserRef = { id: number; username: string; displayName: string }
+export type Friendship = { id: number; direction: 'FRIEND' | 'INCOMING' | 'OUTGOING'; user: UserRef; since: string }
+export type MyLocation = { shared: boolean; lat: number | null; lng: number | null; updatedAt: string | null }
+export type FriendLocation = { userId: number; username: string; displayName: string; lat: number; lng: number; updatedAt: string }
+
+/** "5 мин өмнө" */
+export function agoText(iso: string) {
+  const min = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000))
+  return min < 1 ? 'дөнгөж сая' : min < 60 ? `${min} мин өмнө` : `${Math.round(min / 60)} цагийн өмнө`
+}
+
+// ---- Where to go after login / onboarding (e.g. back to an invite link) ----
+const NEXT_KEY = 'routeplanner:next'
+/** Remembers ?next=/path from the login / register URL (only same-site paths). */
+export function rememberNext(search: string) {
+  const next = new URLSearchParams(search).get('next')
+  if (next && next.startsWith('/') && !next.startsWith('//')) sessionStorage.setItem(NEXT_KEY, next)
+}
+export function takeNext(): string {
+  const next = sessionStorage.getItem(NEXT_KEY)
+  sessionStorage.removeItem(NEXT_KEY)
+  return next ?? '/'
+}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { api, ApiError, type Category, type ConsentType, type OnboardingStatus } from '../api'
+import { api, ApiError, type Category, type ConsentType, type OnboardingStatus, takeNext } from '../api'
 import { MAIN_CATEGORY_COLORS } from '../places'
 
 const MIN_SELECTED = 3
@@ -42,7 +42,7 @@ export default function OnboardingPage() {
     setError(null)
     try {
       await api('/api/onboarding', { method: 'POST', body: { categoryCodes: [...selected], consents: [...consents] } })
-      navigate('/', { replace: true })
+      navigate(takeNext(), { replace: true })
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Сервертэй холбогдсонгүй')
     } finally {

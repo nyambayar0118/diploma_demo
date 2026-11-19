@@ -6,11 +6,14 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import OnboardingPage from './pages/OnboardingPage'
 import ProfilePage from './pages/ProfilePage'
+import FriendsPage from './pages/FriendsPage'
+import FriendInvitePage from './pages/FriendInvitePage'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth()
   if (loading) return null
-  return user ? children : <Navigate to="/login" replace />
+  const next = encodeURIComponent(window.location.pathname + window.location.search)
+  return user ? children : <Navigate to={`/login?next=${next}`} replace />
 }
 
 export default function App() {
@@ -23,6 +26,8 @@ export default function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/onboarding" element={<RequireAuth><OnboardingPage /></RequireAuth>} />
           <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
+          <Route path="/friends" element={<RequireAuth><FriendsPage /></RequireAuth>} />
+          <Route path="/invite/friend/:token" element={<FriendInvitePage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

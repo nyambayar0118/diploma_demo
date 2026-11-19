@@ -72,7 +72,10 @@ export default function ProfilePage() {
             <h1>{user.displayName}</h1>
             <p className="lead" style={{ margin: 0 }}>@{user.username} · {user.email}</p>
           </div>
-          <Link className="btn secondary" to="/">Газрын зураг</Link>
+          <span className="row" style={{ gap: 8 }}>
+            <Link className="btn secondary" to="/friends">Найзууд</Link>
+            <Link className="btn secondary" to="/">Газрын зураг</Link>
+          </span>
         </div>
 
         {message && <div className={message.ok ? 'success' : 'error'} style={{ marginTop: 16 }}>{message.text}</div>}

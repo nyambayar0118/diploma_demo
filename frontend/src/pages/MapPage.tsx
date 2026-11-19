@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { api, ApiError, isActiveRoute, type Category, type PlaceSummary, type RecommendationItem, type RouteView,
+import { agoText, api, ApiError, isActiveRoute, type Category, type FriendLocation, type PlaceSummary, type RecommendationItem, type RouteView,
   type VisitResult } from '../api'
 import { addPlacesLayer, filterPlacesLayer, onRecommendationClick, onRouteStopClick, showRecommendations,
   showRoute } from '../places'
@@ -13,6 +13,7 @@ import PlaceSheet from '../components/PlaceSheet'
 import RecommendationPanel from '../components/RecommendationPanel'
 import RoutePanel from '../components/RoutePanel'
 import VisitPrompt from '../components/VisitPrompt'
+import { useLocationSharing } from '../locationSharing'
 // MapLibre runs tile parsing in a Web Worker loaded from a separate file. Vite bundles the main
 // library into /assets/index-*.js, so the default worker URL points to a file that does not exist
 // (nginx then returns index.html and the map stays blank). Emit the worker as an asset and use it.
@@ -76,6 +77,35 @@ export default function MapPage() {
       mapRef.current = null
     }
   }, [])
+
+  // Location sharing (sends my position while the app is open) and friends' shared positions (АШ21)
+  useLocationSharing(!!user)
+  const friendMarkers = useRef<maplibregl.Marker[]>([])
+  useEffect(() => {
+    const map = mapRef.current
+    if (!user || !map || !mapReady) return
+    const draw = (list: FriendLocation[]) => {
+      friendMarkers.current.forEach((m) => m.remove())
+      friendMarkers.current = list.map((f) => {
+        const el = document.createElement('div')
+        el.className = 'friend-marker'
+        el.textContent = f.displayName.trim().charAt(0).toUpperCase()
+        el.title = `${f.displayName} · ${agoText(f.updatedAt)}`
+        return new maplibregl.Marker({ element: el }).setLngLat([f.lng, f.lat])
+          .setPopup(new maplibregl.Popup({ offset: 18, closeButton: false })
+            .setText(`${f.displayName} (@${f.username}) · ${agoText(f.updatedAt)}`))
+          .addTo(map)
+      })
+    }
+    const load = () => api<FriendLocation[]>('/api/friends/locations').then(draw).catch(() => undefined)
+    load()
+    const timer = window.setInterval(load, 60_000)
+    return () => {
+      window.clearInterval(timer)
+      friendMarkers.current.forEach((m) => m.remove())
+      friendMarkers.current = []
+    }
+  }, [user, mapReady])
 
   // An unfinished route from an earlier visit (e.g. the user went to Google Maps and came back)
   useEffect(() => {

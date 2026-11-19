@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { api, ApiError, type OnboardingStatus } from '../api'
+import { api, ApiError, rememberNext, takeNext, type OnboardingStatus } from '../api'
 import { useAuth } from '../auth'
 import GoogleButton from '../components/GoogleButton'
 
@@ -10,6 +10,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState({ displayName: '', username: '', email: '', password: '' })
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  useEffect(() => rememberNext(window.location.search), [])
 
   const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm({ ...form, [key]: e.target.value })
@@ -34,7 +35,7 @@ export default function RegisterPage() {
     try {
       await loginWithGoogle(credential)
       const status = await api<OnboardingStatus>('/api/onboarding')
-      navigate(status.completed ? '/' : '/onboarding', { replace: true })
+      navigate(status.completed ? takeNext() : '/onboarding', { replace: true })
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Сервертэй холбогдсонгүй')
     } finally {

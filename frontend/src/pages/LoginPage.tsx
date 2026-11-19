@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { api, ApiError, type OnboardingStatus } from '../api'
+import { api, ApiError, rememberNext, takeNext, type OnboardingStatus } from '../api'
 import { useAuth } from '../auth'
 import GoogleButton from '../components/GoogleButton'
 
@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  useEffect(() => rememberNext(window.location.search), [])
 
   const run = async (doLogin: () => Promise<unknown>) => {
     setBusy(true)
@@ -18,7 +19,7 @@ export default function LoginPage() {
     try {
       await doLogin()
       const status = await api<OnboardingStatus>('/api/onboarding')
-      navigate(status.completed ? '/' : '/onboarding', { replace: true })
+      navigate(status.completed ? takeNext() : '/onboarding', { replace: true })
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Сервертэй холбогдсонгүй')
     } finally {
@@ -50,7 +51,7 @@ export default function LoginPage() {
         <button className="btn block" disabled={busy}>{busy ? 'Түр хүлээнэ үү…' : 'Нэвтрэх'}</button>
         <GoogleButton onCredential={(c) => run(() => loginWithGoogle(c))} />
         <p className="muted" style={{ textAlign: 'center', marginTop: 16 }}>
-          Бүртгэлгүй юу? <Link to="/register">Бүртгүүлэх</Link> · <Link to="/">Газрын зураг</Link>
+          Бүртгэлгүй юу? <Link to={`/register${window.location.search}`}>Бүртгүүлэх</Link> · <Link to="/">Газрын зураг</Link>
         </p>
       </form>
     </div>
