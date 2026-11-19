@@ -259,3 +259,17 @@ a.link { font-size: 13px; color: var(--c-primary); }
 .diff td.old { color: var(--c-muted); text-decoration: line-through; }
 .diff td.new { background: #ebfbee; border-radius: 4px; }
 .request input.comment { flex: 1; min-width: 180px; font: inherit; font-size: 14px; border: 1px solid var(--c-border); border-radius: 8px; padding: 8px 10px; }
+
+/* ---------- Admin dashboard ---------- */
+.card.admin { max-width: 980px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+.stat { border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; }
+.stat-value { font-size: 22px; font-weight: 700; }
+.stat-label { font-size: 13px; font-weight: 600; margin-top: 2px; }
+.stat-sub { font-size: 12px; color: var(--c-muted); margin-top: 2px; }
+.ok { color: #2b8a3e; }
+.bad { color: var(--c-danger); font-weight: 700; }
+.table-wrap { overflow-x: auto; }
+table.metrics { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.metrics th, table.metrics td { padding: 6px 8px; border-bottom: 1px solid var(--c-border); text-align: right; white-space: nowrap; }
+table.metrics th:first-child, table.metrics td:first-child { text-align: left; }

@@ -163,7 +163,10 @@ export default function ProfilePage() {
           </ul>
         )}
         {(user?.role === 'MODERATOR' || user?.role === 'ADMIN') && (
-          <p><Link className="btn secondary" to="/moderation">Хүсэлт хянах (модератор)</Link></p>
+          <p className="row" style={{ justifyContent: 'flex-start' }}>
+            <Link className="btn secondary" to="/moderation">Хүсэлт хянах (модератор)</Link>
+            {user?.role === 'ADMIN' && <Link className="btn secondary" to="/admin">Хяналтын самбар</Link>}
+          </p>
         )}
 
         <h2>Хувийн мэдээллийн зөвшөөрөл</h2>
