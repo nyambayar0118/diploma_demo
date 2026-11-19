@@ -15,9 +15,21 @@ final class TestHttp {
 
     private final HttpClient http = HttpClient.newHttpClient();
     private final int port;
+    private final java.util.function.BiConsumer<String, String> roleSetter;
 
     TestHttp(int port) {
+        this(port, (email, role) -> {
+            throw new IllegalStateException("create TestHttp with a JdbcTemplate to set roles");
+        });
+    }
+
+    TestHttp(int port, org.springframework.jdbc.core.JdbcTemplate jdbc) {
+        this(port, (email, role) -> jdbc.update("UPDATE users SET role = ? WHERE email = ?", role, email));
+    }
+
+    private TestHttp(int port, java.util.function.BiConsumer<String, String> roleSetter) {
         this.port = port;
+        this.roleSetter = roleSetter;
     }
 
     HttpResponse<String> send(String method, String path, String body, String token) throws Exception {
@@ -39,6 +51,22 @@ final class TestHttp {
                 """.formatted(suffix, suffix), null);
         assertTrue(reg.statusCode() == 201, reg.body());
         return extract(reg.body(), "\"token\"\\s*:\\s*\"([^\"]+)\"");
+    }
+
+    /**
+     * Registers a user and gives it a role straight in the database (tests only), then logs in again so the
+     * token carries the role.
+     */
+    String tokenWithRole(String role) throws Exception {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        String email = "r-" + suffix + "@example.com";
+        send("POST", "/api/auth/register", """
+                {"email":"%s","password":"secret123","displayName":"Role","username":"r_%s"}
+                """.formatted(email, suffix), null);
+        roleSetter.accept(email, role);
+        HttpResponse<String> login = send("POST", "/api/auth/login",
+                "{\"email\":\"%s\",\"password\":\"secret123\"}".formatted(email), null);
+        return extract(login.body(), "\"token\"\\s*:\\s*\"([^\"]+)\"");
     }
 
     static String extract(String text, String regex) {

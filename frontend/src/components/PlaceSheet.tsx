@@ -4,6 +4,7 @@ import { api, googleMapsUrl, logInteraction, type MarkType, type PlaceDetails } 
 import { useAuth } from '../auth'
 import { describeOpeningHours, type OpeningInfo } from '../openingHours'
 import { MAIN_CATEGORY_COLORS } from '../places'
+import Reviews from './Reviews'
 
 type Props = {
   placeId: number
@@ -93,9 +94,6 @@ export default function PlaceSheet({ placeId, recommendationId, onAddToRoute, on
               {place.instagram && <a href={place.instagram} target="_blank" rel="noopener noreferrer">Instagram</a>}
             </div>
           )}
-          {place.reviewCount > 0 && (
-            <div className="sheet-row">★ {place.averageRating.toFixed(1)} ({place.reviewCount})</div>
-          )}
 
           <div className="sheet-actions">
             <button className="btn" onClick={openInMaps}>Google Maps-ээр очих</button>
@@ -114,6 +112,7 @@ export default function PlaceSheet({ placeId, recommendationId, onAddToRoute, on
               <Link className="btn secondary" to="/login">Хадгалахын тулд нэвтрэх</Link>
             )}
           </div>
+          <Reviews placeId={place.id} user={user} />
           <p className="muted small">© OpenStreetMap-ийн хувь нэмэрлэгчид</p>
         </>
       )}

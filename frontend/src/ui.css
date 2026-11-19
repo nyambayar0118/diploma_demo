@@ -217,3 +217,19 @@ button.link:disabled { color: var(--c-muted); text-decoration: none; }
 .or { display: flex; align-items: center; gap: 10px; color: var(--c-muted); font-size: 13px; margin: 16px 0 12px; }
 .or::before, .or::after { content: ''; flex: 1; height: 1px; background: var(--c-border); }
 .google-btn { display: flex; justify-content: center; min-height: 44px; }
+
+/* ---------- Reviews ---------- */
+.reviews { margin-top: 20px; border-top: 1px solid var(--c-border); padding-top: 12px; }
+.reviews-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 14px; }
+.reviews-head h3 { font-size: 15px; margin: 0; }
+.stars { color: #dee2e6; letter-spacing: 1px; white-space: nowrap; }
+.stars .on { color: #f59f00; }
+.stars.input button { font-size: 26px; background: none; border: none; padding: 0 2px; cursor: pointer; color: #dee2e6; }
+.stars.input button.on { color: #f59f00; }
+.review-form { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+.review-form textarea { font: inherit; font-size: 14px; border: 1px solid var(--c-border); border-radius: 8px; padding: 8px 10px; resize: vertical; }
+.review-list { list-style: none; padding: 0; margin: 8px 0 0; }
+.review-list li { padding: 10px 0; border-top: 1px solid var(--c-border); font-size: 14px; }
+.review-list li.hidden { opacity: 0.6; }
+.review-top { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 2px; }
+.review-actions { display: flex; gap: 12px; margin-top: 4px; }
