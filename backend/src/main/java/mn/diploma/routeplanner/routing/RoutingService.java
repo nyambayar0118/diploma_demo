@@ -297,7 +297,7 @@ public class RoutingService {
         return new RouteView(route.id, route.status, route.transportMode, route.start.lat(), route.start.lng(),
                 route.plannedStart, route.timeBudgetMinutes, route.estimatedDurationMinutes,
                 route.estimatedDurationMinutes > route.timeBudgetMinutes, route.createdAt, stops, links,
-                Boolean.TRUE.equals(feedback), route.groupSessionId);
+                Boolean.TRUE.equals(feedback), route.groupSessionId, isShortestOrder(route));
     }
 
     private List<StopRequest> autoSelect(long userId, LatLng start, TransportMode mode, int budget, LocalDateTime at,

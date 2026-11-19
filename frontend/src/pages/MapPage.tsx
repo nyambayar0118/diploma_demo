@@ -295,6 +295,7 @@ export default function MapPage() {
       {showRecs && (
         <RecommendationPanel mapCenter={center} showOrigin={showOrigin} pickOnMap={pickOnMap}
                              onResults={updateRecs} onClose={closeRecs} onRoute={routeCreated}
+                             categories={categories} initialCategory={category || undefined}
                              onOpen={(it) => select(it.placeId)} />
       )}
       {showRoutePanel && route && !showRecs && (

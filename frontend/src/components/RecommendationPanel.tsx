@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { api, ApiError, logInteraction, type Preferences, type RecommendationBatch, type RecommendationItem,
+import { api, ApiError, logInteraction, type Category, type Preferences, type RecommendationBatch, type RecommendationItem,
   type RouteView, type TransportMode } from '../api'
 import { TRANSPORT_LABELS } from '../categoryLabels'
 import { MAIN_CATEGORY_COLORS } from '../places'
@@ -17,6 +17,10 @@ type Props = {
   onOpen: (item: RecommendationItem) => void
   onRoute: (route: RouteView) => void
   onClose: () => void
+  /** Main categories (with subcategories) for the "what are you looking for" chips. */
+  categories: Category[]
+  /** Category chosen on the map's chip row, used as the starting choice. */
+  initialCategory?: string
 }
 
 const MAX_STOPS = 4
@@ -44,9 +48,21 @@ function distanceText(m: number) {
   return m < 1000 ? `${m} м` : `${(m / 1000).toFixed(1)} км`
 }
 
-export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, onResults, onOpen, onRoute, onClose }: Props) {
+export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, onResults, onOpen, onRoute, onClose,
+  categories, initialCategory }: Props) {
   const [minutes, setMinutes] = useState(180)
   const [mode, setMode] = useState<TransportMode>('WALKING')
+  // What to look for: main categories, optionally narrowed to subcategories of one of them (empty = everything)
+  const [mains, setMains] = useState<string[]>(initialCategory ? [initialCategory] : [])
+  const [subs, setSubs] = useState<string[]>([])
+  const toggleMain = (code: string) => {
+    setSubs([])
+    setMains((m) => (m.includes(code) ? m.filter((x) => x !== code) : [...m, code]))
+  }
+  const toggleSub = (code: string) => setSubs((s) => (s.includes(code) ? s.filter((x) => x !== code) : [...s, code]))
+  const chosenCategories = subs.length > 0 ? subs : mains
+  const narrowable = mains.length === 1 ? categories.find((c) => c.code === mains[0]) : undefined
+  const subOptions = narrowable?.children?.filter((c) => c.recommendable !== false) ?? []
   const [batch, setBatch] = useState<RecommendationBatch | null>(null)
   const [items, setItems] = useState<RecommendationItem[]>([])
   const [origin, setOrigin] = useState<Origin | null>(null)
@@ -103,7 +119,8 @@ export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, 
     setError(null)
     try {
       const b = await api<RecommendationBatch>('/api/recommendations', {
-        method: 'POST', body: { lat: origin.lat, lng: origin.lng, availableMinutes: minutes, transportMode: mode },
+        method: 'POST',
+        body: { lat: origin.lat, lng: origin.lng, availableMinutes: minutes, transportMode: mode, categories: chosenCategories },
       })
       setBatch(b)
       setItems(b.items)
@@ -134,7 +151,8 @@ export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, 
         .map((i) => ({ placeId: i.placeId, recommendationId: i.recommendationId }))
       const route = await api<RouteView>('/api/routes', {
         method: 'POST',
-        body: { lat: origin.lat, lng: origin.lng, transportMode: mode, timeBudgetMinutes: minutes, stops },
+        body: { lat: origin.lat, lng: origin.lng, transportMode: mode, timeBudgetMinutes: minutes, stops,
+          categories: chosenCategories },
       })
       onRoute(route)
     } catch (err) {
@@ -173,6 +191,27 @@ export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, 
           </span>
         </div>
         {origin?.warning && <span className="hint warn">{origin.warning}</span>}
+      </div>
+      <div className="field">
+        <label>Юу хайж байна вэ?</label>
+        <div className="chips">
+          <button type="button" className={`chip ${mains.length === 0 ? 'on' : ''}`}
+                  onClick={() => { setMains([]); setSubs([]) }}>Бүгд</button>
+          {categories.map((c) => (
+            <button key={c.code} type="button" className={`chip ${mains.includes(c.code) ? 'on' : ''}`}
+                    onClick={() => toggleMain(c.code)}>
+              <span className="dot" style={{ background: MAIN_CATEGORY_COLORS[c.code] ?? '#888' }} /> {c.nameMn}
+            </button>
+          ))}
+        </div>
+        {subOptions.length > 1 && (
+          <div className="chips sub-chips">
+            {subOptions.map((c) => (
+              <button key={c.code} type="button" className={`chip small ${subs.includes(c.code) ? 'on' : ''}`}
+                      onClick={() => toggleSub(c.code)}>{c.nameMn}</button>
+            ))}
+          </div>
+        )}
       </div>
       <div className="field">
         <label htmlFor="rec-time">Боломжит хугацаа</label>

@@ -3,6 +3,7 @@ import { api, ApiError, clockTime, durationText, type MapsLink, type RouteView }
 import { TRANSPORT_LABELS } from '../categoryLabels'
 import { MAIN_CATEGORY_COLORS } from '../places'
 import BottomSheet from './BottomSheet'
+import SortableList from './SortableList'
 
 type Props = {
   route: RouteView
@@ -34,6 +35,25 @@ export default function RoutePanel({ route, onChange, onSelectPlace, onClose }: 
       setBusy(false)
     }
   }
+
+  // Shown in the new order right away while the server recomputes the times
+  const [optimistic, setOptimistic] = useState<RouteView['stops'] | null>(null)
+  const stops = optimistic ?? route.stops
+
+  const reorder = (from: number, to: number) => {
+    if (busy) return
+    const next = [...stops]
+    const [moved] = next.splice(from, 1)
+    next.splice(to, 0, moved)
+    setOptimistic(next)
+    call(() => api<RouteView>(`/api/routes/${route.id}/stops`, {
+      method: 'PATCH', body: { op: 'REORDER', stopIds: next.map((s) => s.stopId) },
+    })).finally(() => setOptimistic(null))
+  }
+
+  const optimize = () => call(() => api<RouteView>(`/api/routes/${route.id}/stops`, {
+    method: 'PATCH', body: { op: 'OPTIMIZE' },
+  }))
 
   const removeStop = (stopId: number) => call(() => api<RouteView>(`/api/routes/${route.id}/stops`, {
     method: 'PATCH', body: { op: 'REMOVE', stopId },
@@ -77,19 +97,29 @@ export default function RoutePanel({ route, onChange, onSelectPlace, onClose }: 
         </p>
       )}
 
-      <ol className="route-stops">
-        {route.stops.map((s) => (
-          <li key={s.stopId} className={s.visited || s.skipped ? 'done' : ''}>
-            <div className="route-leg">{s.travelMinutes} мин зам</div>
+      {route.status === 'CREATED' && route.stops.length > 1 && (
+        <p className="reorder-hint">
+          <span>Дарааллыг ⠿ бариулаар чирж өөрчилнө.</span>
+          {!route.shortestOrder && (
+            <button type="button" className="link" disabled={busy} onClick={optimize}>Хамгийн богино дараалал</button>
+          )}
+        </p>
+      )}
+      <SortableList className="route-stops" items={stops} keyOf={(s) => s.stopId}
+                    enabled={route.status === 'CREATED' && stops.length > 1} onReorder={reorder}
+                    renderItem={(s, i, handle) => (
+          <div className={s.visited || s.skipped ? 'done' : ''}>
+            <div className={`route-leg ${optimistic ? 'stale' : ''}`}>{s.travelMinutes} мин зам</div>
             <div className="route-stop">
+              {handle}
               <span className="rec-num" style={{ background: s.visited || s.skipped ? '#adb5bd' : MAIN_CATEGORY_COLORS[s.mainCategory] ?? '#888' }}>
-                {s.visited ? '✓' : s.order}
+                {s.visited ? '✓' : i + 1}
               </span>
               <button type="button" className="rec-main" onClick={() => onSelectPlace(s.placeId)}>
                 <span className="r-main">
                   <span className="r-name">{s.name}</span>
                   <span className="r-sub">
-                    {s.categoryName} · {clockTime(s.estimatedArrival)} ирэх · ~{s.stayMinutes} мин байх
+                    {s.categoryName} · {optimistic ? '…' : clockTime(s.estimatedArrival)} ирэх · ~{s.stayMinutes} мин байх
                   </span>
                   {s.openAtArrival === 'CLOSED' && active && (
                     <span className="hint warn">Ирэх үед хаалттай байж магадгүй</span>
@@ -102,9 +132,8 @@ export default function RoutePanel({ route, onChange, onSelectPlace, onClose }: 
                 <button type="button" className="rec-x" title="Хасах" disabled={busy} onClick={() => removeStop(s.stopId)}>✕</button>
               )}
             </div>
-          </li>
-        ))}
-      </ol>
+          </div>
+        )} />
 
       {route.status === 'CREATED' && route.stops.length < 4 && (
         <p className="hint" style={{ fontSize: 12, color: 'var(--c-muted)' }}>

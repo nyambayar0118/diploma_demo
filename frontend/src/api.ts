@@ -205,6 +205,8 @@ export type RouteView = {
   mapsLinks: MapsLink[]
   feedbackGiven: boolean
   groupSessionId: number | null
+  /** False after the user reordered the stops by hand. */
+  shortestOrder: boolean
 }
 
 export type PendingVisit = {
