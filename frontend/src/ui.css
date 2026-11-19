@@ -245,3 +245,6 @@ button.link:disabled { color: var(--c-muted); text-decoration: none; }
 .avatar.small { width: 34px; height: 34px; font-size: 14px; box-shadow: none; flex: none; }
 .invite-box { display: flex; gap: 8px; align-items: center; background: #f6f8fb; border-radius: 8px; padding: 8px 10px; }
 .invite-box code { flex: 1; font-size: 12px; overflow-wrap: anywhere; }
+.meeting { background: #f6f8fb; border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; }
+.friend-list select { font: inherit; font-size: 13px; border: 1px solid var(--c-border); border-radius: 6px; padding: 4px 6px; }
+a.link { font-size: 13px; color: var(--c-primary); }

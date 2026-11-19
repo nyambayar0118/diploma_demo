@@ -203,6 +203,7 @@ export type RouteView = {
   stops: RouteStop[]
   mapsLinks: MapsLink[]
   feedbackGiven: boolean
+  groupSessionId: number | null
 }
 
 export type PendingVisit = {
@@ -255,4 +256,59 @@ export function takeNext(): string {
   const next = sessionStorage.getItem(NEXT_KEY)
   sessionStorage.removeItem(NEXT_KEY)
   return next ?? '/'
+}
+
+// ---- Group planning ----
+export type GroupStatus = 'RECOMMENDED' | 'SHARED' | 'COMPLETED' | 'CANCELLED'
+export type PlaceRef = { id: number; name: string; categoryName: string; mainCategory: string; lat: number; lng: number }
+export type GroupMember = {
+  id: number
+  role: 'INITIATOR' | 'MEMBER'
+  userId: number | null
+  name: string
+  guest: boolean
+  startSource: 'SHARED_LOCATION' | 'PINNED' | 'SAME_AS_INITIATOR' | null
+  startLat: number | null
+  startLng: number | null
+  transportMode: TransportMode
+  usesInterests: boolean
+  travelMinutes: number | null
+  joinedViaLink: boolean
+  mapsUrl: string | null
+  me: boolean
+}
+export type GroupView = {
+  id: number
+  status: GroupStatus
+  timeBudgetMinutes: number
+  budgetLevel: PriceLevel
+  createdAt: string
+  meetingPlace: PlaceRef | null
+  members: GroupMember[]
+  initiator: boolean
+  inviteToken: string | null
+  inviteExpiresAt: string | null
+  myRouteId: number | null
+}
+export type GroupOption = {
+  recommendationId: number
+  place: PlaceRef
+  score: number
+  travelMinutesByMember: Record<string, number>
+  maxTravelMinutes: number
+}
+export type GroupOptions = { batchId: number; aggregator: string; options: GroupOption[] }
+export type JoinInfo = { status: GroupStatus; initiatorName: string; memberCount: number; meetingPlace: PlaceRef | null; expiresAt: string | null; valid: boolean }
+export type JoinResult = { memberId: number; name: string; meetingPlace: PlaceRef; mapsUrl: string; travelMinutes: number | null; routeId: number | null }
+
+/** Device position (needs https or localhost); null when unavailable or refused. */
+export function currentPosition(timeout = 10000) {
+  return new Promise<{ lat: number; lng: number } | null>((resolve) => {
+    if (!navigator.geolocation) return resolve(null)
+    navigator.geolocation.getCurrentPosition(
+      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      () => resolve(null),
+      { enableHighAccuracy: true, timeout, maximumAge: 30000 },
+    )
+  })
 }

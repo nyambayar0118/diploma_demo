@@ -74,6 +74,7 @@ export default function ProfilePage() {
           </div>
           <span className="row" style={{ gap: 8 }}>
             <Link className="btn secondary" to="/friends">Найзууд</Link>
+            <Link className="btn secondary" to="/groups">Бүлэг</Link>
             <Link className="btn secondary" to="/">Газрын зураг</Link>
           </span>
         </div>

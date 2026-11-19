@@ -263,6 +263,7 @@ export default function MapPage() {
             {isActiveRoute(route) && (
               <button className="btn secondary" onClick={() => openRoute(route)}>🗺 Миний маршрут</button>
             )}
+            <Link className="btn secondary" to="/groups" title="Найзуудтайгаа уулзах газар сонгох">👥</Link>
             <button className="btn" onClick={() => setShowRecs(true)}>✨ Санал болгох</button>
           </div>
         ) : (
