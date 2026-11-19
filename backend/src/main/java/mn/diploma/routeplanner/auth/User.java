@@ -64,6 +64,16 @@ public class User {
         return u;
     }
 
+    public static User withGoogle(String email, String subject, String displayName, String username) {
+        User u = new User();
+        u.email = email;
+        u.displayName = displayName;
+        u.username = username;
+        u.authProvider = AuthProvider.GOOGLE;
+        u.providerUserId = subject;
+        return u;
+    }
+
     public Long getId() { return id; }
     public String getEmail() { return email; }
     public String getPasswordHash() { return passwordHash; }

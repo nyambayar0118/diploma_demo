@@ -212,3 +212,8 @@ button.link:disabled { color: var(--c-muted); text-decoration: none; }
 .visit-title { font-size: 13px; font-weight: 700; color: var(--c-primary); }
 .visit-place { font-size: 17px; font-weight: 700; margin: 2px 0; }
 .visit-actions { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+
+/* ---------- Google login ---------- */
+.or { display: flex; align-items: center; gap: 10px; color: var(--c-muted); font-size: 13px; margin: 16px 0 12px; }
+.or::before, .or::after { content: ''; flex: 1; height: 1px; background: var(--c-border); }
+.google-btn { display: flex; justify-content: center; min-height: 44px; }

@@ -93,3 +93,16 @@ gunzip -c backups/routeplanner-YYYYMMDD-HHMM.sql.gz | dc exec -T db psql -U rout
 ```
 
 Never run `dc down -v`: `-v` deletes the database and certificate volumes.
+
+---
+
+## Google login (optional)
+
+1. https://console.cloud.google.com → create a project → **APIs & Services → OAuth consent screen**:
+   External, app name, your e-mail. While it is in "Testing" mode only the test users you add can sign in;
+   press **Publish app** for the trial (basic scopes need no Google review).
+2. **Credentials → Create credentials → OAuth client ID → Web application.**
+   Authorized JavaScript origins: `https://<name>.duckdns.org` and `http://localhost:8080`.
+   (No redirect URI is needed: the button returns the token to the page directly.)
+3. Put the client id (`....apps.googleusercontent.com`) into `.env` as `GOOGLE_CLIENT_ID` and restart.
+   The "Google-ээр үргэлжлүүлэх" button appears on the login and register pages.

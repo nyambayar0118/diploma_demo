@@ -45,6 +45,17 @@ public class AuthController {
         return auth.login(req);
     }
 
+    @PostMapping("/api/auth/google")
+    public AuthResponse google(@Valid @RequestBody AuthDtos.GoogleLoginRequest req) {
+        return auth.loginWithGoogle(req.credential());
+    }
+
+    /** Public settings the login page needs (Google client id, or null when Google login is off). */
+    @GetMapping("/api/auth/config")
+    public AuthDtos.AuthConfig config() {
+        return auth.config();
+    }
+
     @GetMapping("/api/users/me")
     public UserDto me(@AuthenticationPrincipal Jwt jwt) {
         return auth.me(JwtService.userId(jwt));

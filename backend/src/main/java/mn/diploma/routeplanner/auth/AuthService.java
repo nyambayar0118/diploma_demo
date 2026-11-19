@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import mn.diploma.routeplanner.auth.AuthDtos.AuthResponse;
+import mn.diploma.routeplanner.auth.GoogleTokenVerifier.GoogleUser;
 import mn.diploma.routeplanner.auth.AuthDtos.LoginRequest;
 import mn.diploma.routeplanner.auth.AuthDtos.PreferencesDto;
 import mn.diploma.routeplanner.auth.AuthDtos.RegisterRequest;
@@ -21,13 +22,15 @@ public class AuthService {
     private final UserPreferencesRepository preferences;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final GoogleTokenVerifier google;
 
     public AuthService(UserRepository users, UserPreferencesRepository preferences,
-                       PasswordEncoder passwordEncoder, JwtService jwtService) {
+                       PasswordEncoder passwordEncoder, JwtService jwtService, GoogleTokenVerifier google) {
         this.users = users;
         this.preferences = preferences;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.google = google;
     }
 
     @Transactional
@@ -54,6 +57,55 @@ public class AuthService {
                 .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS",
                         "Имэйл эсвэл нууц үг буруу байна"));
         return new AuthResponse(jwtService.issue(user), UserDto.of(user));
+    }
+
+    /**
+     * "Sign in with Google": logs in the account linked to the Google user, or creates one on first use.
+     * An existing e-mail / password account with the same address is not taken over silently.
+     */
+    @Transactional
+    public AuthResponse loginWithGoogle(String credential) {
+        if (!google.isEnabled()) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "GOOGLE_DISABLED", "Google-ээр нэвтрэх тохируулагдаагүй байна");
+        }
+        GoogleUser g = google.verify(credential)
+                .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "INVALID_GOOGLE_TOKEN",
+                        "Google-ийн баталгаажуулалт амжилтгүй боллоо"));
+        if (g.email() == null || !g.emailVerified()) {
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "EMAIL_NOT_VERIFIED", "Google бүртгэлийн имэйл баталгаажаагүй байна");
+        }
+        User user = users.findByAuthProviderAndProviderUserIdAndDeletedAtIsNull(AuthProvider.GOOGLE, g.subject())
+                .orElseGet(() -> createGoogleUser(g));
+        return new AuthResponse(jwtService.issue(user), UserDto.of(user));
+    }
+
+    private User createGoogleUser(GoogleUser g) {
+        String email = g.email().trim().toLowerCase(Locale.ROOT);
+        if (users.existsByEmailIgnoreCaseAndDeletedAtIsNull(email)) {
+            throw new ApiException(HttpStatus.CONFLICT, "EMAIL_REGISTERED_WITH_PASSWORD",
+                    "Энэ имэйлээр нууц үгтэй бүртгэл байна. Имэйл, нууц үгээрээ нэвтэрнэ үү.");
+        }
+        String name = g.name() == null || g.name().isBlank() ? email.substring(0, email.indexOf('@')) : g.name().trim();
+        User user = users.save(User.withGoogle(email, g.subject(), name.length() > 100 ? name.substring(0, 100) : name,
+                uniqueUsername(email)));
+        preferences.save(UserPreferences.defaultsFor(user.getId()));
+        return user;
+    }
+
+    /** "bat.erdene@gmail.com" -> "bat_erdene", then "bat_erdene2", ... until free. */
+    private String uniqueUsername(String email) {
+        String base = email.substring(0, email.indexOf('@')).replaceAll("[^A-Za-z0-9_]", "_");
+        if (base.length() < 3) base = base + "_user";
+        if (base.length() > 25) base = base.substring(0, 25);
+        String candidate = base;
+        for (int i = 2; users.existsByUsernameIgnoreCaseAndDeletedAtIsNull(candidate); i++) {
+            candidate = base + i;
+        }
+        return candidate;
+    }
+
+    public AuthDtos.AuthConfig config() {
+        return new AuthDtos.AuthConfig(google.isEnabled() ? google.clientId() : null);
     }
 
     @Transactional(readOnly = true)

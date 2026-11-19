@@ -6,6 +6,7 @@ type AuthState = {
   loading: boolean
   login: (email: string, password: string) => Promise<User>
   register: (data: { email: string; password: string; displayName: string; username: string }) => Promise<User>
+  loginWithGoogle: (credential: string) => Promise<User>
   logout: () => void
 }
 
@@ -46,7 +47,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = (data: { email: string; password: string; displayName: string; username: string }) =>
     api<AuthResponse>('/api/auth/register', { method: 'POST', body: data }).then(accept)
 
-  return <AuthContext.Provider value={{ user, loading, login, register, logout }}>{children}</AuthContext.Provider>
+  const loginWithGoogle = (credential: string) =>
+    api<AuthResponse>('/api/auth/google', { method: 'POST', body: { credential } }).then(accept)
+
+  return (
+    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, logout }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

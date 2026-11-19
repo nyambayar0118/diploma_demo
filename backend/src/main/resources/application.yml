@@ -19,6 +19,9 @@ server:
 app:
   ml:
     base-url: ${ML_URL:http://localhost:8000}
+  google:
+    # OAuth client id from Google Cloud Console ("Web application"); empty = Google login hidden
+    client-id: ${GOOGLE_CLIENT_ID:}
   jwt:
     # At least 32 characters. Set JWT_SECRET in .env for anything other than local development.
     secret: ${JWT_SECRET:dev-only-secret-change-me-0123456789abcdef}

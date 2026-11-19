@@ -2,21 +2,21 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { api, ApiError, type OnboardingStatus } from '../api'
 import { useAuth } from '../auth'
+import GoogleButton from '../components/GoogleButton'
 
 export default function LoginPage() {
-  const { login } = useAuth()
+  const { login, loginWithGoogle } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
-  const submit = async (e: FormEvent) => {
-    e.preventDefault()
+  const run = async (doLogin: () => Promise<unknown>) => {
     setBusy(true)
     setError(null)
     try {
-      await login(email, password)
+      await doLogin()
       const status = await api<OnboardingStatus>('/api/onboarding')
       navigate(status.completed ? '/' : '/onboarding', { replace: true })
     } catch (err) {
@@ -24,6 +24,11 @@ export default function LoginPage() {
     } finally {
       setBusy(false)
     }
+  }
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault()
+    run(() => login(email, password))
   }
 
   return (
@@ -43,6 +48,7 @@ export default function LoginPage() {
                  onChange={(e) => setPassword(e.target.value)} />
         </div>
         <button className="btn block" disabled={busy}>{busy ? 'Түр хүлээнэ үү…' : 'Нэвтрэх'}</button>
+        <GoogleButton onCredential={(c) => run(() => loginWithGoogle(c))} />
         <p className="muted" style={{ textAlign: 'center', marginTop: 16 }}>
           Бүртгэлгүй юу? <Link to="/register">Бүртгүүлэх</Link> · <Link to="/">Газрын зураг</Link>
         </p>
