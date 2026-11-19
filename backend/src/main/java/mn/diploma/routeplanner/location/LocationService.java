@@ -96,6 +96,20 @@ public class LocationService {
                 ids.toArray(Long[]::new), (int) FRESH_FOR.toMinutes());
     }
 
+    /** A user's shared, fresh position (used for group members' start points), if any. */
+    @Transactional(readOnly = true)
+    public java.util.Optional<FriendLocation> sharedLocation(long userId) {
+        return jdbc.query("""
+                SELECT u.id, u.username, u.display_name, ST_Y(l.location) AS lat, ST_X(l.location) AS lng, l.updated_at
+                FROM user_locations l JOIN users u ON u.id = l.user_id
+                WHERE l.user_id = ? AND l.is_shared_with_friends AND l.updated_at > now() - make_interval(mins => ?)
+                  AND EXISTS (SELECT 1 FROM privacy_consents c WHERE c.user_id = u.id
+                              AND c.data_type = 'LOCATION_SHARING' AND c.revoked_at IS NULL)
+                """, (rs, i) -> new FriendLocation(rs.getLong(1), rs.getString(2), rs.getString(3), rs.getDouble(4),
+                        rs.getDouble(5), rs.getTimestamp(6).toInstant()), userId, (int) FRESH_FOR.toMinutes())
+                .stream().findFirst();
+    }
+
     /** Retention: stale positions are deleted every 15 minutes. */
     @Scheduled(fixedDelay = 15 * 60 * 1000, initialDelay = 60 * 1000)
     public int deleteStale() {

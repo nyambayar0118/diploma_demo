@@ -38,6 +38,11 @@ public class MapsUrlBuilder {
         return links;
     }
 
+    /** Directions from wherever the phone is (no origin given: Google Maps uses the current location). */
+    public String fromCurrentLocation(LatLng to, TransportMode mode) {
+        return BASE + "&destination=" + coord(to) + "&travelmode=" + travelMode(mode);
+    }
+
     private static String url(LatLng from, LatLng to, List<LatLng> waypoints, TransportMode mode) {
         StringBuilder sb = new StringBuilder(BASE)
                 .append("&origin=").append(coord(from))

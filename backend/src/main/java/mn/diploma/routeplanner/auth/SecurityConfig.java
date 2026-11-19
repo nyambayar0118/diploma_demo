@@ -43,7 +43,7 @@ public class SecurityConfig {
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // "/error": let Spring show the real error status instead of turning it into 401
-                .requestMatchers("/error", "/api/health", "/actuator/health/**", "/api/auth/**").permitAll()
+                .requestMatchers("/error", "/api/health", "/actuator/health/**", "/api/auth/**", "/api/groups/join/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/places/**", "/api/categories", "/api/friends/invites/*").permitAll()
                 .requestMatchers("/api/moderation/**").hasAnyRole("MODERATOR", "ADMIN")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")

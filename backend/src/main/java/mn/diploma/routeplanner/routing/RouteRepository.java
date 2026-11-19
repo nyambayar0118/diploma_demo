@@ -30,7 +30,7 @@ public class RouteRepository {
     private static final String ROUTE_SELECT = """
             SELECT r.id, r.owner_id, ST_Y(r.start_location) AS start_lat, ST_X(r.start_location) AS start_lng,
                    r.transport_mode, r.time_budget_min, r.estimated_duration_min, r.planned_start, r.status,
-                   r.created_at, r.opened_at, r.closed_at
+                   r.created_at, r.opened_at, r.closed_at, r.group_session_id
             FROM routes r
             """;
 
@@ -68,12 +68,12 @@ public class RouteRepository {
     public void insert(Route r) {
         r.id = jdbc.queryForObject("""
                 INSERT INTO routes (owner_id, start_location, transport_mode, time_budget_min, estimated_duration_min,
-                                    planned_start, status, created_at)
-                VALUES (?, ST_SetSRID(ST_MakePoint(?, ?), 4326), ?, ?, ?, ?, ?, ?)
+                                    planned_start, status, created_at, group_session_id)
+                VALUES (?, ST_SetSRID(ST_MakePoint(?, ?), 4326), ?, ?, ?, ?, ?, ?, ?)
                 RETURNING id
                 """, Long.class, r.ownerId, r.start.lng(), r.start.lat(), r.transportMode.name(), r.timeBudgetMinutes,
                 r.estimatedDurationMinutes, Timestamp.valueOf(r.plannedStart), r.status.name(),
-                Timestamp.from(r.createdAt));
+                Timestamp.from(r.createdAt), r.groupSessionId);
         insertStops(r);
     }
 
@@ -176,6 +176,7 @@ public class RouteRepository {
         r.createdAt = instant(rs.getTimestamp("created_at"));
         r.openedAt = instant(rs.getTimestamp("opened_at"));
         r.closedAt = instant(rs.getTimestamp("closed_at"));
+        r.groupSessionId = rs.getObject("group_session_id", Long.class);
         return r;
     }
 

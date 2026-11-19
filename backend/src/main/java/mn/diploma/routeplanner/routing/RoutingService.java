@@ -104,6 +104,26 @@ public class RoutingService {
         return view(route);
     }
 
+    /** Group plan shared (АШ24): every registered member gets a one-stop route to the meeting place. */
+    @Transactional
+    public long createGroupRoute(long ownerId, LatLng start, TransportMode mode, int budget, long placeId,
+                                 long groupSessionId) {
+        LocalDateTime startAt = LocalDateTime.now(RecommendationService.ZONE).truncatedTo(ChronoUnit.MINUTES);
+        Route route = new Route(ownerId, start, mode, budget, startAt);
+        route.groupSessionId = groupSessionId;
+        route.stops.add(newStop(ownerId, routes.activePlaces(List.of(placeId)), placeId, null));
+        rebuild(route);
+        routes.insert(route);
+        return route.id;
+    }
+
+    /** The group plan was cancelled: its open member routes are cancelled too. */
+    @Transactional
+    public void cancelGroupRoutes(long groupSessionId) {
+        jdbc.update("UPDATE routes SET status = 'CANCELLED', closed_at = now() "
+                + "WHERE group_session_id = ? AND status IN ('CREATED', 'OPENED_IN_MAPS')", groupSessionId);
+    }
+
     @Transactional(readOnly = true)
     public RouteView get(long userId, long routeId) {
         return view(owned(userId, routeId));
@@ -241,7 +261,7 @@ public class RoutingService {
         return new RouteView(route.id, route.status, route.transportMode, route.start.lat(), route.start.lng(),
                 route.plannedStart, route.timeBudgetMinutes, route.estimatedDurationMinutes,
                 route.estimatedDurationMinutes > route.timeBudgetMinutes, route.createdAt, stops, links,
-                Boolean.TRUE.equals(feedback));
+                Boolean.TRUE.equals(feedback), route.groupSessionId);
     }
 
     private List<StopRequest> autoSelect(long userId, LatLng start, TransportMode mode, int budget, LocalDateTime at) {

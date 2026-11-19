@@ -12,6 +12,7 @@ public class Route {
 
     Long id;
     final long ownerId;
+    Long groupSessionId;
     final LatLng start;
     final TransportMode transportMode;
     final int timeBudgetMinutes;

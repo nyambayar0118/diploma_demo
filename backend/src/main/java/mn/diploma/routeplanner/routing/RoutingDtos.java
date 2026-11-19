@@ -61,7 +61,7 @@ public final class RoutingDtos {
     public record RouteView(long id, RouteStatus status, TransportMode transportMode, double startLat, double startLng,
                             LocalDateTime plannedStart, int timeBudgetMinutes, int estimatedDurationMinutes,
                             boolean overBudget, Instant createdAt, List<StopView> stops, List<MapsLink> mapsLinks,
-                            boolean feedbackGiven) {
+                            boolean feedbackGiven, Long groupSessionId) {
     }
 
     /** The "Очсон уу?" question: the stop to ask about and whether the user is standing near it. */
