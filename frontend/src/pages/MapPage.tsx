@@ -15,6 +15,8 @@ import RoutePanel from '../components/RoutePanel'
 import VisitPrompt from '../components/VisitPrompt'
 import ContributionForm from '../components/ContributionForm'
 import SideMenu from '../components/SideMenu'
+import InstallGuide from '../components/InstallGuide'
+import InstallBanner from '../components/InstallBanner'
 import Icon from '../components/Icon'
 import { MAIN_CATEGORY_COLORS } from '../places'
 import { useLocationSharing } from '../locationSharing'
@@ -47,6 +49,8 @@ export default function MapPage() {
   const [pickingNew, setPickingNew] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [guideOpen, setGuideOpen] = useState(false)
+  const closeGuide = useCallback(() => setGuideOpen(false), [])
   const closeMenu = useCallback(() => setMenuOpen(false), [])
   const selectedId = params.get('place') ? Number(params.get('place')) : null
 
@@ -303,7 +307,11 @@ export default function MapPage() {
         </div>
       </div>
       <SideMenu open={menuOpen} onClose={closeMenu} onSelectPlace={showResult} onOpenRoute={openRoute}
-                onAddPlace={startAddPlace} />
+                onAddPlace={startAddPlace} onInstall={() => setGuideOpen(true)} />
+      {guideOpen && <InstallGuide onClose={closeGuide} />}
+      {!showRecs && !showRoutePanel && selectedId == null && !newPlaceAt && (
+        <InstallBanner onOpenGuide={() => setGuideOpen(true)} />
+      )}
       {user && <VisitPrompt onAnswered={visitAnswered} />}
       {pickingNew && <div className="toast">Шинэ газрын байршлыг газрын зураг дээр дарж сонгоно уу</div>}
       {notice && (

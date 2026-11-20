@@ -5,6 +5,7 @@ import { useAuth } from '../auth'
 import { MAIN_CATEGORY_COLORS } from '../places'
 import Icon from './Icon'
 import { useTheme } from '../theme'
+import { platform } from '../pwa'
 
 type View = 'menu' | 'saved' | 'hidden' | 'routes'
 
@@ -14,6 +15,7 @@ type Props = {
   onSelectPlace: (p: PlaceSummary) => void
   onOpenRoute: (r: RouteView) => void
   onAddPlace: () => void
+  onInstall: () => void
 }
 
 const ROUTE_STATUS: Record<RouteView['status'], string> = {
@@ -21,7 +23,7 @@ const ROUTE_STATUS: Record<RouteView['status'], string> = {
 }
 
 /** Side menu: the user's own lists (saved, hidden, routes) and every page outside the map. */
-export default function SideMenu({ open, onClose, onSelectPlace, onOpenRoute, onAddPlace }: Props) {
+export default function SideMenu({ open, onClose, onSelectPlace, onOpenRoute, onAddPlace, onInstall }: Props) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [view, setView] = useState<View>('menu')
@@ -120,6 +122,11 @@ export default function SideMenu({ open, onClose, onSelectPlace, onOpenRoute, on
                   <Item icon={<Icon name="logout" />} label="Гарах" onClick={() => { onClose(); logout() }} />
                 </div>
               </>
+            )}
+            {platform() !== 'installed' && (
+              <div className="drawer-section">
+                <Item icon={<Icon name="download" />} label="Утсандаа суулгах" onClick={() => { onClose(); onInstall() }} />
+              </div>
             )}
             <div className="drawer-foot">
               <label className="theme-toggle">
