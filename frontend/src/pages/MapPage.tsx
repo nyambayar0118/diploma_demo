@@ -17,6 +17,9 @@ import ContributionForm from '../components/ContributionForm'
 import SideMenu from '../components/SideMenu'
 import InstallGuide from '../components/InstallGuide'
 import InstallBanner from '../components/InstallBanner'
+import MapStyleMenu from '../components/MapStyleMenu'
+import { saveMarkerStyle, savedMarkerStyle, type MarkerStyle } from '../markerShapes'
+import { setMarkerStyle } from '../places'
 import Icon from '../components/Icon'
 import { MAIN_CATEGORY_COLORS } from '../places'
 import { useLocationSharing } from '../locationSharing'
@@ -50,6 +53,15 @@ export default function MapPage() {
   const [notice, setNotice] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [guideOpen, setGuideOpen] = useState(false)
+  // Map look menu (marker shape, dark mode), opened from a button among the map controls
+  const [styleMenu, setStyleMenu] = useState<{ right: number; bottom: number } | null>(null)
+  const [markerStyle, setMarkerStyleState] = useState<MarkerStyle>(savedMarkerStyle)
+  const closeStyleMenu = useCallback(() => setStyleMenu(null), [])
+  const changeMarkerStyle = (s: MarkerStyle) => {
+    setMarkerStyleState(s)
+    saveMarkerStyle(s)
+    if (mapRef.current) setMarkerStyle(mapRef.current, s)
+  }
   const closeGuide = useCallback(() => setGuideOpen(false), [])
   const closeMenu = useCallback(() => setMenuOpen(false), [])
   const selectedId = params.get('place') ? Number(params.get('place')) : null
@@ -83,6 +95,9 @@ export default function MapPage() {
       map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right')
       if (!phone) map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right')
       map.addControl(new maplibregl.GeolocateControl({ trackUserLocation: false }), 'bottom-right')
+      map.addControl(new StyleButton((rect) => setStyleMenu((open) => open ? null : {
+        right: window.innerWidth - rect.left + 8, bottom: window.innerHeight - rect.bottom,
+      })), 'bottom-right')
       const m = map
       mapRef.current = m
       m.on('load', () => {
@@ -309,6 +324,9 @@ export default function MapPage() {
       <SideMenu open={menuOpen} onClose={closeMenu} onSelectPlace={showResult} onOpenRoute={openRoute}
                 onAddPlace={startAddPlace} onInstall={() => setGuideOpen(true)} />
       {guideOpen && <InstallGuide onClose={closeGuide} />}
+      {styleMenu && (
+        <MapStyleMenu anchor={styleMenu} markerStyle={markerStyle} onMarkerStyle={changeMarkerStyle} onClose={closeStyleMenu} />
+      )}
       {!showRecs && !showRoutePanel && selectedId == null && !newPlaceAt && (
         <InstallBanner onOpenGuide={() => setGuideOpen(true)} />
       )}
@@ -352,4 +370,35 @@ export default function MapPage() {
       )}
     </>
   )
+}
+
+/** Map control button (stacked with zoom / locate) that opens the map look menu. */
+class StyleButton implements maplibregl.IControl {
+  private container?: HTMLDivElement
+  private readonly onOpen: (rect: DOMRect) => void
+
+  constructor(onOpen: (rect: DOMRect) => void) {
+    this.onOpen = onOpen
+  }
+
+  onAdd() {
+    const div = document.createElement('div')
+    div.className = 'maplibregl-ctrl maplibregl-ctrl-group'
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.title = 'Газрын зургийн харагдац'
+    button.setAttribute('aria-label', 'Газрын зургийн харагдац')
+    button.className = 'style-ctrl'
+    button.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"'
+      + ' stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>'
+    button.addEventListener('pointerdown', (e) => e.stopPropagation())
+    button.addEventListener('click', () => this.onOpen(div.getBoundingClientRect()))
+    div.appendChild(button)
+    this.container = div
+    return div
+  }
+
+  onRemove() {
+    this.container?.remove()
+  }
 }

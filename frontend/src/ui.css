@@ -694,3 +694,23 @@ input, select, textarea { color: var(--c-text); background-color: var(--c-input)
 .install-banner img { border-radius: 9px; flex: none; }
 .install-banner .btn { padding: 8px 14px; min-height: 0; }
 .install-x { border: none; background: none; font-size: 20px; color: var(--c-muted); cursor: pointer; padding: 4px 6px; }
+
+/* ---------- Map look menu ---------- */
+.style-ctrl { display: grid !important; place-items: center; color: var(--c-text); }
+:root[data-theme='dark'] .style-ctrl { color: var(--c-text); }
+.map-style-pop {
+  position: fixed; z-index: 8; width: 248px; background: var(--c-surface); color: var(--c-text); border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(16, 24, 40, 0.28); padding: 14px; animation: fade-in 0.12s ease;
+}
+.msp-title { font-size: 13px; font-weight: 700; color: var(--c-muted); margin-bottom: 8px; }
+.msp-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.msp-option {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px; border-radius: 10px;
+  border: 1.5px solid var(--c-border); background: var(--c-surface); color: var(--c-text); font: inherit; font-size: 13px;
+  cursor: pointer;
+}
+.msp-option:hover { background: var(--c-hover); }
+.msp-option.on { border-color: var(--c-primary); background: var(--c-info-bg); font-weight: 600; }
+.msp-preview { display: flex; gap: 3px; align-items: center; height: 20px; }
+.msp-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px;
+  padding-top: 12px; border-top: 1px solid var(--c-border); font-size: 14px; cursor: pointer; }

@@ -1,4 +1,5 @@
 import * as maplibregl from 'maplibre-gl'
+import { iconExpression, provideMarkerImages, savedMarkerStyle, type MarkerStyle } from './markerShapes'
 
 // Colour per main category (place_categories.code of the parent)
 export const MAIN_CATEGORY_COLORS: Record<string, string> = {
@@ -41,6 +42,23 @@ export function addPlacesLayer(map: maplibregl.Map, onSelect: (placeId: number) 
     },
   })
 
+  // Other marker shapes (star, pin, diamond) are images; only one of the two layers is visible
+  provideMarkerImages(map)
+  map.addLayer({
+    id: 'places-shapes',
+    type: 'symbol',
+    source: SOURCE_ID,
+    minzoom: MIN_PLACES_ZOOM,
+    layout: {
+      visibility: 'none',
+      'icon-image': iconExpression('star'),
+      'icon-allow-overlap': true,
+      'icon-ignore-placement': true,
+      'symbol-sort-key': ['case', ['get', 'recommendable'], 1, 0],
+    },
+  })
+  setMarkerStyle(map, savedMarkerStyle())
+
   let controller: AbortController | null = null
   const refresh = () => {
     if (map.getZoom() < MIN_PLACES_ZOOM) return
@@ -58,18 +76,35 @@ export function addPlacesLayer(map: maplibregl.Map, onSelect: (placeId: number) 
   map.on('moveend', refresh)
   refresh()
 
-  map.on('click', 'places-circles', (e) => {
-    const id = e.features?.[0]?.properties?.id
-    if (id != null) onSelect(Number(id))
-  })
-  map.on('mouseenter', 'places-circles', () => (map.getCanvas().style.cursor = 'pointer'))
-  map.on('mouseleave', 'places-circles', () => (map.getCanvas().style.cursor = ''))
+  for (const layer of PLACE_LAYERS) {
+    map.on('click', layer, (e) => {
+      const id = e.features?.[0]?.properties?.id
+      if (id != null) onSelect(Number(id))
+    })
+    map.on('mouseenter', layer, () => (map.getCanvas().style.cursor = 'pointer'))
+    map.on('mouseleave', layer, () => (map.getCanvas().style.cursor = ''))
+  }
+}
+
+const PLACE_LAYERS = ['places-circles', 'places-shapes']
+
+/** Switches the place markers between dots and an image shape. */
+export function setMarkerStyle(map: maplibregl.Map, style: MarkerStyle) {
+  if (!map.getLayer('places-circles') || !map.getLayer('places-shapes')) return
+  const dots = style === 'dot'
+  map.setLayoutProperty('places-circles', 'visibility', dots ? 'visible' : 'none')
+  map.setLayoutProperty('places-shapes', 'visibility', dots ? 'none' : 'visible')
+  if (!dots) {
+    map.setLayoutProperty('places-shapes', 'icon-image', iconExpression(style))
+    map.setLayoutProperty('places-shapes', 'icon-anchor', style === 'pin' ? 'bottom' : 'center')
+  }
 }
 
 /** Shows only one main category on the map ('' = all). */
 export function filterPlacesLayer(map: maplibregl.Map, mainCategory: string) {
-  if (!map.getLayer('places-circles')) return
-  map.setFilter('places-circles', mainCategory ? ['==', ['get', 'mainCategory'], mainCategory] : null)
+  for (const layer of PLACE_LAYERS) {
+    if (map.getLayer(layer)) map.setFilter(layer, mainCategory ? ['==', ['get', 'mainCategory'], mainCategory] : null)
+  }
 }
 
 const RECS_SOURCE = 'recommendations'
