@@ -13,7 +13,7 @@ export default defineConfig({
         description: 'Сонирхолд суурилсан газар санал болгох, маршрут төлөвлөх систем',
         lang: 'mn',
         theme_color: '#1f6feb',
-        background_color: '#ffffff',
+        background_color: '#121722',
         display: 'standalone',
         start_url: '/',
         // Android needs 192 and 512 PNGs to offer "install"; the maskable one may be cropped to a circle

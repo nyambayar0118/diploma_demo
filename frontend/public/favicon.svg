@@ -1,19 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#3b82f6"/>
-      <stop offset="1" stop-color="#1d4ed8"/>
-    </linearGradient>
-  </defs>
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a3140"/><stop offset="1" stop-color="#121722"/></linearGradient><filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000" flood-opacity="0.35"/></filter></defs>
   <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-  <g transform="translate(-7 -2)">
-  <!-- route: dashed path from a start dot to the pin -->
-  <path d="M150 382 C 190 330, 300 360, 300 300" fill="none" stroke="#ffffff" stroke-width="16"
-        stroke-linecap="round" stroke-dasharray="1 34" opacity="0.9"/>
-  <circle cx="150" cy="382" r="22" fill="#ffffff"/>
-  <circle cx="150" cy="382" r="10" fill="#1d4ed8"/>
-  <!-- pin -->
-  <path d="M300 112c-55 0-98 42-98 96 0 70 98 166 98 166s98-96 98-166c0-54-43-96-98-96z" fill="#ffffff"/>
-  <circle cx="300" cy="208" r="38" fill="#1d4ed8"/>
+  <g transform="translate(0.0 0.0) scale(1.0)">
+    <circle cx="150" cy="330" r="29.9" fill="#e8590c" stroke="#ffffff" stroke-width="8.4"/><circle cx="205" cy="372" r="23.0" fill="#7048e8" stroke="#ffffff" stroke-width="6.4"/><circle cx="118" cy="262" r="19.549999999999997" fill="#2f9e44" stroke="#ffffff" stroke-width="5.5"/><circle cx="250" cy="410" r="18.4" fill="#f08c00" stroke="#ffffff" stroke-width="5.2"/><circle cx="178" cy="425" r="25.299999999999997" fill="#c2255c" stroke="#ffffff" stroke-width="7.1"/><circle cx="110" cy="380" r="17.25" fill="#1971c2" stroke="#ffffff" stroke-width="4.8"/><circle cx="88" cy="318" r="13.799999999999999" fill="#0c8599" stroke="#ffffff" stroke-width="3.9"/><circle cx="232" cy="330" r="16.099999999999998" fill="#e8590c" stroke="#ffffff" stroke-width="4.5"/><circle cx="300" cy="430" r="14.95" fill="#7048e8" stroke="#ffffff" stroke-width="4.2"/><circle cx="140" cy="448" r="13.799999999999999" fill="#e8590c" stroke="#ffffff" stroke-width="3.9"/><circle cx="355" cy="395" r="20.7" fill="#f08c00" stroke="#ffffff" stroke-width="5.8"/><circle cx="390" cy="340" r="13.799999999999999" fill="#2f9e44" stroke="#ffffff" stroke-width="3.9"/><circle cx="410" cy="418" r="17.25" fill="#e8590c" stroke="#ffffff" stroke-width="4.8"/><circle cx="330" cy="470" r="12.649999999999999" fill="#1971c2" stroke="#ffffff" stroke-width="3.5"/><circle cx="78" cy="420" r="11.5" fill="#7048e8" stroke="#ffffff" stroke-width="3.2"/><circle cx="176" cy="278" r="12.649999999999999" fill="#e8590c" stroke="#ffffff" stroke-width="3.5"/><circle cx="96" cy="214" r="10.35" fill="#e8590c" stroke="#ffffff" stroke-width="3.0"/><circle cx="420" cy="280" r="11.5" fill="#c2255c" stroke="#ffffff" stroke-width="3.2"/><circle cx="262" cy="470" r="11.5" fill="#0c8599" stroke="#ffffff" stroke-width="3.2"/><circle cx="440" cy="370" r="10.35" fill="#7048e8" stroke="#ffffff" stroke-width="3.0"/>
+    <g filter="url(#sh)">
+      <path d="M300 92c-58 0-104 45-104 102 0 74 104 176 104 176s104-102 104-176c0-57-46-102-104-102z" fill="#3b82f6"/>
+    </g>
+    <circle cx="300" cy="194" r="40" fill="#ffffff"/>
   </g>
 </svg>
