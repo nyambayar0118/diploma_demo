@@ -17,7 +17,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import mn.diploma.routeplanner.auth.GoogleTokenVerifier;
 import mn.diploma.routeplanner.auth.GoogleTokenVerifier.GoogleUser;
 
-/** Google login with the token verification mocked (CI cannot call Google). */
+/** Токены шалгалтыг орлуулсан Google-ээр нэвтрэх тест (CI Google-ийг дуудаж чадахгүй). */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class GoogleLoginTest {
 
@@ -44,7 +44,7 @@ class GoogleLoginTest {
         String id = TestHttp.extract(first.body(), "\"id\":(\\d+)");
         assertTrue(first.body().contains("Бат Эрдэнэ"), first.body());
 
-        // Same Google account again -> same user
+        // Ижил Google хаяг дахин -> ижил хэрэглэгч
         HttpResponse<String> second = http.send("POST", "/api/auth/oauth", "{\"provider\":\"GOOGLE\",\"token\":\"good\"}", null);
         assertEquals(id, TestHttp.extract(second.body(), "\"id\":(\\d+)"));
         String token = TestHttp.extract(second.body(), "\"token\"\\s*:\\s*\"([^\"]+)\"");
@@ -52,7 +52,7 @@ class GoogleLoginTest {
 
         assertEquals(401, http.send("POST", "/api/auth/oauth", "{\"provider\":\"GOOGLE\",\"token\":\"forged\"}", null).statusCode());
 
-        // An e-mail / password account is not taken over by a Google login with the same address
+        // Ижил имэйлтэй Google нэвтрэлт имэйл, нууц үгийн бүртгэлийг өөртөө нэгтгэхгүй
         String suffix = UUID.randomUUID().toString().substring(0, 8);
         String taken = "p-" + suffix + "@gmail.com";
         http.send("POST", "/api/auth/register", """

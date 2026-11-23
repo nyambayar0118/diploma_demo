@@ -9,7 +9,7 @@ import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import mn.diploma.routeplanner.common.TransportMode;
 
-/** Stores a set of transport modes as "WALKING,PUBLIC_TRANSPORT". */
+/** Тээврийн хэрэгслийн олонлогийг "WALKING,PUBLIC_TRANSPORT" хэлбэрээр хадгална. */
 @Converter
 public class TransportModesConverter implements AttributeConverter<Set<TransportMode>, String> {
 

@@ -3,10 +3,10 @@ package mn.diploma.routeplanner.routing;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
-/** One place of a route, with its order and estimated arrival. */
+/** Маршрутын нэг газар, дараалал болон ирэх цагийн тооцооны хамт. */
 public class RouteStop {
 
-    /** Place data needed to plan and show the stop. */
+    /** Зогсоолыг төлөвлөх, харуулахад хэрэгтэй газрын мэдээлэл. */
     public record PlaceInfo(long id, String name, String nameLatin, String category, String categoryName,
                             String mainCategory, double lat, double lng, String openingHours) {
     }
@@ -32,7 +32,7 @@ public class RouteStop {
         visitedAt = time;
     }
 
-    /** The user answered "Очсон уу?" (yes or no). */
+    /** Хэрэглэгч "Очсон уу?" асуултад хариулсан (тийм эсвэл үгүй). */
     boolean isAnswered() {
         return visited || skippedAt != null;
     }

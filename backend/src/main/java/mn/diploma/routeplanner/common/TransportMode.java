@@ -1,6 +1,6 @@
 package mn.diploma.routeplanner.common;
 
-/** Transport mode chosen by the user (shared by several modules). */
+/** Хэрэглэгчийн сонгосон тээврийн хэрэгсэл (хэд хэдэн модуль хуваалцан ашиглана). */
 public enum TransportMode {
     WALKING, DRIVING, BICYCLE, PUBLIC_TRANSPORT
 }

@@ -13,8 +13,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Times every /api request and records it under its route pattern ("GET /api/places/{id}"). Runs before
- * Spring Security, so requests it rejects are counted too.
+ * /api хүсэлт бүрийн хугацааг хэмжиж, маршрутын загвараар нь ("GET /api/places/{id}") бүртгэнэ. Spring Security-ээс
+ * өмнө ажилладаг тул түүний татгалзсан хүсэлтүүд ч тоологдоно.
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
@@ -41,7 +41,7 @@ public class RequestMetricsFilter extends OncePerRequestFilter {
             status = response.getStatus();
         } finally {
             Object pattern = request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
-            // Requests rejected before reaching a controller (401, 403, 404) have no pattern: group them
+            // Controller-т хүрэхээс өмнө татгалзсан хүсэлтэд (401, 403, 404) загвар байхгүй: нэг бүлэгт нэгтгэнэ
             String path = pattern != null ? pattern.toString() : status == 404 ? "(not found)" : "(rejected)";
             metrics.record(request.getMethod() + " " + path, (System.nanoTime() - start) / 1_000_000, status);
         }

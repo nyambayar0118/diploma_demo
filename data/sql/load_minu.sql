@@ -1,20 +1,20 @@
--- Loads the Minu Map download (data/minu/fetch.py -> companies.jsonl) into places.
---   * only companies inside the Ulaanbaatar box whose category maps to ours (minu_category_mappings)
---   * a Minu company that is the same place as an existing OSM/user place (similar name within 75 m)
---     only fills that place's empty fields and adds its website; nothing OSM has is overwritten
---   * every other company becomes a place with source = 'MINU'
--- Safe to run repeatedly. The download is read from standard input:
+-- Minu Map-аас татсан өгөгдлийг (data/minu/fetch.py -> companies.jsonl) places хүснэгтэд ачаална.
+--   * зөвхөн Улаанбаатарын хүрээнд байгаа, ангилал нь манай ангилалд таарах компаниуд (minu_category_mappings)
+--   * одоо байгаа OSM / хэрэглэгчийн газартай ижил Minu компани (75 м дотор төстэй нэртэй) зөвхөн тэр газрын
+--     хоосон талбарыг бөглөж, вэб хуудсыг нэмнэ; OSM-д байгаа мэдээллийг дарж бичихгүй
+--   * бусад компани source = 'MINU' газар болно
+-- Дахин дахин ажиллуулахад аюулгүй. Татсан файлыг стандарт оролтоос уншина:
 --   psql -f load_minu.sql < /data/raw/minu/companies.jsonl
 \set ON_ERROR_STOP on
 
 CREATE SCHEMA IF NOT EXISTS minu;
 DROP TABLE IF EXISTS minu.raw;
 CREATE TABLE minu.raw (doc JSONB);
--- One JSON document per line; the odd quote/delimiter characters make COPY take each line as is
+-- Мөр бүрд нэг JSON баримт; ердийн бус хашилт / тусгаарлагч тэмдэгт нь COPY-д мөр бүрийг бүхлээр нь авахуулна
 \copy minu.raw (doc) FROM pstdin WITH (FORMAT csv, QUOTE E'\x01', DELIMITER E'\x02')
 
--- Minu "days" = 7 ranges, Monday first ("09:00-20:00;...;11:00-17:00") -> OSM opening_hours.
--- "00:00-00:00" means open all day; an empty day is closed; no times at all -> unknown (NULL).
+-- Minu-ийн "days" = даваагаас эхэлсэн 7 интервал ("09:00-20:00;...;11:00-17:00") -> OSM-ийн opening_hours.
+-- "00:00-00:00" бол өдөржин нээлттэй; хоосон өдөр хаалттай; цаг огт байхгүй бол тодорхойгүй (NULL).
 CREATE OR REPLACE FUNCTION pg_temp.minu_hours(days TEXT) RETURNS TEXT
     LANGUAGE plpgsql IMMUTABLE AS
 $$
@@ -44,7 +44,7 @@ BEGIN
     END LOOP;
     IF NOT known THEN RETURN NULL; END IF;
     IF vals = ARRAY_FILL('00:00-24:00'::TEXT, ARRAY[7]) THEN RETURN '24/7'; END IF;
-    -- Merge runs of identical days: "Mo-Fr 09:00-20:00; Sa-Su 11:00-17:00"
+    -- Ижил цагтай дараалсан өдрүүдийг нэгтгэнэ: "Mo-Fr 09:00-20:00; Sa-Su 11:00-17:00"
     i := 1;
     WHILE i <= 7 LOOP
         j := i;
@@ -58,7 +58,7 @@ $$;
 
 BEGIN;
 
--- 1. One row per Minu company, cleaned up
+-- 1. Minu компани бүрд цэвэрлэсэн нэг мөр
 CREATE TEMP TABLE mc ON COMMIT DROP AS
 WITH latest AS (
     SELECT DISTINCT ON (doc ->> 'companyId') doc
@@ -77,7 +77,7 @@ WITH latest AS (
            nullif(trim(doc ->> 'addressDescription'), '') AS addr
     FROM latest
 ), named AS (
-    -- Display name: the first of short / official / display name that is written in Cyrillic
+    -- Харуулах нэр: богино / албан ёсны / харуулах нэрийн кириллээр бичигдсэн эхнийх нь
     SELECT n.*,
            coalesce(CASE WHEN n.short_name ~ '[А-Яа-яӨөҮүЁё]' THEN n.short_name END,
                     CASE WHEN n.official_name ~ '[А-Яа-яӨөҮүЁё]' THEN n.official_name END,
@@ -112,7 +112,7 @@ WHERE b.lon BETWEEN 106.55 AND 107.25 AND b.lat BETWEEN 47.75 AND 48.05
 
 CREATE INDEX ON mc USING GIST (location);
 
--- 2. Same place already on the map? Best name match within 75 m, one Minu company per place
+-- 2. Ижил газар газрын зураг дээр аль хэдийн байгаа юу? 75 м дотор нэр нь хамгийн сайн таарах, газар бүрд нэг Minu компани
 CREATE TEMP TABLE candidates ON COMMIT DROP AS
 SELECT mc.minu_id, p.id AS place_id, p.score, p.dist
 FROM mc
@@ -123,8 +123,8 @@ JOIN LATERAL (
            ST_Distance(p.location::geography, mc.location::geography) AS dist
     FROM places p
     WHERE p.source <> 'MINU' AND p.is_active
-      -- box test first so the spatial index on places.location is used (0.0012° ≈ 90-130 m here),
-      -- then the exact 75 m check on the few places inside the box
+      -- эхлээд тэгш өнцөгт хүрээгээр шалгаж places.location-ий орон зайн индексийг ашиглана (0.0012° ≈ энд 90-130 м),
+      -- дараа нь хүрээнд орсон цөөн газарт яг 75 м-ийн шалгалт хийнэ
       AND p.location && ST_Expand(mc.location, 0.0012)
       AND ST_DWithin(p.location::geography, mc.location::geography, 75)
 ) p ON p.score >= 0.35;
@@ -138,17 +138,17 @@ SELECT minu_id, place_id FROM (
 ) r
 WHERE by_company = 1 AND by_place = 1;
 
--- A Minu-only place that OSM has since added: retire the Minu copy, the OSM place takes over the link
+-- Зөвхөн Minu-д байсан газрыг OSM дараа нь нэмсэн: Minu хуулбарыг идэвхгүй болгож, холбоосыг OSM газар авна
 UPDATE places p SET is_active = FALSE, minu_id = NULL
 FROM matched m
 WHERE p.source = 'MINU' AND p.minu_id = m.minu_id;
 
--- Links that no longer hold are released before new ones are set (minu_id is unique)
+-- Хүчингүй болсон холбоосыг шинийг тогтоохоос өмнө чөлөөлнө (minu_id давтагдахгүй)
 UPDATE places p SET minu_id = NULL
 WHERE p.source <> 'MINU' AND p.minu_id IS NOT NULL
   AND NOT EXISTS (SELECT 1 FROM matched m WHERE m.place_id = p.id AND m.minu_id = p.minu_id);
 
--- 3. Enrich the matched places: only empty fields are filled, user-approved edits are kept
+-- 3. Таарсан газруудыг баяжуулна: зөвхөн хоосон талбарыг бөглөж, баталгаажсан хэрэглэгчийн засварыг хадгална
 UPDATE places p SET
     minu_id           = mc.minu_id,
     minu_data         = mc.doc,
@@ -164,7 +164,7 @@ FROM matched m
 JOIN mc ON mc.minu_id = m.minu_id
 WHERE p.id = m.place_id;
 
--- 4. Everything else becomes a Minu place
+-- 4. Бусад нь Minu газар болно
 INSERT INTO places (source, is_verified, name_cyrillic, name_latin, category_id, location,
                     country, city_or_aimag, district_or_sum, khoroo_or_bag, street,
                     opening_hours_raw, minu_id, minu_data, is_active, last_synced_at)
@@ -187,20 +187,20 @@ ON CONFLICT (minu_id) WHERE minu_id IS NOT NULL DO UPDATE SET
     is_active         = CASE WHEN 'is_active' = ANY (places.user_edited_fields) THEN places.is_active ELSE TRUE END,
     last_synced_at    = EXCLUDED.last_synced_at;
 
--- Minu places that dropped out of Minu (or out of our categories) are hidden, not deleted
+-- Minu-аас (эсвэл манай ангиллаас) хасагдсан Minu газрыг устгалгүй нууна
 UPDATE places p SET is_active = FALSE
 WHERE p.source = 'MINU' AND p.is_active
   AND NOT ('is_active' = ANY (p.user_edited_fields))
   AND NOT EXISTS (SELECT 1 FROM mc WHERE mc.minu_id = p.minu_id);
 
--- 5. Websites (ExternalLink, verified because they come from the source)
+-- 5. Вэб хуудас (ExternalLink, эх сурвалжаас ирсэн тул баталгаажсан)
 INSERT INTO external_links (place_id, url, type, is_verified)
 SELECT p.id, mc.website, 'WEBSITE', TRUE
 FROM places p JOIN mc ON mc.minu_id = p.minu_id
 WHERE mc.website IS NOT NULL
 ON CONFLICT (place_id, url) DO NOTHING;
 
--- 6. Buildings for the new Minu places (smallest building containing the point)
+-- 6. Шинэ Minu газрын барилга (цэгийг агуулсан хамгийн жижиг барилга)
 UPDATE places p SET building_id = (
     SELECT b.id FROM buildings b
     WHERE ST_Contains(b.area, p.location)
@@ -209,7 +209,7 @@ WHERE p.source = 'MINU' AND p.building_id IS NULL;
 
 COMMIT;
 
--- Summary
+-- Хураангуй
 SELECT count(*) AS "Minu: компани (нийт)" FROM minu.raw;
 SELECT count(*) AS "Minu: Улаанбаатар, ангилал таарсан" FROM places WHERE minu_id IS NOT NULL OR source = 'MINU';
 SELECT count(*) AS "OSM газрыг баяжуулсан" FROM places WHERE source <> 'MINU' AND minu_id IS NOT NULL;
@@ -218,7 +218,7 @@ SELECT c.code AS "Ангилал", count(*) AS "Minu газар"
 FROM places p JOIN place_categories c ON c.id = p.category_id
 WHERE p.source = 'MINU' AND p.is_active
 GROUP BY c.code ORDER BY 2 DESC;
--- Most common Minu categories in Ulaanbaatar that map to nothing: candidates for minu_category_mappings
+-- Улаанбаатарт хамгийн түгээмэл, ямар ч ангилалд таараагүй Minu ангилал: minu_category_mappings-д нэмэх нэр дэвшигч
 SELECT trim(c.name) AS "Тохироогүй Minu ангилал", count(*) AS "Компани"
 FROM minu.raw r
 CROSS JOIN LATERAL jsonb_array_elements_text(CASE WHEN jsonb_typeof(r.doc -> 'categoryNameEng') = 'array'

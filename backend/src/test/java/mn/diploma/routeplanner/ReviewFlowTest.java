@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-/** Reviews (АШ16): write / edit, average rating; moderators hide (АШ17). */
+/** Үнэлгээ, сэтгэгдэл (АШ16): бичих / засах, дундаж үнэлгээ; модератор нуух (АШ17). */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ReviewFlowTest {
 
@@ -40,13 +40,13 @@ class ReviewFlowTest {
         long bobReview = Long.parseLong(TestHttp.extract(bobs.body(), "\"id\":(\\d+)"));
         assertAverage(place, "3.00", 2);
 
-        // Writing again edits the same review
+        // Дахин бичихэд ижил сэтгэгдлийг засна
         assertEquals(200, http.send("POST", path, "{\"rating\":5}", alice).statusCode());
         assertAverage(place, "3.50", 2);
         assertEquals(400, http.send("POST", path, "{\"rating\":6}", alice).statusCode());
         assertEquals(401, http.send("POST", path, "{\"rating\":3}", null).statusCode());
 
-        // Hiding needs the moderator role
+        // Нуухад модераторын эрх хэрэгтэй
         String hide = "/api/moderation/reviews/" + bobReview + "/hide";
         assertEquals(403, http.send("POST", hide, null, alice).statusCode());
         String moderator = http.tokenWithRole("MODERATOR");

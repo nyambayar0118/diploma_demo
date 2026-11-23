@@ -1,16 +1,16 @@
-"""Place categories and their OSM tag mappings (single source of truth).
+"""Газрын ангиллууд болон тэдгээрийн OSM шошгын харгалзуулалт (нэг эх сурвалж).
 
-Run `python data/categories.py` to regenerate
-backend/src/main/resources/db/migration/V3__seed_categories.sql.
-NOTE: V3 is already applied to databases, so this list is FROZEN (editing it would
-change V3's checksum and Flyway would refuse to start). Later changes are separate migrations:
-  V4__more_category_mappings.sql  tourism=artwork -> historic; new non-recommendable
-                                  "beauty" (shop=beauty, shop=hairdresser) under wellness
+`python data/categories.py`-г ажиллуулж backend/src/main/resources/db/migration/V3__seed_categories.sql-г
+дахин үүсгэнэ.
+АНХААР: V3 өгөгдлийн санд аль хэдийн хэрэгжсэн тул энэ жагсаалтыг ӨӨРЧЛӨХГҮЙ (өөрчилбөл V3-ийн
+checksum өөрчлөгдөж Flyway эхлэхгүй). Дараагийн өөрчлөлтүүд тусдаа шилжилт болно:
+  V4__more_category_mappings.sql  tourism=artwork -> historic; санал болгохгүй шинэ
+                                  "beauty" (shop=beauty, shop=hairdresser) ангилал wellness дор
 """
 from pathlib import Path
 
 CATEGORIES = [
-    # (main code, name_mn, name_en, [(sub code, name_mn, name_en, recommendable, [osm tags])])
+    # (үндсэн код, name_mn, name_en, [(дэд код, name_mn, name_en, санал болгох эсэх, [osm шошго])])
     ("food", "Хоол, ундаа", "Food & drink", [
         ("cafe", "Кафе", "Cafe", True, ["amenity=cafe"]),
         ("restaurant", "Ресторан", "Restaurant", True, ["amenity=restaurant"]),
@@ -71,9 +71,9 @@ CATEGORIES = [
     ]),
 ]
 
-# When one OSM object matches several tags, the mapping with the highest priority wins.
+# Нэг OSM объект хэд хэдэн шошгод таарвал хамгийн өндөр ач холбогдолтой харгалзуулалт сонгогдоно.
 KEY_PRIORITY = {"amenity": 30, "tourism": 25, "leisure": 20, "historic": 15, "shop": 10, "natural": 5}
-OVERRIDES = {"tourism=attraction": 1}  # generic tag: loses to any more specific one
+OVERRIDES = {"tourism=attraction": 1}  # ерөнхий шошго: илүү тодорхой шошгод ялагдана
 
 
 def q(s: str) -> str:

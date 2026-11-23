@@ -7,7 +7,7 @@ import java.util.Base64;
 
 import org.springframework.stereotype.Component;
 
-/** Random, expiring invite tokens for a shared group plan (АШ24). */
+/** Хуваалцсан бүлгийн төлөвлөгөөний санамсаргүй, хугацаатай урилгын токен (АШ24). */
 @Component
 public class GroupInviteService {
 

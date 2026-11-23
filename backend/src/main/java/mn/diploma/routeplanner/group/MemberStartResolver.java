@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 import mn.diploma.routeplanner.location.LocationService;
 
 /**
- * A member's start point (design 3.2, Group): the location they share with friends, else a point the
- * initiator pinned on the map, else the initiator's own start.
+ * Гишүүний эхлэх цэг (зохиомж 3.2, Бүлгийн модуль): найзуудтайгаа хуваалцсан байршил, үгүй бол санаачлагчийн
+ * газрын зураг дээр тэмдэглэсэн цэг, үгүй бол санаачлагчийн өөрийн эхлэх цэг.
  */
 @Component
 public class MemberStartResolver {

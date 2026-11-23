@@ -14,7 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 
-/** Categories the user picked at registration; the starting point of the interest profile (cold start). */
+/** Бүртгүүлэх үед хэрэглэгчийн сонгосон ангиллууд; сонирхлын профайлын эхлэл (хүйтэн эхлэл). */
 @Entity
 @Table(name = "onboarding_surveys")
 public class OnboardingSurvey {

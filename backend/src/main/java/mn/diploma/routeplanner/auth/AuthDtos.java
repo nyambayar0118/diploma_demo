@@ -13,7 +13,7 @@ import jakarta.validation.constraints.Size;
 import mn.diploma.routeplanner.common.PriceLevel;
 import mn.diploma.routeplanner.common.TransportMode;
 
-/** Request and response bodies of the Auth module API. */
+/** Нэвтрэлтийн модулийн API-ийн хүсэлт, хариуны бүтэц. */
 public final class AuthDtos {
 
     private AuthDtos() {
@@ -41,14 +41,14 @@ public final class AuthDtos {
     public record AuthResponse(String token, UserDto user) {
     }
 
-    /** {@code token} = for GOOGLE the ID token ("credential") from Google Identity Services. */
+    /** {@code token}: GOOGLE-ийн хувьд Google Identity Services-ээс авсан ID токен ("credential"). */
     public record OAuthLoginRequest(@NotNull AuthProvider provider, @NotBlank String token) {
     }
 
     public record RoleRequest(@NotNull Role role) {
     }
 
-    /** Public client configuration (the Google client id is not a secret). */
+    /** Клиентэд өгөх нийтийн тохиргоо (Google client id нь нууц биш). */
     public record AuthConfig(String googleClientId) {
     }
 

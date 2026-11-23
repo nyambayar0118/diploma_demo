@@ -11,7 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-/** One consent per data type; revoking keeps the row (revokedAt) as history. */
+/** Мэдээллийн төрөл бүрд нэг зөвшөөрөл; цуцлахад мөрийг (revokedAt) түүх болгон үлдээнэ. */
 @Entity
 @Table(name = "privacy_consents")
 public class PrivacyConsent {

@@ -2,7 +2,7 @@ package mn.diploma.routeplanner.routing;
 
 import java.util.Map;
 
-/** Typical minutes spent at a place of each subcategory; used for arrival times and the time budget. */
+/** Дэд ангилал бүрийн газарт ихэвчлэн өнгөрүүлэх хугацаа, минутаар; ирэх цаг болон цагийн хязгаарт ашиглана. */
 final class StayDurations {
 
     static final int DEFAULT_MINUTES = 45;

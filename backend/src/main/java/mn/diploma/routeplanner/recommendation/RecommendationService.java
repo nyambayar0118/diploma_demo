@@ -16,7 +16,7 @@ import mn.diploma.routeplanner.auth.ConsentService;
 import mn.diploma.routeplanner.common.PriceLevel;
 import mn.diploma.routeplanner.common.TransportMode;
 
-/** Public service of the Recommendation module (АШ09, ДШ04): filter -> rank -> explore -> log. */
+/** Санал болголтын модулийн нийтийн сервис (АШ09, ДШ04): шүүх -> эрэмбэлэх -> судалгааны санал нэмэх -> бүртгэх. */
 @Service
 public class RecommendationService {
 

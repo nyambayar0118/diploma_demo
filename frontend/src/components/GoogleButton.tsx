@@ -26,8 +26,8 @@ function loadGoogleScript() {
 }
 
 /**
- * "Sign in with Google" (Google Identity Services). Google gives the browser a signed ID token,
- * which the backend verifies and exchanges for our own token. Hidden when no client id is configured.
+ * "Google-ээр нэвтрэх" (Google Identity Services). Google хөтөчид гарын үсэгтэй ID токен өгч, сервер түүнийг
+ * шалгаад өөрийн токеноор солино. Client id тохируулаагүй бол товч харагдахгүй.
  */
 export default function GoogleButton({ onCredential }: { onCredential: (credential: string) => void }) {
   const ref = useRef<HTMLDivElement>(null)

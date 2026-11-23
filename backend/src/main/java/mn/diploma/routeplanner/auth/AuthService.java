@@ -33,7 +33,7 @@ public class AuthService {
     private final GoogleTokenVerifier google;
     private final ApplicationEventPublisher events;
     private final JdbcTemplate jdbc;
-    /** E-mails that get the ADMIN role when they register or log in (env ADMIN_EMAILS, comma-separated). */
+    /** Бүртгүүлэх эсвэл нэвтрэх үед ADMIN эрх авах имэйлүүд (ADMIN_EMAILS орчны хувьсагч, таслалаар тусгаарлана). */
     private final Set<String> adminEmails;
 
     public AuthService(UserRepository users, UserPreferencesRepository preferences,
@@ -86,8 +86,8 @@ public class AuthService {
     }
 
     /**
-     * "Sign in with Google": logs in the account linked to the Google user, or creates one on first use.
-     * An existing e-mail / password account with the same address is not taken over silently.
+     * "Google-ээр нэвтрэх": Google хэрэглэгчтэй холбосон бүртгэлээр нэвтрүүлэх, анх удаа бол шинээр үүсгэнэ.
+     * Ижил имэйлтэй, имэйл ба нууц үгээр үүсгэсэн бүртгэлийг санамсаргүйгээр нэгтгэхгүй.
      */
     @Transactional
     public AuthResponse loginWithGoogle(String credential) {
@@ -118,7 +118,7 @@ public class AuthService {
         return user;
     }
 
-    /** "bat.erdene@gmail.com" -> "bat_erdene", then "bat_erdene2", ... until free. */
+    /** "bat.erdene@gmail.com" -> "bat_erdene", давхцвал "bat_erdene2", ... гэх мэтээр сул нэр олтол. */
     private String uniqueUsername(String email) {
         String base = email.substring(0, email.indexOf('@')).replaceAll("[^A-Za-z0-9_]", "_");
         if (base.length() < 3) base = base + "_user";
@@ -134,7 +134,7 @@ public class AuthService {
         return new AuthDtos.AuthConfig(google.isEnabled() ? google.clientId() : null);
     }
 
-    /** ХШ08: deletes the account's personal data in every module, keeps anonymous history. */
+    /** ХШ08: бүх модуль дахь бүртгэлийн хувийн мэдээллийг устгаж, нэргүй болгосон түүхийг үлдээнэ. */
     @Transactional
     public void deleteAccount(Long userId) {
         User user = activeUser(userId);
@@ -146,7 +146,7 @@ public class AuthService {
         users.save(user);
     }
 
-    /** Admin: give or take the moderator role. */
+    /** Администратор: модераторын эрх олгох эсвэл хасах. */
     @Transactional
     public UserDto changeRole(Long userId, Role role) {
         User user = activeUser(userId);

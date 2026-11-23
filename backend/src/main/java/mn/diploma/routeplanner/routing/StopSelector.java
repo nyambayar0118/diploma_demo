@@ -10,13 +10,13 @@ import org.springframework.stereotype.Component;
 import mn.diploma.routeplanner.common.TransportMode;
 
 /**
- * Picks the stops of an automatic route from ranked recommendations: greedily in rank order, at most one
- * place per subcategory, as long as the optimised route (travel + typical stay) still fits the time budget.
+ * Эрэмбэлсэн санал болголтоос автомат маршрутын зогсоолыг сонгоно: эрэмбийн дарааллаар шунахайгаар, дэд ангилал
+ * бүрээс нэг газар, оновчилсон маршрут (зорчих + байх хугацаа) цагийн хязгаарт багтаж байх хүртэл.
  */
 @Component
 public class StopSelector {
 
-    /** A ranked recommendation offered as a possible stop. */
+    /** Зогсоол болж болох эрэмбэлсэн санал болголт. */
     public record ScoredPlace(long placeId, Long recommendationId, String category, double lat, double lng) {
     }
 
@@ -43,12 +43,12 @@ public class StopSelector {
             }
         }
         if (chosen.isEmpty() && !candidates.isEmpty()) {
-            chosen.add(candidates.getFirst()); // nothing fits: still offer the best one, flagged as over budget
+            chosen.add(candidates.getFirst()); // юу ч багтахгүй: шилдгийг нь хязгаар хэтэрсэн гэж тэмдэглээд санал болгоно
         }
         return chosen;
     }
 
-    /** Travel along the best order plus the typical stay at every stop. */
+    /** Хамгийн сайн дарааллаарх зорчих хугацаа дээр зогсоол бүрт байх хугацааг нэмнэ. */
     int durationMinutes(LatLng start, List<ScoredPlace> stops, TransportMode mode) {
         List<LatLng> points = new ArrayList<>();
         points.add(start);

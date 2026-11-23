@@ -9,7 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-/** Interest of one user in one subcategory, 0..1 (design decision: one row per category). */
+/** Нэг хэрэглэгчийн нэг дэд ангилалд харгалзах сонирхлын жин, 0..1 (зохиомжийн шийдвэр: ангилал бүрд нэг мөр). */
 @Entity
 @Table(name = "interest_weights")
 public class InterestWeight {

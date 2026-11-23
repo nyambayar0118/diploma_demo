@@ -3,8 +3,8 @@ package mn.diploma.routeplanner.recommendation;
 import java.util.List;
 
 /**
- * Combines the members' scores of one place into the group score (research 2.x, Masthoff 2011).
- * Chosen with app.group.aggregator (default LEAST_MISERY: no member gets a place they dislike).
+ * Нэг газарт гишүүдийн өгсөн оноог бүлгийн оноо болгон нэгтгэнэ (судалгааны бүлэг 2, Masthoff 2011).
+ * app.group.aggregator-оор сонгоно (анхдагч LEAST_MISERY: аль ч гишүүнд таалагдахгүй газар сонгогдохгүй).
  */
 public interface GroupAggregator {
 
@@ -13,14 +13,14 @@ public interface GroupAggregator {
     String name();
 
     enum Strategy implements GroupAggregator {
-        /** S_avg(p) = mean over members of s_u(p): highest total satisfaction. */
+        /** S_avg(p) = гишүүдийн s_u(p)-ийн дундаж: нийт сэтгэл ханамж хамгийн өндөр. */
         AVERAGE {
             @Override
             public double aggregate(List<Double> s) {
                 return s.stream().mapToDouble(Double::doubleValue).average().orElse(0);
             }
         },
-        /** S_lm(p) = min over members of s_u(p): avoids places one member would not like at all. */
+        /** S_lm(p) = гишүүдийн s_u(p)-ийн хамгийн бага утга (хамгийн бага сэтгэл ханамж, least misery): нэг гишүүнд огт таалагдахгүй газраас зайлсхийнэ. */
         LEAST_MISERY {
             @Override
             public double aggregate(List<Double> s) {

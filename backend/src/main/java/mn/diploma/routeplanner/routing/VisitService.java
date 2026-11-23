@@ -17,9 +17,9 @@ import mn.diploma.routeplanner.routing.RoutingDtos.PendingVisit;
 import mn.diploma.routeplanner.routing.RoutingDtos.VisitResult;
 
 /**
- * Visit confirmation (АШ23). Google Maps does the navigation, so the system cannot see whether the user
- * arrived: when the app is opened again it asks "Очсон уу?" about a stop whose estimated arrival has passed,
- * or about the stop the user is standing near. Only confirmed visits become VISIT labels.
+ * Зочлолыг баталгаажуулах (АШ23). Навигацийг Google Maps хийдэг тул хэрэглэгч очсон эсэхийг систем харахгүй:
+ * апп дахин нээгдэхэд ирэх цагийн тооцоо нь өнгөрсөн зогсоол, эсвэл хэрэглэгчийн ойролцоо байгаа зогсоолын
+ * талаар "Очсон уу?" гэж асууна. Зөвхөн баталгаажсан зочлол VISIT шошго болно.
  */
 @Service
 public class VisitService {
@@ -36,7 +36,7 @@ public class VisitService {
         this.interactions = interactions;
     }
 
-    /** The stop to ask about: a nearby one first, otherwise the earliest unanswered one already due. */
+    /** Асуух зогсоол: эхлээд ойролцоох нь, үгүй бол хугацаа нь болсон хамгийн эртний хариулаагүй нь. */
     @Transactional(readOnly = true)
     public Optional<PendingVisit> pendingQuestion(long userId, Double lat, Double lng, LocalDateTime now) {
         Optional<PendingVisit> nearby = Optional.empty();
@@ -72,7 +72,7 @@ public class VisitService {
             routes.updateStop(stop);
             interactions.log(userId, stop.place.id(), InteractionType.VISIT, stop.recommendationId, route.id, lat, lng);
         }
-        // Confirming the last stop (or answering every stop) finishes the route
+        // Сүүлийн зогсоолыг баталгаажуулах (эсвэл бүх зогсоолд хариулах) нь маршрутыг дуусгана
         boolean lastStop = stop.stopOrder == route.stops.size();
         if ((lastStop && stop.visited) || route.remainingStops().isEmpty()) {
             routing.close(route, RouteStatus.COMPLETED);
@@ -80,7 +80,7 @@ public class VisitService {
         return new VisitResult(stop.id, stop.visited, route.id, route.status);
     }
 
-    /** "Үгүй, очоогүй": the stop is not asked about again and gives no VISIT label. */
+    /** "Үгүй, очоогүй": зогсоолын талаар дахин асуухгүй бөгөөд VISIT шошго үүсэхгүй. */
     @Transactional
     public VisitResult skipQuestion(long userId, long stopId) {
         Route route = routeOfStop(userId, stopId);

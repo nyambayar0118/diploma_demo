@@ -1,6 +1,6 @@
 package mn.diploma.routeplanner.auth;
 
-/** Moderator and administrator are roles of a user (design decision: role attribute, not inheritance). */
+/** Модератор, администратор нь хэрэглэгчийн эрх (зохиомжийн шийдвэр: удамшил бус, role шинж чанар). */
 public enum Role {
     USER, MODERATOR, ADMIN
 }

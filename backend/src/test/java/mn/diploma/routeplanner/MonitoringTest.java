@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-/** Admin monitoring (СНШ05, СНШ07): component health, request metrics, usage numbers; admins only. */
+/** Администраторын хяналт (СНШ05, СНШ07): бүрэлдэхүүн хэсгийн төлөв, хүсэлтийн хэмжүүр, хэрэглээ; зөвхөн администратор. */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class MonitoringTest {
 
@@ -41,7 +41,7 @@ class MonitoringTest {
         assertTrue(body.contains("GET /api/places/search"), body);
         assertTrue(body.contains("\"targetP95Ms\":1000"), body);
         assertTrue(body.contains("\"users\""), body);
-        // The rejected call above is counted too (the filter runs before Spring Security)
+        // Дээрх татгалзсан дуудлага ч тоологдоно (шүүлтүүр Spring Security-ээс өмнө ажилладаг)
         assertTrue(body.contains("(rejected)"), body);
 
         assertTrue(http.send("GET", "/api/admin/users?q=r-", null, admin).body().contains("ADMIN"));

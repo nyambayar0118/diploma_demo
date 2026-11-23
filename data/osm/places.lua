@@ -1,6 +1,6 @@
--- osm2pgsql flex style: loads raw OSM objects needed by the system into the "osm" staging schema.
--- Category mapping is NOT done here; data/sql/load_places.sql maps tags -> categories using
--- the osm_tag_mappings table, so categories can change without re-running osm2pgsql.
+-- osm2pgsql-ийн flex загвар: системд хэрэгтэй OSM объектуудыг "osm" завсрын схемд ачаална.
+-- Ангилалд харгалзуулах ажлыг энд ХИЙХГҮЙ; data/sql/load_places.sql шошгыг osm_tag_mappings хүснэгтээр
+-- ангилалд харгалзуулдаг тул osm2pgsql-ийг дахин ажиллуулалгүйгээр ангиллыг өөрчилж болно.
 
 local POI_KEYS = { 'amenity', 'shop', 'leisure', 'tourism', 'historic', 'natural' }
 
@@ -28,7 +28,7 @@ local buildings = osm2pgsql.define_table({
 
 local function is_poi(tags)
     if not (tags.name or tags['name:mn']) then
-        return false -- unnamed objects are not useful as places
+        return false -- нэргүй объект газар болоход хэрэггүй
     end
     for _, key in ipairs(POI_KEYS) do
         if tags[key] then return true end

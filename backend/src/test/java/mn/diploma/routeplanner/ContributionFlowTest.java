@@ -14,7 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
-/** Contributions (АШ03-АШ06, АШ18): submit -> moderator approves / rejects -> place changes, points. */
+/** Хувь нэмэр (АШ03-АШ06, АШ18): илгээх -> модератор батлах / татгалзах -> газар өөрчлөгдөх, оноо. */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ContributionFlowTest {
 
@@ -32,7 +32,7 @@ class ContributionFlowTest {
         String user = http.registerUser();
         String moderator = http.tokenWithRole("MODERATOR");
 
-        // New place
+        // Шинэ газар
         assertEquals(400, http.send("POST", "/api/change-requests",
                 "{\"type\":\"CREATE_PLACE\",\"data\":{\"categoryCode\":\"cafe\",\"lat\":47.55,\"lng\":107.7}}", user).statusCode());
         JsonNode created = json(http.send("POST", "/api/change-requests", """
@@ -50,7 +50,7 @@ class ContributionFlowTest {
         assertEquals("USER", jdbc.queryForObject("SELECT source FROM places WHERE id = ?", String.class, placeId));
         assertEquals(409, http.send("POST", "/api/moderation/requests/" + createId + "/approve", null, moderator).statusCode());
 
-        // Edit: the field is protected from the OSM re-import (СНШ10)
+        // Засвар: талбар OSM-ийг дахин импортлоход хамгаалагдана (СНШ10)
         long editId = json(http.send("POST", "/api/change-requests", """
                 {"type":"UPDATE_PLACE","targetPlaceId":%d,"data":{"nameCyrillic":"Зассан кафе","phone":"99112233"}}
                 """.formatted(placeId), user), 201).get("id").asLong();
@@ -59,7 +59,7 @@ class ContributionFlowTest {
         assertTrue(jdbc.queryForObject("SELECT 'name_cyrillic' = ANY (user_edited_fields) FROM places WHERE id = ?",
                 Boolean.class, placeId));
 
-        // Link
+        // Холбоос
         long linkId = json(http.send("POST", "/api/change-requests", """
                 {"type":"ADD_LINK","targetPlaceId":%d,"data":{"url":"https://facebook.com/test-cafe","linkType":"FACEBOOK"}}
                 """.formatted(placeId), user), 201).get("id").asLong();
@@ -69,7 +69,7 @@ class ContributionFlowTest {
         json(http.send("POST", "/api/moderation/requests/" + linkId + "/approve", null, moderator), 200);
         assertTrue(http.send("GET", "/api/places/" + placeId, null, null).body().contains("facebook.com/test-cafe"));
 
-        // Reject needs a reason, which the submitter sees
+        // Татгалзахад шалтгаан заавал, илгээгч түүнийг харна
         long badId = json(http.send("POST", "/api/change-requests", """
                 {"type":"UPDATE_PLACE","targetPlaceId":%d,"data":{"permanentlyClosed":true}}
                 """.formatted(placeId), user), 201).get("id").asLong();
@@ -77,10 +77,10 @@ class ContributionFlowTest {
         json(http.send("POST", "/api/moderation/requests/" + badId + "/reject", "{\"comment\":\"Нээлттэй байна\"}", moderator), 200);
         assertTrue(json(http.send("GET", "/api/users/me/change-requests", null, user), 200).toString().contains("Нээлттэй байна"));
 
-        // Points: 20 (new) + 10 (edit) + 5 (link)
+        // Оноо: 20 (шинэ) + 10 (засвар) + 5 (холбоос)
         assertEquals(35, json(http.send("GET", "/api/users/me/rewards", null, user), 200).get("total").asInt());
 
-        // Moderators cannot approve their own requests
+        // Модератор өөрийн хүсэлтийг батлах боломжгүй
         long own = json(http.send("POST", "/api/change-requests", """
                 {"type":"UPDATE_PLACE","targetPlaceId":%d,"data":{"street":"Энхтайваны өргөн чөлөө"}}
                 """.formatted(placeId), moderator), 201).get("id").asLong();

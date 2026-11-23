@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import mn.diploma.routeplanner.auth.UserDeletedEvent;
 import mn.diploma.routeplanner.common.ApiException;
 
-/** Reviews and ratings (АШ16) and hiding inappropriate ones (АШ17). */
+/** Үнэлгээ, сэтгэгдэл (АШ16) болон зохисгүйг нуух (АШ17). */
 @Service
 public class ReviewService {
 
@@ -26,7 +26,7 @@ public class ReviewService {
         this.jdbc = jdbc;
     }
 
-    /** Newest first; hidden reviews only for moderators (and their own author). */
+    /** Хамгийн сүүлийнх нь эхэндээ; нуусан сэтгэгдлийг зөвхөн модератор (болон бичсэн хүн нь) харна. */
     @Transactional(readOnly = true)
     public List<ReviewDto> list(long placeId, Long viewerId, boolean moderator) {
         requirePlace(placeId);
@@ -47,7 +47,7 @@ public class ReviewService {
                 }, placeId, moderator, viewerId == null ? -1L : viewerId, viewerId == null ? -1L : viewerId);
     }
 
-    /** Creates the user's review of the place, or edits it if one exists. */
+    /** Хэрэглэгчийн тухайн газарт өгөх үнэлгээг үүсгэнэ, аль хэдийн байвал засна. */
     @Transactional
     public ReviewDto write(long userId, long placeId, int rating, String comment) {
         requirePlace(placeId);
@@ -70,7 +70,7 @@ public class ReviewService {
         refreshAverage(placeId);
     }
 
-    /** Moderator: hide or show again. Hidden reviews do not count in the average. */
+    /** Модератор: нуух эсвэл дахин харуулах. Нуусан үнэлгээг дунджид тооцохгүй. */
     @Transactional
     public ReviewDto setHidden(long moderatorId, long reviewId, boolean hidden) {
         List<Long> place = jdbc.queryForList("""
@@ -83,7 +83,7 @@ public class ReviewService {
         return byId(reviewId, moderatorId);
     }
 
-    /** places.average_rating / review_count are denormalised for fast lists and the ML features. */
+    /** places.average_rating / review_count-ийг жагсаалт хурдан гаргах, машин сургалтын шинж чанарт зориулан давхардуулж хадгална. */
     private void refreshAverage(long placeId) {
         jdbc.update("""
                 UPDATE places p SET average_rating = coalesce(s.avg, 0), review_count = coalesce(s.n, 0)
@@ -113,7 +113,7 @@ public class ReviewService {
         if (!Boolean.TRUE.equals(exists)) throw new ApiException(HttpStatus.NOT_FOUND, "PLACE_NOT_FOUND", "Газар олдсонгүй");
     }
 
-    /** ХШ08: a deleted user's reviews are removed (they are personal content) and the averages recomputed. */
+    /** ХШ08: устгагдсан хэрэглэгчийн сэтгэгдлийг (хувийн агуулга тул) устгаж, дунджийг дахин тооцно. */
     @EventListener
     void onUserDeleted(UserDeletedEvent e) {
         List<Long> places = jdbc.queryForList("DELETE FROM reviews WHERE author_id = ? RETURNING place_id",

@@ -10,15 +10,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Place module API (design table "Газрын модулийн API").
- * Open to everyone, including users who are not logged in.
+ * Газрын модулийн API (зохиомжийн "Газрын модулийн API" хүснэгт).
+ * Нэвтрээгүй хэрэглэгч ч ашиглах боломжтой.
  */
 @RestController
 public class PlaceController {
 
     private static final int DEFAULT_LIMIT = 2000;
     private static final int MAX_LIMIT = 5000;
-    // Sükhbaatar Square: distance reference when the client does not send its map centre
+    // Сүхбаатарын талбай: клиент газрын зургийн төвөө илгээгээгүй үед зайг үүнээс тооцно
     private static final double UB_CENTER_LAT = 47.9186;
     private static final double UB_CENTER_LNG = 106.9177;
 
@@ -30,7 +30,7 @@ public class PlaceController {
 
     /**
      * GET /api/places?bbox=minLon,minLat,maxLon,maxLat[&limit=N]
-     * Places inside the visible map area as a GeoJSON FeatureCollection (АШ08, ХХШ02).
+     * Газрын зургийн харагдаж буй хэсэг дэх газрууд, GeoJSON FeatureCollection хэлбэрээр (АШ08, ХХШ02).
      */
     @GetMapping(value = "/api/places", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> placesInBbox(@RequestParam String bbox,
@@ -42,7 +42,7 @@ public class PlaceController {
 
     /**
      * GET /api/places/search?q=...[&category=mainCode][&lat=..&lng=..][&limit=N]
-     * Name search in Cyrillic or Latin letters, tolerant to typos (АШ01, АШ02, СГШ01).
+     * Кирилл эсвэл латин үсгээр нэрээр хайх, үсгийн алдааг тэвчинэ (АШ01, АШ02, СГШ01).
      */
     @GetMapping(value = "/api/places/search", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> search(@RequestParam String q,
@@ -60,7 +60,7 @@ public class PlaceController {
                 Math.clamp(limit, 1, 50)));
     }
 
-    /** GET /api/places/{id}: details of one place (ХСШ04, АШ19). */
+    /** GET /api/places/{id}: нэг газрын дэлгэрэнгүй мэдээлэл (ХСШ04, АШ19). */
     @GetMapping(value = "/api/places/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> details(@PathVariable long id) {
         String json = places.detailsAsJson(id);
@@ -70,7 +70,7 @@ public class PlaceController {
         return ResponseEntity.ok(json);
     }
 
-    /** GET /api/categories: main categories with their subcategories (ДШ11). */
+    /** GET /api/categories: үндсэн ангиллууд, тэдгээрийн дэд ангиллын хамт (ДШ11). */
     @GetMapping(value = "/api/categories", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> categories() {
         return ResponseEntity.ok(places.categoryTreeAsJson());

@@ -15,7 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
-/** Group planning (АШ10, АШ24): friends only, fair meeting place, share, guests through the invite link. */
+/** Бүлгийн төлөвлөгөө (АШ10, АШ24): зөвхөн найз, шударга уулзах газар, хуваалцах, урилгын холбоосоор зочин нэгдэх. */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class GroupFlowTest {
 
@@ -44,14 +44,14 @@ class GroupFlowTest {
             http.send("POST", "/api/onboarding", "{\"categoryCodes\":[\"cafe\",\"museum\",\"park\"],"
                     + "\"consents\":[\"INTERESTS\",\"INTERACTION_HISTORY\"]}", t);
         }
-        // A and B become friends; B shares their location
+        // A, B найз болно; B байршлаа хуваалцана
         String invite = json(http.send("POST", "/api/friends/invite-link", null, a), 200).get("token").asString();
         json(http.send("POST", "/api/friends/invites/" + invite + "/accept", null, b), 200);
         http.send("POST", "/api/consents/LOCATION_SHARING", null, b);
         json(http.send("PUT", "/api/locations/me",
                 "{\"lat\":%s,\"lng\":%s,\"shared\":true}".formatted(LAT, LNG + 0.01), b), 200);
 
-        // Only friends can be added
+        // Зөвхөн найзыг нэмж болно
         String create = "{\"friendIds\":[%d],\"lat\":%s,\"lng\":%s,\"transportMode\":\"WALKING\",\"timeBudgetMinutes\":180}";
         assertEquals(400, http.send("POST", "/api/groups", create.formatted(cId, LAT, LNG - 0.01), a).statusCode());
         JsonNode group = json(http.send("POST", "/api/groups", create.formatted(bId, LAT, LNG - 0.01), a), 201);
@@ -59,7 +59,7 @@ class GroupFlowTest {
         assertEquals(2, group.get("members").size());
         assertTrue(group.get("members").get(1).get("startSource").toString().contains("SHARED_LOCATION"), group.toString());
 
-        // Options: the cafe halfway between them beats the one next to A (fairness penalty)
+        // Хувилбар: тэдний дундах кафе A-гийн хажуудахаас өндөр оноо авна (шударга байдлын торгууль)
         JsonNode options = json(http.send("GET", "/api/groups/" + groupId + "/options", null, a), 200);
         assertEquals(middleCafe, options.get("options").get(0).get("place").get("id").asLong(), options.toString());
         boolean nearAListed = false;
@@ -69,7 +69,7 @@ class GroupFlowTest {
                 "SELECT ranker_name FROM recommendation_batches WHERE group_session_id = ? LIMIT 1", String.class, groupId));
         assertEquals(404, http.send("GET", "/api/groups/" + groupId + "/options", null, b).statusCode());
 
-        // Asking again: a place not offered yet comes first; earlier ones only fill the remaining slots
+        // Дахин асуух: өмнө санал болгоогүй газар эхэнд орно; өмнөх газрууд зөвхөн үлдсэн байрыг дүүргэнэ
         java.util.Set<Long> firstIds = new java.util.HashSet<>();
         for (JsonNode o : options.get("options")) firstIds.add(o.get("place").get("id").asLong());
         place("Шинэ кафе", "cafe", 0.002);
@@ -77,11 +77,11 @@ class GroupFlowTest {
         long firstAgain = again.get("options").get(0).get("place").get("id").asLong();
         assertFalse(firstIds.contains(firstAgain), again.toString());
 
-        // Members see the plan; others do not
+        // Гишүүд төлөвлөгөөг харна; бусад нь харахгүй
         assertEquals(200, http.send("GET", "/api/groups/" + groupId, null, b).statusCode());
         assertEquals(404, http.send("GET", "/api/groups/" + groupId, null, c).statusCode());
 
-        // Share: invite link + a route for each registered member
+        // Хуваалцах: урилгын холбоос + бүртгэлтэй гишүүн бүрд маршрут
         group = json(http.send("POST", "/api/groups/" + groupId + "/share", "{\"placeId\":" + middleCafe + "}", a), 200);
         assertTrue(group.get("status").toString().contains("SHARED"));
         String token = group.get("inviteToken").asString();
@@ -92,7 +92,7 @@ class GroupFlowTest {
         assertEquals(409, http.send("PATCH", "/api/groups/" + groupId + "/members",
                 "{\"op\":\"ADD\",\"userId\":" + cId + "}", a).statusCode());
 
-        // Guest without an account joins through the link and gets their own Maps link
+        // Бүртгэлгүй зочин холбоосоор нэгдэж, өөрийн Maps холбоосыг авна
         JsonNode info = json(http.send("GET", "/api/groups/join/" + token, null, null), 200);
         assertTrue(info.get("valid").asBoolean());
         assertEquals(400, http.send("POST", "/api/groups/join/" + token, "{}", null).statusCode());
@@ -101,12 +101,12 @@ class GroupFlowTest {
         String url = guest.get("mapsUrl").asString();
         assertTrue(url.contains("origin=") && url.contains("destination="), url);
         assertTrue(guest.get("travelMinutes").asInt() > 0);
-        // A logged-in user who is not a friend can also join through the link (and gets a route)
+        // Найз биш нэвтэрсэн хэрэглэгч мөн холбоосоор нэгдэж болно (маршрут авна)
         JsonNode joined = json(http.send("POST", "/api/groups/join/" + token,
                 "{\"lat\":%s,\"lng\":%s}".formatted(LAT, LNG + 0.003), c), 200);
         assertFalse(joined.get("routeId").isNull());
 
-        // Cancel: the link stops working and member routes are cancelled
+        // Цуцлах: холбоос ажиллахаа больж, гишүүдийн маршрут цуцлагдана
         assertEquals(204, http.send("DELETE", "/api/groups/" + groupId, null, a).statusCode());
         assertEquals(404, http.send("GET", "/api/groups/join/" + token, null, null).statusCode());
         assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM routes WHERE group_session_id = ? "

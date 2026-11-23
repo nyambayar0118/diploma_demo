@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 /**
- * Baseline ranker: score = 0.55 * interest weight + 0.25 * closeness + 0.20 * time-of-day suitability,
- * where closeness = 1 - distance / search radius. Used until the ML model beats it on NDCG@10.
+ * Суурь загвар болох дүрэмд суурилсан эрэмбэлэгч: оноо = 0.55 * сонирхлын жин + 0.25 * ойр байдал + 0.20 * цагийн тохирц,
+ * энд ойр байдал = 1 - зай / хайлтын радиус. Машин сургалтын загвар NDCG@10-аар давтал үүнийг ашиглана.
  */
 @Component
 public class RuleBasedRanker implements Ranker {

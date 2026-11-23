@@ -20,7 +20,7 @@ import mn.diploma.routeplanner.contribution.ContributionDtos.ChangeRequestView;
 import mn.diploma.routeplanner.contribution.ContributionDtos.ReviewDecision;
 import mn.diploma.routeplanner.contribution.ContributionDtos.RewardsView;
 
-/** Contribution module API (design table "Хувь нэмэр ба хяналтын модулийн API"). */
+/** Хувь нэмрийн модулийн API (зохиомжийн "Хувь нэмэр ба хяналтын модулийн API" хүснэгт). */
 @RestController
 public class ContributionController {
 

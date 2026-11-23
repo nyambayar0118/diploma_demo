@@ -11,7 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-/** Current saved / hidden state of a place for a user (the history is in user_interactions). */
+/** Хэрэглэгчийн хувьд газрын одоогийн хадгалсан / нуусан төлөв (түүх нь user_interactions хүснэгтэд). */
 @Entity
 @Table(name = "place_marks")
 public class PlaceMark {

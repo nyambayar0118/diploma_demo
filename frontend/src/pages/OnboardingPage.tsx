@@ -15,6 +15,7 @@ const CONSENT_TEXT: { type: ConsentType; title: string; desc: string; required?:
     desc: 'Аль газрыг хадгалсан, очсон зэрэг үйлдлийг санал болголтын загварыг сайжруулахад ашиглана.' },
 ]
 
+/** Бүртгэлийн асуулга (ДШ02, хүйтэн эхлэл): сонирхсон ангилал, тээврийн хэрэгсэл, хувийн мэдээллийн зөвшөөрөл. */
 export default function OnboardingPage() {
   const navigate = useNavigate()
   const [step, setStep] = useState<1 | 2>(1)
@@ -26,7 +27,7 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     api<Category[]>('/api/categories').then(setCategories).catch(() => setError('Ангиллыг ачаалж чадсангүй'))
-    // When redoing the survey, start from the previous choices
+    // Асуулгыг дахин бөглөхөд өмнөх сонголтоос эхэлнэ
     api<OnboardingStatus>('/api/onboarding').then((s) => s.completed && setSelected(new Set(s.categoryCodes)))
   }, [])
 

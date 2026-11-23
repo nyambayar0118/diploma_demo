@@ -17,7 +17,7 @@ import mn.diploma.routeplanner.auth.JwtService;
 import mn.diploma.routeplanner.interest.InterestProfileService.OnboardingStatus;
 import mn.diploma.routeplanner.interest.InterestProfileService.WeightDto;
 
-/** Interest Profile module API (design table "Сонирхлын загварчлалын модулиудын API"). */
+/** Сонирхлын профайлын модулийн API (зохиомжийн "Сонирхлын загварчлалын модулиудын API" хүснэгт). */
 @RestController
 public class InterestController {
 

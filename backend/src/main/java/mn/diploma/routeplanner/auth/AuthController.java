@@ -23,7 +23,7 @@ import mn.diploma.routeplanner.auth.AuthDtos.RegisterRequest;
 import mn.diploma.routeplanner.auth.AuthDtos.UserDto;
 import mn.diploma.routeplanner.common.ApiException;
 
-/** Auth module API (design table "Хэрэглэгч ба нууцлалын модулиудын API"). */
+/** Нэвтрэлтийн модулийн API (зохиомжийн "Хэрэглэгч ба нууцлалын модулиудын API" хүснэгт). */
 @RestController
 public class AuthController {
 
@@ -45,7 +45,7 @@ public class AuthController {
         return auth.login(req);
     }
 
-    /** Social login (АШ07). Only GOOGLE is implemented; FACEBOOK answers 400. */
+    /** Гуравдагч талын хаягаар нэвтрэх (АШ07). Зөвхөн GOOGLE хэрэгжсэн; FACEBOOK бол 400 буцаана. */
     @PostMapping("/api/auth/oauth")
     public AuthResponse oauth(@Valid @RequestBody AuthDtos.OAuthLoginRequest req) {
         if (req.provider() != AuthProvider.GOOGLE) {
@@ -54,7 +54,7 @@ public class AuthController {
         return auth.loginWithGoogle(req.token());
     }
 
-    /** ХШ08: delete my account and personal data. */
+    /** ХШ08: өөрийн бүртгэл болон хувийн мэдээллээ устгах. */
     @DeleteMapping("/api/users/me")
     public ResponseEntity<Void> deleteMe(@AuthenticationPrincipal Jwt jwt) {
         auth.deleteAccount(JwtService.userId(jwt));
@@ -66,7 +66,7 @@ public class AuthController {
         return auth.changeRole(id, req.role());
     }
 
-    /** Public settings the login page needs (Google client id, or null when Google login is off). */
+    /** Нэвтрэх хуудсанд хэрэгтэй нийтийн тохиргоо (Google client id; Google-ээр нэвтрэх унтраастай бол null). */
     @GetMapping("/api/auth/config")
     public AuthDtos.AuthConfig config() {
         return auth.config();

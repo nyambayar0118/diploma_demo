@@ -10,7 +10,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** Tiny HTTP helper for the end-to-end tests (no extra test libraries needed). */
+/** Эхнээс нь дуустал тестэд зориулсан жижиг HTTP туслах (нэмэлт тестийн сан шаардлагагүй). */
 final class TestHttp {
 
     private final HttpClient http = HttpClient.newHttpClient();
@@ -43,7 +43,7 @@ final class TestHttp {
         return http.send(b.build(), HttpResponse.BodyHandlers.ofString());
     }
 
-    /** Registers a fresh user and returns its token. */
+    /** Шинэ хэрэглэгч бүртгэж, түүний токеныг буцаана. */
     String registerUser() throws Exception {
         String suffix = UUID.randomUUID().toString().substring(0, 8);
         HttpResponse<String> reg = send("POST", "/api/auth/register", """
@@ -54,8 +54,8 @@ final class TestHttp {
     }
 
     /**
-     * Registers a user and gives it a role straight in the database (tests only), then logs in again so the
-     * token carries the role.
+     * Хэрэглэгч бүртгэж, эрхийг шууд өгөгдлийн санд олгоно (зөвхөн тестэд), дараа нь дахин нэвтэрч
+     * токенд эрхийг нь оруулна.
      */
     String tokenWithRole(String role) throws Exception {
         String suffix = UUID.randomUUID().toString().substring(0, 8);

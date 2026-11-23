@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-/** Search, details, save / hide and the interest update triggered by interactions. */
+/** Хайлт, дэлгэрэнгүй мэдээлэл, хадгалах / нуух болон үйлдлээр сонирхол шинэчлэгдэх. */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class PlaceFlowTest {
 
@@ -33,7 +33,7 @@ class PlaceFlowTest {
                 RETURNING id
                 """, Long.class);
 
-        // Search: Cyrillic, transliterated Latin, typo
+        // Хайлт: кирилл, галигласан латин, үсгийн алдаа
         for (String q : new String[] {"тэнгэр", "tenger", "tengr kino"}) {
             HttpResponse<String> r = http.send("GET", "/api/places/search?q=" + q.replace(" ", "%20"), null, null);
             assertEquals(200, r.statusCode(), r.body());
@@ -58,7 +58,7 @@ class PlaceFlowTest {
         assertTrue(http.send("GET", "/api/places/" + placeId + "/mark", null, token).body().contains("SAVED"));
         assertTrue(http.send("GET", "/api/users/me/saved", null, token).body().contains("Тэнгэр кино театр"));
 
-        // The weight update runs asynchronously after the SAVE interaction
+        // SAVE үйлдлийн дараа жин асинхроноор шинэчлэгдэнэ
         double after = before;
         for (int i = 0; i < 30 && after <= before; i++) {
             Thread.sleep(100);

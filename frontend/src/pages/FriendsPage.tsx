@@ -6,7 +6,7 @@ import { agoText, api, ApiError, type Consent, type FriendLocation, type Friends
 import { useAuth } from '../auth'
 import { SHARING_CHANGED } from '../locationSharing'
 
-/** Friends (АШ20) and location sharing (АШ21, ХШ07). */
+/** Найз (АШ20) болон байршил хуваалцах (АШ21, ХШ07). */
 export default function FriendsPage() {
   const { user } = useAuth()
   const [friends, setFriends] = useState<Friendship[]>([])
@@ -101,7 +101,7 @@ export default function FriendsPage() {
     <div className="page social">
       <PageHeader title="Найзууд" back="/" />
 
-      {/* Who I am */}
+      {/* Би хэн бэ */}
       <section className="s-card me-card">
         <Avatar name={user?.displayName ?? '?'} size={56} />
         <div className="r-main">
@@ -120,7 +120,7 @@ export default function FriendsPage() {
       {error && <div className="s-note error">{error}</div>}
       {message && <div className="s-note success">{message}</div>}
 
-      {/* Incoming requests first: they need an answer */}
+      {/* Ирсэн хүсэлт эхэндээ: хариу шаарддаг */}
       {incoming.length > 0 && (
         <section className="s-card highlight">
           <h2>Ирсэн хүсэлт <span className="count">{incoming.length}</span></h2>
@@ -145,7 +145,7 @@ export default function FriendsPage() {
         </section>
       )}
 
-      {/* Location sharing */}
+      {/* Байршил хуваалцах */}
       <section className="s-card">
         <label className="switch-row first">
           <span className={`share-dot ${sharing ? 'on' : ''}`}><Icon name="navigation" size={18} /></span>
@@ -166,7 +166,7 @@ export default function FriendsPage() {
         </p>
       </section>
 
-      {/* Add a friend */}
+      {/* Найз нэмэх */}
       <section className="s-card">
         <h2>Найз нэмэх</h2>
         <p className="s-desc">Найзынхаа хэрэглэгчийн нэрийг оруулах эсвэл урилгын холбоос илгээнэ үү.</p>
@@ -199,7 +199,7 @@ export default function FriendsPage() {
         )}
       </section>
 
-      {/* Friends */}
+      {/* Найзууд */}
       <section className="s-card">
         <h2>Найзууд <span className="count muted-count">{accepted.length}</span></h2>
         {accepted.length === 0 ? (

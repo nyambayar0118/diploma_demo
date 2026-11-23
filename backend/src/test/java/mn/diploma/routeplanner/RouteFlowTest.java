@@ -18,11 +18,11 @@ import mn.diploma.routeplanner.routing.RouteExpiryJob;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
-/** Routes: ordering, Maps links, modification, open -> visit -> complete -> feedback, expiry. */
+/** Маршрут: дараалуулах, Maps холбоос, өөрчлөх, нээх -> зочлох -> дуусгах -> үнэлгээ, хугацаа дуусах. */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class RouteFlowTest {
 
-    // An area far from the other tests' places
+    // Бусад тестийн газраас хол газар
     static final double LAT = 47.70;
     static final double LNG = 107.30;
 
@@ -40,7 +40,7 @@ class RouteFlowTest {
     @Test
     void routeLifecycle() throws Exception {
         TestHttp http = new TestHttp(port);
-        // Three places on a line east of the start
+        // Эхлэх цэгийн зүүн талд нэг шугам дээрх гурван газар
         long near = place("Маршрут кафе", "cafe", 0.003);
         long middle = place("Маршрут цэцэрлэг", "park", 0.006);
         long far = place("Маршрут галерей", "gallery", 0.009);
@@ -51,7 +51,7 @@ class RouteFlowTest {
                 "{\"categoryCodes\":[\"cafe\",\"park\",\"gallery\"],"
                         + "\"consents\":[\"INTERESTS\",\"LOCATION\",\"INTERACTION_HISTORY\"]}", token).statusCode());
 
-        // Recommendation ids are kept on the stops so VISIT can be linked back to the ranked list
+        // Зогсоолд санал болголтын id-г хадгалдаг тул VISIT-ийг эрэмбэлсэн жагсаалттай холбож болно
         JsonNode recs = json(http.send("POST", "/api/recommendations",
                 "{\"lat\":%s,\"lng\":%s,\"k\":10}".formatted(LAT, LNG), token), 200);
         Long nearRec = null;
@@ -59,7 +59,7 @@ class RouteFlowTest {
             if (item.get("placeId").asLong() == near) nearRec = item.get("recommendationId").asLong();
         }
 
-        // Requested in the wrong order; the optimizer visits near -> middle -> far
+        // Буруу дарааллаар хүссэн; оновчлогч ойр -> дунд -> хол дарааллаар зочилно
         String create = """
                 {"lat":%s,"lng":%s,"transportMode":"WALKING","timeBudgetMinutes":240,
                  "stops":[{"placeId":%d},{"placeId":%d,"recommendationId":%s},{"placeId":%d}]}
@@ -73,7 +73,7 @@ class RouteFlowTest {
         assertTrue(url.contains("travelmode=walking") && url.contains("waypoints="), url);
         assertTrue(route.get("estimatedDurationMinutes").asInt() > 0);
 
-        // Modify: remove the middle stop, add another place; duplicates are rejected
+        // Өөрчлөх: дунд зогсоолыг хасаж, өөр газар нэмэх; давхардлыг татгалзана
         long middleStop = stopId(route, middle);
         route = json(http.send("PATCH", "/api/routes/" + routeId + "/stops",
                 "{\"op\":\"REMOVE\",\"stopId\":" + middleStop + "}", token), 200);
@@ -84,7 +84,7 @@ class RouteFlowTest {
         assertEquals(400, http.send("PATCH", "/api/routes/" + routeId + "/stops",
                 "{\"op\":\"ADD\",\"placeId\":" + near + "}", token).statusCode());
 
-        // Manual order is kept as given (and arrivals follow it); OPTIMIZE goes back to the shortest order
+        // Гараар тогтоосон дарааллыг хэвээр хадгална (ирэх цаг түүнийг дагана); OPTIMIZE хамгийн богино дараалал руу буцаана
         String reorder = "{\"op\":\"REORDER\",\"stopIds\":[%d,%d,%d]}"
                 .formatted(stopId(route, far), stopId(route, near), stopId(route, extra));
         route = json(http.send("PATCH", "/api/routes/" + routeId + "/stops", reorder, token), 200);
@@ -93,7 +93,7 @@ class RouteFlowTest {
                 .compareTo(route.get("stops").get(1).get("estimatedArrival").asString()) < 0);
         assertEquals(400, http.send("PATCH", "/api/routes/" + routeId + "/stops",
                 "{\"op\":\"REORDER\",\"stopIds\":[%d]}".formatted(stopId(route, far)), token).statusCode());
-        // Removing a stop keeps the manual order of the rest
+        // Зогсоол хасахад бусдын гар дараалал хадгалагдана
         long extraStop = stopId(route, extra);
         route = json(http.send("PATCH", "/api/routes/" + routeId + "/stops",
                 "{\"op\":\"REMOVE\",\"stopId\":" + extraStop + "}", token), 200);
@@ -104,7 +104,7 @@ class RouteFlowTest {
         route = json(http.send("PATCH", "/api/routes/" + routeId + "/stops", "{\"op\":\"OPTIMIZE\"}", token), 200);
         assertEquals(List.of(near, extra, far), placeIds(route));
 
-        // Recommendations limited to chosen categories
+        // Сонгосон ангиллаар хязгаарласан санал болголт
         JsonNode onlyCafes = json(http.send("POST", "/api/recommendations",
                 "{\"lat\":%s,\"lng\":%s,\"k\":10,\"categories\":[\"cafe\"]}".formatted(LAT, LNG), token), 200);
         for (JsonNode item : onlyCafes.get("items")) {
@@ -113,17 +113,17 @@ class RouteFlowTest {
         assertEquals("{cafe}", jdbc.queryForObject("SELECT category_filter::text FROM recommendation_batches WHERE id = ?",
                 String.class, onlyCafes.get("batchId").asLong()));
 
-        // Other users cannot see it
+        // Бусад хэрэглэгч харахгүй
         assertEquals(404, http.send("GET", "/api/routes/" + routeId, null, http.registerUser()).statusCode());
 
-        // Open in Google Maps: the route is locked and OPEN_IN_MAPS is logged for every stop
+        // Google Maps-д нээх: маршрут түгжигдэж, зогсоол бүрд OPEN_IN_MAPS бүртгэгдэнэ
         route = json(http.send("POST", "/api/routes/" + routeId + "/open", null, token), 200);
         assertTrue(route.get("status").toString().contains("OPENED_IN_MAPS"));
         assertEquals(409, http.send("PATCH", "/api/routes/" + routeId + "/stops",
                 "{\"op\":\"REMOVE\",\"stopId\":" + stopId(route, far) + "}", token).statusCode());
         assertEquals(3, count("SELECT count(*) FROM user_interactions WHERE route_id = ? AND type = 'OPEN_IN_MAPS'", routeId));
 
-        // Standing next to the first stop: the app asks "Очсон уу?" about it
+        // Эхний зогсоолын дэргэд байх үед: апп түүний талаар "Очсон уу?" гэж асууна
         JsonNode pending = json(http.send("GET", "/api/visits/pending?lat=%s&lng=%s".formatted(LAT, LNG + 0.003),
                 null, token), 200);
         assertTrue(pending.get("nearby").asBoolean());
@@ -140,32 +140,32 @@ class RouteFlowTest {
                     + "WHERE route_id = ? AND type = 'VISIT'", Long.class, routeId));
         }
 
-        // "Did not go" to the other two: every stop is answered, so the route is completed
+        // Бусад хоёрт "очоогүй": бүх зогсоолд хариулсан тул маршрут дуусна
         http.send("POST", "/api/visits/" + stopId(route, extra) + "/skip", null, token);
         visit = json(http.send("POST", "/api/visits/" + stopId(route, far) + "/skip", null, token), 200);
         assertTrue(visit.get("routeStatus").toString().contains("COMPLETED"), visit.toString());
         assertEquals(204, http.send("GET", "/api/visits/pending", null, token).statusCode());
 
-        // Satisfaction feedback, once
+        // Сэтгэл ханамжийн үнэлгээ, нэг удаа
         String fb = "{\"relevance\":5,\"timeSuitability\":4,\"estimateAccuracy\":3}";
         assertEquals(201, http.send("POST", "/api/routes/" + routeId + "/feedback", fb, token).statusCode());
         assertEquals(409, http.send("POST", "/api/routes/" + routeId + "/feedback", fb, token).statusCode());
         assertTrue(json(http.send("GET", "/api/routes/" + routeId, null, token), 200).get("feedbackGiven").asBoolean());
 
-        // Public transport: Google Maps has no transit waypoints, so one link per leg
+        // Нийтийн тээвэр: Google Maps-д дамжих цэг дэмжигддэггүй тул хэсэг бүрд нэг холбоос
         JsonNode transit = json(http.send("POST", "/api/routes", """
                 {"lat":%s,"lng":%s,"transportMode":"PUBLIC_TRANSPORT","stops":[{"placeId":%d},{"placeId":%d}]}
                 """.formatted(LAT, LNG, near, far), token), 201);
         assertEquals(2, transit.get("mapsLinks").size());
         assertEquals(204, http.send("DELETE", "/api/routes/" + transit.get("id").asLong(), null, token).statusCode());
 
-        // Automatic route: the server picks the stops from its own recommendations
+        // Автомат маршрут: сервер зогсоолыг өөрийн санал болголтоос сонгоно
         JsonNode auto = json(http.send("POST", "/api/routes",
                 "{\"lat\":%s,\"lng\":%s,\"timeBudgetMinutes\":240}".formatted(LAT, LNG), token), 201);
         assertFalse(auto.get("stops").isEmpty());
         assertTrue(auto.get("stops").size() <= 3);
 
-        // A route planned for a past day is closed by the expiry job (never opened -> CANCELLED)
+        // Өнгөрсөн өдөрт төлөвлөсөн маршрутыг хугацааны ажил хаана (огт нээгээгүй -> CANCELLED)
         JsonNode old = json(http.send("POST", "/api/routes", """
                 {"lat":%s,"lng":%s,"startAt":"2020-01-01T10:00:00","stops":[{"placeId":%d}]}
                 """.formatted(LAT, LNG, near), token), 201);

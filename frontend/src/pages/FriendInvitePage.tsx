@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router'
 import { api, ApiError, type UserRef } from '../api'
 import { useAuth } from '../auth'
 
-/** Opened from a friend's invite link: accept to become friends right away. */
+/** Найзын урилгын холбоосоос нээгдэнэ: зөвшөөрвөл шууд найз болно. */
 export default function FriendInvitePage() {
   const { token = '' } = useParams()
   const { user, loading } = useAuth()

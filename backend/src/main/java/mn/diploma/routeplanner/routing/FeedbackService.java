@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import mn.diploma.routeplanner.common.ApiException;
 import mn.diploma.routeplanner.routing.RoutingDtos.FeedbackRequest;
 
-/** Satisfaction rating of a finished route (1-5 on three questions); used in the evaluation chapter. */
+/** Дууссан маршрутын сэтгэл ханамжийн үнэлгээ (гурван асуулт, 1-5 оноо); үнэлгээний бүлэгт ашиглана. */
 @Service
 public class FeedbackService {
 

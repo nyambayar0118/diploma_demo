@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { bannerDismissed, dismissBanner, platform } from '../pwa'
 
-/** A one-time hint on phones that the site can be installed; closing it hides it for good. */
+/** Утсанд сайтыг суулгаж болохыг нэг удаа сануулна; хаавал дахин гарахгүй. */
 export default function InstallBanner({ onOpenGuide }: { onOpenGuide: () => void }) {
   const [show, setShow] = useState(false)
 
   useEffect(() => {
     const p = platform()
     if (p === 'installed' || p === 'desktop' || bannerDismissed()) return
-    const t = window.setTimeout(() => setShow(true), 8000) // not in the first seconds of a visit
+    const t = window.setTimeout(() => setShow(true), 8000) // хуудас нээгдсэн эхний секундүүдэд биш
     return () => window.clearTimeout(t)
   }, [])
 

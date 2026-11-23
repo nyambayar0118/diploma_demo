@@ -6,15 +6,15 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 /**
- * Visiting order with the least total travel time (ДШ05, ХСШ05). A route has at most 4 stops,
- * so every order is checked (4! = 24); the route is open (it does not return to the start).
+ * Нийт зорчих хугацаа хамгийн бага байх зочлох дараалал (ДШ05, ХСШ05). Маршрут хамгийн ихдээ 4 зогсоолтой тул
+ * бүх дарааллыг шалгана (4! = 24); маршрут нээлттэй (эхлэх цэг рүүгээ буцахгүй).
  */
 @Component
 public class RouteOrderOptimizer {
 
-    static final int MAX_STOPS = 8; // guard: 8! = 40 320 orders is still instant
+    static final int MAX_STOPS = 8; // хамгаалалт: 8! = 40 320 дараалал ч хормын дотор тооцогдоно
 
-    /** Indices of the non-start points in the best visiting order. */
+    /** Эхлэх цэгээс бусад цэгийн индекс, хамгийн сайн зочлох дарааллаар. */
     public List<Integer> optimizeOrder(TravelTimeMatrix matrix, int startIndex) {
         List<Integer> stops = new ArrayList<>();
         for (int i = 0; i < matrix.size(); i++) {

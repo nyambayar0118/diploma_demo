@@ -33,7 +33,7 @@ function Stat({ label, value, sub }: { label: string; value: React.ReactNode; su
 const n = (v: unknown) => (v == null ? '—' : String(v))
 const list = (rows: Row[], key: string) => rows.map((r) => `${r[key]}: ${r.n}`).join(' · ') || '—'
 
-/** Admin dashboard (СНШ05, СНШ07): component health, response times vs targets, errors, trial usage, roles. */
+/** Администраторын хяналтын хуудас (СНШ05, СНШ07): бүрэлдэхүүн хэсгийн төлөв, хариу өгөх хугацаа ба зорилт, алдаа, туршилтын хэрэглээ, эрх. */
 export default function AdminPage() {
   const [health, setHealth] = useState<Health | null>(null)
   const [metrics, setMetrics] = useState<Metrics | null>(null)

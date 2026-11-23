@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import mn.diploma.routeplanner.auth.UserDeletedEvent;
 
 /**
- * ХШ08: routes are detached from the user and their start point (personal) is removed;
- * the stops and the satisfaction ratings stay as anonymous evaluation data.
+ * ХШ08: маршрутыг хэрэглэгчээс салгаж, хувийн мэдээлэл болох эхлэх цэгийг устгана;
+ * зогсоолууд болон сэтгэл ханамжийн үнэлгээ нэргүй үнэлгээний өгөгдөл болж үлдэнэ.
  */
 @Component
 class RoutingDataCleanup {

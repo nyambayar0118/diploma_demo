@@ -21,7 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }, [])
 
-  // Restore the session from the saved token
+  // Хадгалсан токеноос нэвтрэлтийг сэргээнэ
   useEffect(() => {
     if (!getToken()) return
     api<User>('/api/users/me')

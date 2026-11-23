@@ -5,8 +5,8 @@ import { useAuth } from '../auth'
 import { TRANSPORT_LABELS } from '../categoryLabels'
 
 /**
- * Opened from a group invite link (АШ24). No account needed: a guest gives a name, optionally their position,
- * and gets their own Google Maps link to the meeting place. The result is remembered on this device.
+ * Бүлгийн урилгын холбоосоос нээгдэнэ (АШ24). Бүртгэл шаардлагагүй: зочин нэрээ, хүсвэл байршлаа өгч уулзах газар
+ * хүртэлх өөрийн Google Maps холбоосыг авна. Үр дүнг энэ төхөөрөмж дээр санана.
  */
 export default function JoinPage() {
   const { token = '' } = useParams()
@@ -45,7 +45,7 @@ export default function JoinPage() {
       try {
         localStorage.setItem(storageKey, JSON.stringify(r))
       } catch {
-        /* private mode: just not remembered */
+        /* нууц горим: зүгээр л санахгүй */
       }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Сервертэй холбогдсонгүй')

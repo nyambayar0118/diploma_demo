@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import mn.diploma.routeplanner.auth.UserDeletedEvent;
 
-/** ХШ08: recommendation lists stay as anonymous training data. */
+/** ХШ08: санал болголтын жагсаалтууд нэргүй сургалтын өгөгдөл болж үлдэнэ. */
 @Component
 class RecommendationDataCleanup {
 

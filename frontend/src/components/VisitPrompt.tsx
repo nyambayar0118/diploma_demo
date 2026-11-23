@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { api, type PendingVisit, type VisitResult } from '../api'
 
-/** Position without asking: only when the user has already allowed location access. */
+/** Асуухгүйгээр байршил авна: зөвхөн хэрэглэгч аль хэдийн зөвшөөрсөн бол. */
 async function knownPosition(): Promise<{ lat: number; lng: number } | null> {
   try {
     const status = await navigator.permissions?.query({ name: 'geolocation' })
@@ -17,14 +17,14 @@ async function knownPosition(): Promise<{ lat: number; lng: number } | null> {
 }
 
 /**
- * "Очсон уу?" (АШ23). Google Maps does the navigation, so when the user comes back to the app
- * (page opened or brought to the front) the server is asked whether a route stop needs confirming.
+ * "Очсон уу?" (АШ23). Навигацийг Google Maps хийдэг тул хэрэглэгч апп руу буцаж ирэхэд (хуудас нээгдэх эсвэл
+ * урд гарах үед) маршрутын зогсоолыг баталгаажуулах эсэхийг серверээс асууна.
  */
 export default function VisitPrompt({ onAnswered }: { onAnswered: (result: VisitResult) => void }) {
   const [question, setQuestion] = useState<PendingVisit | null>(null)
   const [busy, setBusy] = useState(false)
   const position = useRef<{ lat: number; lng: number } | null>(null)
-  const later = useRef(new Set<number>()) // "Дараа": not asked again in this session
+  const later = useRef(new Set<number>()) // "Дараа": энэ удаад дахин асуухгүй
 
   const check = useCallback(async () => {
     position.current = await knownPosition()

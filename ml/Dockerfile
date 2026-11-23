@@ -1,3 +1,4 @@
+# Машин сургалтын сервис (FastAPI)-ийн контейнер.
 FROM python:3.12-slim
 WORKDIR /srv
 COPY requirements.txt .

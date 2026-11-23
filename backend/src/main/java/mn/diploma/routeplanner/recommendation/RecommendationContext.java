@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import mn.diploma.routeplanner.common.PriceLevel;
 import mn.diploma.routeplanner.common.TransportMode;
 
-/** Everything a recommendation request depends on (design class RecommendationContext). */
+/** Санал болголтын хүсэлтэд нөлөөлөх бүх зүйл (зохиомжийн RecommendationContext класс). */
 public record RecommendationContext(
         Long userId,
         double lat,
@@ -18,6 +18,6 @@ public record RecommendationContext(
         int k,
         boolean useInterests,
         boolean storeLocation,
-        /** Main or subcategory codes to limit the list to; empty = all categories. */
+        /** Жагсаалтыг хязгаарлах үндсэн эсвэл дэд ангиллын код; хоосон бол бүх ангилал. */
         java.util.List<String> categories) {
 }

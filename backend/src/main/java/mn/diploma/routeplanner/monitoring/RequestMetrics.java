@@ -13,8 +13,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import org.springframework.stereotype.Component;
 
 /**
- * In-memory response times and errors of the last hour per endpoint (СНШ05). Kept in one-minute buckets;
- * the trial's traffic is small, so raw durations are stored and percentiles computed exactly.
+ * API тус бүрийн сүүлийн нэг цагийн хариу өгөх хугацаа, алдааг санах ойд хадгална (СНШ05). Минут тутмын
+ * хэсгүүдэд хуваана; туршилтын ачаалал бага тул хугацааг бүхэлд нь хадгалж, перцентилийг яг тооцно.
  */
 @Component
 public class RequestMetrics {
@@ -22,7 +22,7 @@ public class RequestMetrics {
     static final Duration WINDOW = Duration.ofMinutes(60);
     private static final int MAX_PER_BUCKET = 5000;
 
-    /** Response-time targets (СГШ01-СГШ03), p95 in milliseconds. */
+    /** Хариу өгөх хугацааны зорилт (СГШ01-СГШ03), p95, миллисекундээр. */
     static final Map<String, Long> TARGETS_MS = Map.of(
             "GET /api/places/search", 1000L,
             "POST /api/recommendations", 2000L,
@@ -68,7 +68,7 @@ public class RequestMetrics {
         if (last.samples.size() < MAX_PER_BUCKET) last.samples.add(new Sample(millis, status));
     }
 
-    /** Stats of the last {@code window}, busiest endpoints first. */
+    /** Сүүлийн {@code window} хугацааны үзүүлэлт, хамгийн их хүсэлттэй API эхэндээ. */
     public List<EndpointStats> stats(Duration window) {
         long from = Instant.now().getEpochSecond() / 60 - window.toMinutes();
         List<EndpointStats> result = new ArrayList<>();

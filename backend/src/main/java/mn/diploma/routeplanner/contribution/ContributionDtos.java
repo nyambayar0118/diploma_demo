@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Size;
 
 import mn.diploma.routeplanner.common.PriceLevel;
 
-/** Request and response bodies of the Contribution module API. */
+/** Хувь нэмрийн модулийн API-ийн хүсэлт, хариуны бүтэц. */
 public final class ContributionDtos {
 
     private ContributionDtos() {
@@ -20,14 +20,14 @@ public final class ContributionDtos {
     public enum LinkType { WEBSITE, FACEBOOK, INSTAGRAM, REVIEW_ARTICLE, OTHER }
 
     /**
-     * Proposed values; only the fields that change are given. CREATE_PLACE needs name, category and position;
-     * ADD_LINK needs url and linkType; permanentlyClosed = true reports a place that no longer exists.
+     * Санал болгож буй утгууд; зөвхөн өөрчлөгдөх талбаруудыг өгнө. CREATE_PLACE-д нэр, ангилал, байршил;
+     * ADD_LINK-д url, linkType шаардлагатай; permanentlyClosed = true нь газар байхгүй болсныг мэдэгдэнэ.
      */
     public record ProposedData(
             @Size(max = 255) String nameCyrillic,
             @Size(max = 255) String nameLatin,
             @Size(max = 40) String categoryCode,
-            @DecimalMin("41.5") @DecimalMax("52.2") Double lat,      // Mongolia's bounding box
+            @DecimalMin("41.5") @DecimalMax("52.2") Double lat,      // Монгол улсын хүрээ
             @DecimalMin("87.7") @DecimalMax("119.95") Double lng,
             @Size(max = 100) String phone,
             @Size(max = 500) String openingHours,

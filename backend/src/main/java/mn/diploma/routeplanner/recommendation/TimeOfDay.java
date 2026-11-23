@@ -3,7 +3,7 @@ package mn.diploma.routeplanner.recommendation;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 
-/** Time-of-day buckets used by category_time_priors and later as an ML feature. */
+/** Өдрийн цагийн хэсгүүд; category_time_priors болон машин сургалтын шинж чанарт ашиглана. */
 public enum TimeOfDay {
     MORNING, MIDDAY, AFTERNOON, EVENING, NIGHT;
 

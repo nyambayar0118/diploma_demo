@@ -4,7 +4,7 @@ import { MAIN_CATEGORY_COLORS } from '../places'
 import { useTheme } from '../theme'
 
 type Props = {
-  /** Bottom-right corner of the map button the panel opens from. */
+  /** Самбарыг нээсэн газрын зургийн товчны баруун доод булан. */
   anchor: { right: number; bottom: number }
   markerStyle: MarkerStyle
   onMarkerStyle: (s: MarkerStyle) => void
@@ -13,7 +13,7 @@ type Props = {
 
 const PREVIEW_COLORS = [MAIN_CATEGORY_COLORS.food, MAIN_CATEGORY_COLORS.culture, MAIN_CATEGORY_COLORS.nature]
 
-/** Map look: marker shape and dark mode (opened from the layers button on the map). */
+/** Газрын зургийн харагдац: тэмдэгтийн хэлбэр, бараан горим (газрын зураг дээрх давхаргын товчоос нээнэ). */
 export default function MapStyleMenu({ anchor, markerStyle, onMarkerStyle, onClose }: Props) {
   const [theme, setTheme] = useTheme()
   const ref = useRef<HTMLDivElement>(null)
@@ -22,7 +22,7 @@ export default function MapStyleMenu({ anchor, markerStyle, onMarkerStyle, onClo
     [],
   )
 
-  // Closes on a click outside or Escape
+  // Гадна дарах эсвэл Escape дарахад хаагдана
   useEffect(() => {
     const onDown = (e: PointerEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) onClose()

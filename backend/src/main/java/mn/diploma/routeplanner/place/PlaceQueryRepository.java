@@ -4,8 +4,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 /**
- * Read-only queries for the map. PostgreSQL builds the JSON directly (json_build_object),
- * so large GeoJSON responses need no object mapping in Java.
+ * Газрын зурагт зориулсан зөвхөн унших асуулгууд. JSON-ийг PostgreSQL шууд үүсгэдэг (json_build_object) тул
+ * том GeoJSON хариуг Java-д объект болгон хөрвүүлэх шаардлагагүй.
  */
 @Repository
 public class PlaceQueryRepository {
@@ -41,7 +41,7 @@ public class PlaceQueryRepository {
             WHERE m.parent_id IS NULL
             """;
 
-    /** Ranked by name similarity (Cyrillic, Latin, transliterated), then by distance from the map centre. */
+    /** Нэрийн төстэй байдлаар (кирилл, латин, галигласан), дараа нь газрын зургийн төвөөс хэр хол байгаагаар эрэмбэлнэ. */
     private static final String SEARCH_JSON = """
             WITH q AS (SELECT lower(?) AS q, mn_search_latin(?) AS ql,
                               ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography AS center)
@@ -69,7 +69,7 @@ public class PlaceQueryRepository {
                   LIMIT ?) r
             """;
 
-    /** Full details of one place. The traditional-script name is any OSM tag value in Mongolian script. */
+    /** Нэг газрын бүрэн мэдээлэл. Монгол бичгийн нэр нь монгол бичгээр бичсэн дурын OSM шошгын утга. */
     private static final String DETAILS_JSON = """
             SELECT json_build_object(
                 'id', p.id, 'name', p.name_cyrillic, 'nameLatin', p.name_latin,
@@ -131,7 +131,7 @@ public class PlaceQueryRepository {
         return jdbc.queryForObject(SEARCH_JSON, String.class, query, query, lng, lat, mainCategory, mainCategory, limit);
     }
 
-    /** JSON of the place, or null when it does not exist or is inactive. */
+    /** Газрын JSON; газар байхгүй эсвэл идэвхгүй бол null. */
     public String detailsAsJson(long id) {
         return jdbc.query(DETAILS_JSON, rs -> rs.next() ? rs.getString(1) : null, id);
     }

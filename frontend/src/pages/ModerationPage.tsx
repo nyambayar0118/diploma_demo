@@ -9,7 +9,7 @@ const FIELD_LABELS: Partial<Record<keyof ProposedData, string>> = {
   street: 'Хаяг', priceLevel: 'Үнэ', permanentlyClosed: 'Хаагдсан', url: 'Холбоос', linkType: 'Төрөл', linkTitle: 'Гарчиг',
 }
 
-/** Current value of the target place for a proposed field, to show what would change. */
+/** Санал болгосон талбарын хувьд газрын одоогийн утга; юу өөрчлөгдөхийг харуулна. */
 function current(r: ChangeRequest, key: keyof ProposedData): string | null {
   const t = r.target
   if (!t) return null
@@ -21,7 +21,7 @@ function current(r: ChangeRequest, key: keyof ProposedData): string | null {
   return v == null ? null : String(v)
 }
 
-/** Moderation queue (АШ06): approve or reject users' requests with a reason. */
+/** Модераторын хяналтын жагсаалт (АШ06): хэрэглэгчдийн хүсэлтийг батлах эсвэл шалтгаантай татгалзах. */
 export default function ModerationPage() {
   const [status, setStatus] = useState<'PENDING' | 'APPROVED' | 'REJECTED'>('PENDING')
   const [requests, setRequests] = useState<ChangeRequest[]>([])

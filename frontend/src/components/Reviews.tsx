@@ -25,7 +25,7 @@ function Stars({ value, onChange }: { value: number; onChange?: (v: number) => v
   )
 }
 
-/** Ratings and comments of a place (АШ16); moderators can hide inappropriate ones (АШ17). */
+/** Газрын үнэлгээ, сэтгэгдэл (АШ16); модератор зохисгүйг нууж болно (АШ17). */
 export default function Reviews({ placeId, user }: { placeId: number; user: User | null }) {
   const [reviews, setReviews] = useState<Review[]>([])
   const [rating, setRating] = useState(0)

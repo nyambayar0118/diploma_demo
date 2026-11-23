@@ -2,9 +2,9 @@ import * as maplibregl from 'maplibre-gl'
 import { Protocol } from 'pmtiles'
 import { layers, namedFlavor } from '@protomaps/basemaps'
 
-// Our own vector tiles for Ulaanbaatar (made by `docker compose ... run --rm tiles`, served by nginx)
+// Улаанбаатарын өөрийн вектор тайл (`docker compose ... run --rm tiles`-ээр үүсгэж, nginx түгээнэ)
 const PMTILES_PATH = '/tiles/ulaanbaatar.pmtiles'
-// Used only when the PMTiles file has not been generated yet (e.g. a fresh clone)
+// Зөвхөн PMTiles файл хараахан үүсээгүй үед ашиглана (жишээ нь шинээр татсан төсөл)
 const FALLBACK_STYLE = 'https://tiles.openfreemap.org/styles/liberty'
 
 let protocolAdded = false
@@ -12,7 +12,7 @@ let protocolAdded = false
 function ownStyle(theme: 'light' | 'dark'): maplibregl.StyleSpecification {
   return {
     version: 8,
-    // Fonts and icons of the Protomaps basemap (public CDN; can be self-hosted later)
+    // Protomaps суурь газрын зургийн фонт, дүрс (нийтийн CDN; дараа нь өөрөө байршуулж болно)
     glyphs: 'https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf',
     sprite: `https://protomaps.github.io/basemaps-assets/sprites/v4/${theme}`,
     sources: {
@@ -22,12 +22,12 @@ function ownStyle(theme: 'light' | 'dark'): maplibregl.StyleSpecification {
         attribution: '<a href="https://protomaps.com">Protomaps</a> © <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> · © <a href="https://map.minu.mn">Minu Map</a>',
       },
     },
-    // Labels prefer name:mn and fall back to the default name
+    // Нэрийг name:mn-ээр, байхгүй бол үндсэн нэрээр харуулна
     layers: layers('protomaps', namedFlavor(theme), { lang: 'mn' }),
   }
 }
 
-/** Returns our own basemap style if the PMTiles file exists, otherwise the public fallback. */
+/** PMTiles файл байвал өөрийн суурь газрын зургийн загварыг, үгүй бол нийтийн нөөц загварыг буцаана. */
 export async function basemapStyle(theme: 'light' | 'dark' = 'light'): Promise<maplibregl.StyleSpecification | string> {
   try {
     const res = await fetch(PMTILES_PATH, { method: 'HEAD' })

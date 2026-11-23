@@ -1,3 +1,4 @@
+// Аппликейшний хуудсуудын замчлал: URL хаяг бүрд харгалзах хуудас.
 import type { ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { AuthProvider, useAuth } from './auth'
@@ -14,6 +15,7 @@ import JoinPage from './pages/JoinPage'
 import ModerationPage from './pages/ModerationPage'
 import AdminPage from './pages/AdminPage'
 
+/** Нэвтрээгүй хэрэглэгчийг нэвтрэх хуудас руу шилжүүлнэ. */
 function RequireAuth({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth()
   if (loading) return null

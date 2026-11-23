@@ -1,3 +1,4 @@
+/* Аппликейшний бүх загвар. Өнгийг хувьсагчаар (--c-*) тодорхойлдог тул бараан горим зөвхөн хувьсагчийг сольдог. */
 :root {
   --c-bg: #f6f7f9;
   --c-surface: #ffffff;
@@ -27,7 +28,7 @@
   color-scheme: light;
 }
 
-/* ---------- Dark theme (toggle at the bottom of the side menu) ---------- */
+/* ---------- Бараан горим (хажуугийн цэсний доод хэсгээс асаана) ---------- */
 :root[data-theme='dark'] {
   --c-bg: #111418;
   --c-surface: #1b1f25;
@@ -68,7 +69,7 @@ html, body, #root { margin: 0; height: 100%; font-family: system-ui, -apple-syst
 body { background: var(--c-bg); }
 a { color: var(--c-primary); }
 
-/* ---------- Page layout (auth, onboarding, profile) ---------- */
+/* ---------- Хуудасны бүтэц (нэвтрэх, бүртгэлийн асуулга, профайл) ---------- */
 .page { min-height: 100%; display: flex; justify-content: center; padding: 32px 16px; }
 .card {
   width: 100%; max-width: 440px; background: var(--c-surface); border-radius: var(--radius);
@@ -103,7 +104,7 @@ a { color: var(--c-primary); }
 .muted { color: var(--c-muted); font-size: 14px; }
 .row { display: flex; gap: 12px; align-items: center; justify-content: space-between; }
 
-/* ---------- Category chips (onboarding) ---------- */
+/* ---------- Ангиллын сонголт (бүртгэлийн асуулга) ---------- */
 .group { margin-bottom: 16px; }
 .group-title { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; margin-bottom: 8px; }
 .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
@@ -114,7 +115,7 @@ a { color: var(--c-primary); }
 }
 .chip.on { background: var(--c-primary); border-color: var(--c-primary); color: white; }
 
-/* ---------- Toggles (consents) ---------- */
+/* ---------- Асаах / унтраах (зөвшөөрөл) ---------- */
 .toggle { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--c-border); }
 .toggle:first-of-type { border-top: none; }
 .toggle input { width: 18px; height: 18px; margin-top: 2px; flex: none; }
@@ -125,7 +126,7 @@ a { color: var(--c-primary); }
 .steps span { height: 4px; flex: 1; border-radius: 4px; background: var(--c-border); }
 .steps span.done { background: var(--c-primary); }
 
-/* ---------- Map page ---------- */
+/* ---------- Газрын зургийн хуудас ---------- */
 .topbar {
   position: absolute; top: 10px; left: 10px; right: 56px; display: flex; justify-content: space-between;
   align-items: flex-start; gap: 8px; pointer-events: none; z-index: 3;
@@ -137,7 +138,7 @@ a { color: var(--c-primary); }
   place-items: center; font-weight: 700; text-decoration: none; box-shadow: var(--shadow);
 }
 
-/* ---------- Search ---------- */
+/* ---------- Хайлт ---------- */
 .search { position: relative; flex: 1; max-width: 520px; }
 .search-bar { display: flex; background: var(--c-surface); border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; }
 .search-bar input { flex: 1; min-width: 0; font: inherit; font-size: 15px; border: none; padding: 10px 12px; outline: none; }
@@ -157,7 +158,7 @@ a { color: var(--c-primary); }
 .r-sub { font-size: 12px; color: var(--c-muted); }
 .r-dist { font-size: 12px; color: var(--c-muted); white-space: nowrap; }
 
-/* ---------- Place sheet: left panel on desktop, bottom sheet on phones ---------- */
+/* ---------- Газрын мэдээлэл: компьютерт зүүн самбар, утсанд доод хүснэгт ---------- */
 .sheet {
   position: absolute; z-index: 2; background: var(--c-surface); box-shadow: 0 4px 24px rgba(16, 24, 40, 0.18);
   padding: 20px; overflow: auto; top: 64px; left: 10px; bottom: 10px; width: 380px; border-radius: 14px;
@@ -180,13 +181,13 @@ a { color: var(--c-primary); }
 .badge.closed { background: var(--c-bad-bg); color: var(--c-danger); }
 .pre { white-space: pre-line; }
 .small { font-size: 12px; margin-top: 16px; }
-/* Traditional Mongolian is written top-to-bottom, columns left-to-right */
+/* Монгол бичгийг дээрээс доош, баганыг зүүнээс баруун тийш бичнэ */
 .mongol-script {
   writing-mode: vertical-lr; font-family: 'Mongolian Baiti', 'Noto Sans Mongolian', sans-serif;
   font-size: 20px; max-height: 140px; line-height: 1.4; color: var(--c-text);
 }
 
-/* ---------- Recommendation panel ---------- */
+/* ---------- Санал болголтын самбар ---------- */
 .panel {
   position: absolute; z-index: 1; background: var(--c-surface); box-shadow: 0 4px 24px rgba(16, 24, 40, 0.18);
   padding: 20px; overflow: auto; top: 64px; left: 10px; bottom: 10px; width: 380px; border-radius: 14px;
@@ -223,7 +224,7 @@ button.link:disabled { color: var(--c-muted); text-decoration: none; }
   box-shadow: 0 0 0 6px rgba(31, 111, 235, 0.25), 0 1px 4px rgba(0, 0, 0, 0.4); cursor: grab;
 }
 
-/* ---------- Routes ---------- */
+/* ---------- Маршрут ---------- */
 .fabs {
   position: absolute; z-index: 1; left: 50%; bottom: 28px; transform: translateX(-50%); display: flex; gap: 10px;
 }
@@ -264,12 +265,12 @@ button.link:disabled { color: var(--c-muted); text-decoration: none; }
 .visit-place { font-size: 17px; font-weight: 700; margin: 2px 0; }
 .visit-actions { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
 
-/* ---------- Google login ---------- */
+/* ---------- Google-ээр нэвтрэх ---------- */
 .or { display: flex; align-items: center; gap: 10px; color: var(--c-muted); font-size: 13px; margin: 16px 0 12px; }
 .or::before, .or::after { content: ''; flex: 1; height: 1px; background: var(--c-border); }
 .google-btn { display: flex; justify-content: center; min-height: 44px; }
 
-/* ---------- Reviews ---------- */
+/* ---------- Үнэлгээ, сэтгэгдэл ---------- */
 .reviews { margin-top: 20px; border-top: 1px solid var(--c-border); padding-top: 12px; }
 .reviews-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 14px; }
 .reviews-head h3 { font-size: 15px; margin: 0; }
@@ -285,7 +286,7 @@ button.link:disabled { color: var(--c-muted); text-decoration: none; }
 .review-top { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 2px; }
 .review-actions { display: flex; gap: 12px; margin-top: 4px; }
 
-/* ---------- Friends ---------- */
+/* ---------- Найз ---------- */
 .friend-marker {
   width: 30px; height: 30px; border-radius: 50%; background: #9c36b5; color: white; font-weight: 700; font-size: 14px;
   display: grid; place-items: center; border: 3px solid white; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35); cursor: pointer;
@@ -300,7 +301,7 @@ button.link:disabled { color: var(--c-muted); text-decoration: none; }
 .friend-list select { font: inherit; font-size: 13px; border: 1px solid var(--c-border); border-radius: 6px; padding: 4px 6px; }
 a.link { font-size: 13px; color: var(--c-primary); }
 
-/* ---------- Contributions / moderation ---------- */
+/* ---------- Хувь нэмэр / модераторын хяналт ---------- */
 .contribution { margin-top: 16px; border-top: 1px solid var(--c-border); padding-top: 12px; }
 .contribution h3 { font-size: 15px; margin: 0 0 10px; }
 .request { border: 1px solid var(--c-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; font-size: 14px; }
@@ -311,7 +312,7 @@ a.link { font-size: 13px; color: var(--c-primary); }
 .diff td.new { background: var(--c-ok-bg); border-radius: 4px; }
 .request input.comment { flex: 1; min-width: 180px; font: inherit; font-size: 14px; border: 1px solid var(--c-border); border-radius: 8px; padding: 8px 10px; }
 
-/* ---------- Admin dashboard ---------- */
+/* ---------- Администраторын хяналтын хуудас ---------- */
 .card.admin { max-width: 980px; }
 .stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
 .stat { border: 1px solid var(--c-border); border-radius: 10px; padding: 10px 12px; }
@@ -326,19 +327,19 @@ table.metrics th, table.metrics td { padding: 6px 8px; border-bottom: 1px solid 
 table.metrics th:first-child, table.metrics td:first-child { text-align: left; }
 
 /* =====================================================================
-   Layout v2: side menu, search bar with category chips, mobile-first sheets,
-   page header, settings
+   Бүтцийн 2-р хувилбар: хажуугийн цэс, ангиллын сонголттой хайлтын мөр, утсанд түшиглэсэн
+   доод хүснэгт, хуудасны толгой, тохиргоо
    ===================================================================== */
 :root { --safe-bottom: env(safe-area-inset-bottom, 0px); --topbar-h: 104px; }
 button { -webkit-tap-highlight-color: transparent; }
 
-/* ---------- Top bar: [menu | search] + scrollable category chips ---------- */
+/* ---------- Дээд мөр: [цэс | хайлт] + гүйлгэдэг ангиллын сонголт ---------- */
 .topbar { left: 10px; right: 10px; top: calc(10px + env(safe-area-inset-top, 0px)); flex-direction: column;
   align-items: stretch; gap: 8px; max-width: 560px; }
 .topbar-row { display: flex; align-items: stretch; background: var(--c-surface); border-radius: 14px; box-shadow: var(--shadow); }
 .topbar-row .search { max-width: none; }
 .topbar-row .search-bar { box-shadow: none; border-radius: 0 14px 14px 0; }
-.topbar-row .search-bar input { padding: 12px 12px 12px 4px; font-size: 16px; } /* 16px: iOS does not zoom in */
+.topbar-row .search-bar input { padding: 12px 12px 12px 4px; font-size: 16px; } /* 16px: iOS автоматаар томруулахгүй */
 .menu-btn {
   flex: none; width: 48px; border: none; background: none; cursor: pointer; display: flex; flex-direction: column;
   justify-content: center; align-items: center; gap: 4px; border-radius: 14px 0 0 14px;
@@ -357,10 +358,10 @@ button { -webkit-tap-highlight-color: transparent; }
 .cat-chip.on { background: var(--c-text); color: white; }
 .cat-chip .dot { width: 8px; height: 8px; }
 
-/* Panels start below the taller top bar on wide screens */
+/* Өргөн дэлгэцэнд самбарууд өндөр дээд мөрний доороос эхэлнэ */
 .sheet, .panel { top: calc(var(--topbar-h) + 10px); }
 
-/* ---------- Side menu ---------- */
+/* ---------- Хажуугийн цэс ---------- */
 .drawer-backdrop {
   position: fixed; inset: 0; z-index: 20; background: rgba(16, 24, 40, 0.38); opacity: 0; pointer-events: none;
   transition: opacity 0.2s;
@@ -406,7 +407,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .drawer-row .badge { margin: 0; flex: none; }
 .drawer-action { padding: 0 16px !important; text-decoration: none !important; font-size: 13px; flex: none; }
 
-/* ---------- Toasts (picking a point, confirmations) ---------- */
+/* ---------- Түр мэдэгдэл (цэг сонгох, баталгаажуулалт) ---------- */
 .toast {
   position: absolute; z-index: 4; left: 50%; transform: translateX(-50%); top: calc(var(--topbar-h) + 14px);
   width: min(420px, calc(100% - 24px)); background: #1b1f25; color: #ffffff; border: 1px solid transparent; border-radius: 12px; padding: 12px 16px;
@@ -416,15 +417,15 @@ button { -webkit-tap-highlight-color: transparent; }
 :root[data-theme='dark'] .toast { background: #2a313b; border-color: var(--c-border); }
 .visit-card { top: calc(var(--topbar-h) + 14px); }
 
-/* ---------- Floating buttons ---------- */
+/* ---------- Хөвөгч товч ---------- */
 .fabs, .fab { bottom: calc(24px + var(--safe-bottom)); }
 .maplibregl-ctrl-bottom-right { margin-bottom: var(--safe-bottom); }
 
-/* ---------- Phones ---------- */
+/* ---------- Гар утас ---------- */
 @media (max-width: 640px) {
   :root { --topbar-h: 100px; }
   .topbar { max-width: none; }
-  /* Bottom sheets with a grab handle; content scrolls inside */
+  /* Бариултай доод хүснэгт; агуулга нь дотроо гүйлгэгдэнэ */
   .sheet, .panel {
     top: auto; left: 0; right: 0; bottom: 0; width: auto; max-height: 72vh; border-radius: 18px 18px 0 0;
     padding: 22px 16px calc(16px + var(--safe-bottom));
@@ -443,7 +444,7 @@ button { -webkit-tap-highlight-color: transparent; }
   .visit-card { width: calc(100% - 20px); }
 }
 
-/* ---------- Pages outside the map ---------- */
+/* ---------- Газрын зургаас бусад хуудас ---------- */
 .page { flex-direction: column; align-items: center; justify-content: flex-start; padding: 0 16px 32px; }
 .page > .card { margin-top: 16px; }
 .page-header {
@@ -465,7 +466,7 @@ button { -webkit-tap-highlight-color: transparent; }
   .chip, .btn { min-height: 40px; }
 }
 
-/* ---------- Settings ---------- */
+/* ---------- Тохиргоо ---------- */
 .page.settings .s-card, .page .s-card {
   width: 100%; max-width: 640px; background: var(--c-surface); border-radius: var(--radius); box-shadow: var(--shadow);
   padding: 18px 20px; margin-top: 14px;
@@ -487,7 +488,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .save-state.bad { color: var(--c-danger); }
 .small-btn { padding: 6px 12px; font-size: 13px; min-height: 0 !important; }
 
-/* Segmented buttons */
+/* Хэсэгчилсэн товч */
 .seg { display: flex; background: var(--c-soft); border-radius: 10px; padding: 3px; gap: 3px; }
 .seg.wrap { flex-wrap: wrap; background: none; padding: 0; gap: 8px; }
 .seg button {
@@ -498,14 +499,14 @@ button { -webkit-tap-highlight-color: transparent; }
 .seg.wrap button { flex: 1 1 calc(50% - 8px); border: 1.5px solid var(--c-border); background: var(--c-surface); padding: 10px; }
 .seg.wrap button.on { border-color: var(--c-primary); background: var(--c-info-bg); color: var(--c-primary-dark); box-shadow: none; }
 
-/* Interest bars */
+/* Сонирхлын баганан график */
 .interest-bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .interest-bars li { display: grid; grid-template-columns: 130px 1fr; gap: 10px; align-items: center; font-size: 14px; }
 .ib-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ib-track { height: 8px; background: var(--c-soft); border-radius: 8px; overflow: hidden; }
 .ib-fill { display: block; height: 100%; border-radius: 8px; }
 
-/* Switches */
+/* Асаах / унтраах товч */
 .switch-row { display: flex; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--c-border); cursor: pointer; }
 .switch-row .t-title { font-weight: 600; font-size: 14px; }
 .switch-row .t-desc { color: var(--c-muted); font-size: 12px; }
@@ -532,14 +533,14 @@ input.switch:checked::after, .toggle input[type='checkbox']:checked::after { tra
 .drawer-icon { display: grid; place-items: center; }
 .fabs .btn { display: inline-flex; align-items: center; gap: 8px; }
 @media (max-width: 640px) {
-  /* Locate button above the floating buttons */
+  /* Байршил тогтоох товч хөвөгч товчны дээр */
   .maplibregl-ctrl-bottom-right { margin-bottom: calc(84px + var(--safe-bottom)); }
 }
 
-/* ---------- Draggable bottom sheets (phones) and full-width chips (desktop) ---------- */
+/* ---------- Чирдэг доод хүснэгт (утас) болон бүтэн өргөнтэй ангиллын сонголт (компьютер) ---------- */
 .topbar { max-width: none; }
 .topbar-row { max-width: 560px; width: 100%; }
-.cat-chips { margin-right: 60px; } /* keep clear of the map's corner controls */
+.cat-chips { margin-right: 60px; } /* газрын зургийн булангийн товчнуудаас зай авна */
 .sheet-body { min-height: 0; }
 @media (max-width: 640px) {
   .cat-chips { margin-right: -2px; }
@@ -561,7 +562,7 @@ input.switch:checked::after, .toggle input[type='checkbox']:checked::after { tra
 .chip.small { font-size: 13px; padding: 5px 10px; min-height: 0; }
 .chip .dot { width: 8px; height: 8px; margin-right: 2px; vertical-align: 1px; }
 
-/* ---------- Drag-to-reorder list ---------- */
+/* ---------- Чирж дараалуулдаг жагсаалт ---------- */
 .sortable { list-style: none; margin: 14px 0 6px; padding: 0; }
 .sortable li { position: relative; background: var(--c-surface); border-radius: 10px; will-change: transform; }
 .sortable li.shifting { transition: transform 0.2s ease; }
@@ -581,11 +582,11 @@ input.switch:checked::after, .toggle input[type='checkbox']:checked::after { tra
 .reorder-hint { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 12px; color: var(--c-muted); margin: 10px 0 0; }
 .sortable.has-handles .route-leg { margin-left: 41px; }
 
-/* Form controls follow the theme */
+/* Маягтын элементүүд сонгосон горимыг дагана */
 input, select, textarea { color: var(--c-text); background-color: var(--c-input); }
 .search-bar input, .search-bar select { background: transparent; }
 
-/* ---------- Place sheet ---------- */
+/* ---------- Газрын мэдээлэл ---------- */
 .ps-head { display: flex; justify-content: space-between; gap: 12px; padding-right: 40px; }
 .ps-titles { min-width: 0; }
 .ps-cat { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; }
@@ -646,12 +647,12 @@ input, select, textarea { color: var(--c-text); background-color: var(--c-input)
 .ps-skeleton span:nth-child(3) { width: 50%; }
 @keyframes shimmer { to { background-position: -200% 0; } }
 
-/* ---------- Theme toggle (side menu) ---------- */
+/* ---------- Горим сэлгэх (хажуугийн цэс) ---------- */
 .drawer-foot { display: flex; flex-direction: column; gap: 10px; padding: 8px 0 16px; border-top: 1px solid var(--c-border); }
 .theme-toggle { display: flex; align-items: center; gap: 14px; padding: 8px 18px; cursor: pointer; font-size: 15px; }
 .drawer-credit { padding: 0 18px; font-size: 11px; color: var(--c-muted); }
 
-/* ---------- Install guide (PWA) ---------- */
+/* ---------- Суулгах заавар (PWA) ---------- */
 .modal-backdrop {
   position: fixed; inset: 0; z-index: 30; background: rgba(16, 24, 40, 0.45); display: grid; place-items: center;
   padding: 16px; animation: fade-in 0.15s ease;
@@ -695,7 +696,7 @@ input, select, textarea { color: var(--c-text); background-color: var(--c-input)
 .install-banner .btn { padding: 8px 14px; min-height: 0; }
 .install-x { border: none; background: none; font-size: 20px; color: var(--c-muted); cursor: pointer; padding: 4px 6px; }
 
-/* ---------- Map look menu ---------- */
+/* ---------- Газрын зургийн харагдацын цэс ---------- */
 .style-ctrl { display: grid !important; place-items: center; color: var(--c-text); }
 :root[data-theme='dark'] .style-ctrl { color: var(--c-text); }
 .map-style-pop {
@@ -715,7 +716,7 @@ input, select, textarea { color: var(--c-text); background-color: var(--c-input)
 .msp-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px;
   padding-top: 12px; border-top: 1px solid var(--c-border); font-size: 14px; cursor: pointer; }
 
-/* ---------- Friends & group planning ---------- */
+/* ---------- Найз, бүлгийн төлөвлөгөө ---------- */
 .av {
   display: inline-grid; place-items: center; flex: none; border-radius: 50%; color: #fff; font-weight: 700;
   line-height: 1; user-select: none;
@@ -735,7 +736,7 @@ input, select, textarea { color: var(--c-text); background-color: var(--c-input)
 .s-desc.fine { font-size: 12px; margin: 10px 0 0; }
 .sub-h { font-size: 13px; font-weight: 600; color: var(--c-muted); margin: 18px 0 4px; text-transform: none; }
 
-/* Me */
+/* Би */
 .me-card { display: flex; align-items: center; gap: 14px; }
 .handle {
   font: inherit; font-size: 14px; color: var(--c-muted); background: none; border: none; padding: 2px 0; cursor: pointer;
@@ -750,10 +751,10 @@ input, select, textarea { color: var(--c-text); background-color: var(--c-input)
 .me-count strong { font-size: 22px; line-height: 1.1; }
 .me-count span { font-size: 12px; color: var(--c-muted); }
 
-/* Incoming requests stand out */
+/* Ирсэн хүсэлт тодорч харагдана */
 .s-card.highlight { box-shadow: 0 0 0 2px var(--c-primary), var(--shadow); }
 
-/* People list */
+/* Хүмүүсийн жагсаалт */
 .people { list-style: none; margin: 0; padding: 0; }
 .people li { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--c-border); }
 .people li:first-child { border-top: none; padding-top: 4px; }
@@ -769,7 +770,7 @@ input, select, textarea { color: var(--c-text); background-color: var(--c-input)
 .empty { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 18px 8px 8px; color: var(--c-muted); text-align: center; }
 .empty p { margin: 0; font-size: 14px; }
 
-/* Location sharing */
+/* Байршил хуваалцах */
 .switch-row.first { border-top: none; padding-top: 0; }
 .share-dot {
   width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; flex: none;
@@ -778,7 +779,7 @@ input, select, textarea { color: var(--c-text); background-color: var(--c-input)
 .share-dot.on { background: var(--c-ok-bg); color: var(--c-ok); }
 .switch-row .r-main { gap: 2px; }
 
-/* Add friend */
+/* Найз нэмэх */
 .add-friend { display: flex; gap: 8px; }
 .at-input {
   flex: 1; display: flex; align-items: center; border: 1.5px solid var(--c-border); border-radius: 10px;
@@ -805,7 +806,7 @@ input, select, textarea { color: var(--c-text); background-color: var(--c-input)
 .invite-box { border-radius: 10px; }
 .invite-box > svg { color: var(--c-primary); flex: none; }
 
-/* Group planning */
+/* Бүлгийн төлөвлөгөө */
 .intro-card { display: flex; gap: 14px; align-items: center; }
 .intro-card p { margin: 0; font-size: 14px; color: var(--c-muted); line-height: 1.5; }
 .intro-card strong { color: var(--c-text); font-weight: 600; }
@@ -867,7 +868,7 @@ input, select, textarea { color: var(--c-text); background-color: var(--c-input)
   .plan .badge { font-size: 11px; padding: 2px 7px; }
 }
 
-/* ---------- One group plan ---------- */
+/* ---------- Нэг бүлгийн төлөвлөгөө ---------- */
 .plan-hero { display: flex; flex-direction: column; gap: 14px; }
 .hero-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .hero-top .badge { margin: 0; }
@@ -941,7 +942,7 @@ input, select, textarea { color: var(--c-text); background-color: var(--c-input)
   .member-side { margin-left: 52px; }
 }
 
-/* ---------- Recommendations next to the map: focused item ---------- */
+/* ---------- Газрын зургийн хажуудах санал болголт: анхаарлын төвд байгаа санал ---------- */
 .rec-list li { transition: background 0.15s; }
 .rec-list li.focused { background: var(--c-info-bg); border-radius: 10px; border-top-color: transparent; }
 .rec-list li.focused + li { border-top-color: transparent; }
@@ -967,6 +968,6 @@ input, select, textarea { color: var(--c-text); background-color: var(--c-input)
   .choose-card .btn { width: 100%; text-align: center; }
 }
 
-/* Hide / show place dots */
+/* Газрын цэгийг нуух / харуулах */
 .places-toggle.off { color: var(--c-primary) !important; background: var(--c-info-bg) !important; }
 .toast.flash { pointer-events: none; animation: opt-in 0.2s ease both; }

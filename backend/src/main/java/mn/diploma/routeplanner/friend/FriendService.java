@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import mn.diploma.routeplanner.auth.UserDeletedEvent;
 import mn.diploma.routeplanner.common.ApiException;
 
-/** Friend module (АШ20): requests by username or invite link, accept / reject, remove. */
+/** Найзын модуль (АШ20): хэрэглэгчийн нэр эсвэл урилгын холбоосоор хүсэлт илгээх, зөвшөөрөх / татгалзах, хасах. */
 @Service
 public class FriendService {
 
@@ -25,7 +25,7 @@ public class FriendService {
     public record UserRef(long id, String username, String displayName) {
     }
 
-    /** {@code direction}: FRIEND, INCOMING (waits for my answer) or OUTGOING (I asked). */
+    /** {@code direction}: FRIEND (найз), INCOMING (миний хариуг хүлээж буй) эсвэл OUTGOING (би илгээсэн). */
     public record FriendshipDto(long id, String direction, UserRef user, Instant since) {
     }
 
@@ -58,7 +58,7 @@ public class FriendService {
                 userId, userId, userId);
     }
 
-    /** Ids of accepted friends (used by Location and Group modules). */
+    /** Зөвшөөрөгдсөн найзуудын id (Байршил, Бүлгийн модуль ашиглана). */
     public List<Long> friendIds(long userId) {
         return jdbc.queryForList("""
                 SELECT CASE WHEN requester_id = ? THEN addressee_id ELSE requester_id END
@@ -93,7 +93,7 @@ public class FriendService {
         return accept ? find(userId, friendshipId) : null;
     }
 
-    /** Removes a friend, or withdraws / declines a pending request. */
+    /** Найзыг хасах, эсвэл хүлээгдэж буй хүсэлтийг цуцлах / татгалзах. */
     @Transactional
     public void remove(long userId, long friendshipId) {
         int n = jdbc.update("DELETE FROM friendships WHERE id = ? AND (requester_id = ? OR addressee_id = ?)",
@@ -106,7 +106,7 @@ public class FriendService {
         return new InviteLink(token, tokens.expiresAt(token));
     }
 
-    /** Who sent the invite (shown before accepting). */
+    /** Урилгыг хэн илгээсэн (зөвшөөрөхөөс өмнө харуулна). */
     @Transactional(readOnly = true)
     public UserRef inviter(String token) {
         long inviter = tokens.verify(INVITE_PURPOSE, token).orElseThrow(FriendService::invalidInvite);
@@ -115,7 +115,7 @@ public class FriendService {
                 .stream().findFirst().orElseThrow(FriendService::invalidInvite);
     }
 
-    /** Opening a friend's invite link makes both friends at once: the link itself is the inviter's consent. */
+    /** Найзын урилгын холбоосыг нээхэд хоёулаа шууд найз болно: холбоос өөрөө урьсан хүний зөвшөөрөл болно. */
     @Transactional
     public FriendshipDto acceptInvite(long userId, String token) {
         long inviter = inviter(token).id();
@@ -147,10 +147,10 @@ public class FriendService {
             throw new ApiException(HttpStatus.CONFLICT, "ALREADY_REQUESTED", "Хүсэлт аль хэдийн илгээсэн");
         }
         if (preApproved || ("PENDING".equals(status) && !iAsked)) {
-            // They had already asked me (or the link says yes): becoming friends
+            // Тэр намайг аль хэдийн урьсан (эсвэл холбоос зөвшөөрлийг илэрхийлнэ): найз болно
             jdbc.update("UPDATE friendships SET status = 'ACCEPTED', responded_at = now() WHERE id = ?", id);
         } else {
-            // Rejected earlier: ask again
+            // Өмнө татгалзсан: дахин хүсэлт илгээнэ
             jdbc.update("""
                     UPDATE friendships SET requester_id = ?, addressee_id = ?, status = 'PENDING', created_at = now(),
                                            responded_at = NULL WHERE id = ?

@@ -24,8 +24,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
- * Stateless JWT security (design 3.1.3): the client sends "Authorization: Bearer <token>".
- * Tokens are signed with HMAC-SHA256 using app.jwt.secret (env JWT_SECRET).
+ * Төлөвгүй JWT хамгаалалт (зохиомж 3.1.3): клиент "Authorization: Bearer <token>" толгойг илгээнэ.
+ * Токеныг app.jwt.secret (JWT_SECRET орчны хувьсагч) түлхүүрээр HMAC-SHA256 аргаар гарын үсэг зурна.
  */
 @Configuration
 public class SecurityConfig {
@@ -42,7 +42,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // "/error": let Spring show the real error status instead of turning it into 401
+                // "/error": алдааг 401 болгон хувиргалгүй, Spring-д жинхэнэ төлөвийг нь харуулуулна
                 .requestMatchers("/error", "/api/health", "/actuator/health/**", "/api/auth/**", "/api/groups/join/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/places/**", "/api/categories", "/api/friends/invites/*").permitAll()
                 .requestMatchers("/api/moderation/**").hasAnyRole("MODERATOR", "ADMIN")

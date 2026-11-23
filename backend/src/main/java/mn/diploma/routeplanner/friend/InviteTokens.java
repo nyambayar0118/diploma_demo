@@ -14,8 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * Signed, expiring invite tokens ("<purpose>.<id>.<expiry>.<signature>"), so invite links need no table.
- * The key is derived from the JWT secret with a purpose prefix, so an invite can never be used as a login token.
+ * Гарын үсэгтэй, хугацаатай урилгын токен ("<purpose>.<id>.<expiry>.<signature>"); тул урилгын холбоосонд хүснэгт хэрэггүй.
+ * Түлхүүрийг JWT нууц түлхүүрээс зорилгын угтвартайгаар гаргадаг тул урилгыг нэвтрэх токен болгон ашиглах боломжгүй.
  */
 @Component
 public class InviteTokens {
@@ -32,7 +32,7 @@ public class InviteTokens {
         return payload + "." + sign(payload);
     }
 
-    /** The id inside a valid, unexpired token of this purpose. */
+    /** Энэ зорилгын хүчинтэй, хугацаа нь дуусаагүй токен доторх id. */
     public Optional<Long> verify(String purpose, String token) {
         String[] parts = token == null ? new String[0] : token.split("\\.");
         if (parts.length != 4 || !parts[0].equals(purpose)) return Optional.empty();

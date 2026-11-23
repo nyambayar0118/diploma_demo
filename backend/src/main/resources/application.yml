@@ -10,7 +10,7 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: validate   # Flyway owns the schema; Hibernate only checks that entities match it
+      ddl-auto: validate   # Схемийг Flyway удирдана; Hibernate зөвхөн Entity таарч байгааг шалгана
 
 server:
   port: 8080
@@ -19,22 +19,22 @@ server:
 app:
   ml:
     base-url: ${ML_URL:http://localhost:8000}
-  # Comma-separated e-mails that become ADMIN at their next login (e.g. your own account)
+  # Дараагийн нэвтрэлтээс ADMIN болох имэйлүүд, таслалаар тусгаарлана (жишээ нь өөрийн бүртгэл)
   admin-emails: ${ADMIN_EMAILS:}
   alert:
-    # Administrator e-mail(s) for alerts (СНШ06), comma-separated; sent through the SMTP server below
+    # Анхааруулга авах администраторын имэйл (СНШ06), таслалаар тусгаарлана; доорх SMTP сервероор илгээнэ
     email: ${ALERT_EMAIL:}
     smtp:
-      host: ${SMTP_HOST:}          # e.g. smtp.gmail.com (empty = alerts are only logged)
+      host: ${SMTP_HOST:}          # жишээ нь smtp.gmail.com (хоосон бол анхааруулгыг зөвхөн бүртгэлд бичнэ)
       port: ${SMTP_PORT:587}
       username: ${SMTP_USERNAME:}
-      password: ${SMTP_PASSWORD:}  # for Gmail: an "app password"
+      password: ${SMTP_PASSWORD:}  # Gmail-д: "app password"
 
   google:
-    # OAuth client id from Google Cloud Console ("Web application"); empty = Google login hidden
+    # Google Cloud Console-оос авсан OAuth client id ("Web application"); хоосон бол Google-ээр нэвтрэх товч харагдахгүй
     client-id: ${GOOGLE_CLIENT_ID:}
   jwt:
-    # At least 32 characters. Set JWT_SECRET in .env for anything other than local development.
+    # Дор хаяж 32 тэмдэгт. Өөрийн компьютероос бусад орчинд .env-д JWT_SECRET тохируулна.
     secret: ${JWT_SECRET:dev-only-secret-change-me-0123456789abcdef}
     ttl: ${JWT_TTL:P7D}
 

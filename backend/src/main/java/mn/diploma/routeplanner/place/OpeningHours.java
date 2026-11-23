@@ -10,11 +10,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Evaluator for the common subset of the OSM opening_hours syntax:
+ * OSM-ийн opening_hours (ажиллах цаг) бичиглэлийн түгээмэл хэсгийг тооцоолно:
  * "24/7", "Mo-Fr 09:00-18:00; Sa 10:00-16:00; Su off", "Mo,We 10:00-14:00,15:00-19:00", "10:00-22:00",
- * overnight ranges ("Fr-Sa 18:00-02:00") and public-holiday rules (ignored).
- * Anything more complex (months, week numbers, sunrise, ...) gives {@link Status#UNKNOWN}, and the place
- * is then treated as possibly open rather than wrongly excluded.
+ * шөнө дундыг давсан хугацаа ("Fr-Sa 18:00-02:00") болон баярын өдрийн дүрэм (үл тооно).
+ * Илүү нарийн бичиглэл (сар, долоо хоногийн дугаар, нар мандах гэх мэт) {@link Status#UNKNOWN} өгөх бөгөөд
+ * газрыг буруугаар хасахын оронд нээлттэй байж магадгүй гэж үзнэ.
  */
 public final class OpeningHours {
 
@@ -27,14 +27,14 @@ public final class OpeningHours {
                     + "(?<times>off|closed|\\d{1,2}:\\d{2}-\\d{1,2}:\\d{2}(?:\\s*,\\s*\\d{1,2}:\\d{2}-\\d{1,2}:\\d{2})*)$");
     private static final Pattern TIME_RANGE = Pattern.compile("(\\d{1,2}):(\\d{2})-(\\d{1,2}):(\\d{2})");
 
-    /** Opening intervals per weekday in minutes since midnight [start, end). */
+    /** Гараг бүрийн ажиллах интервал, шөнө дундаас хойших минутаар [эхлэх, дуусах). */
     private final Map<DayOfWeek, List<int[]>> week;
 
     private OpeningHours(Map<DayOfWeek, List<int[]>> week) {
         this.week = week;
     }
 
-    /** Parses the value; returns null when the syntax is outside the supported subset. */
+    /** Утгыг задлана; дэмжигдээгүй бичиглэл бол null буцаана. */
     public static OpeningHours parse(String raw) {
         if (raw == null || raw.isBlank()) {
             return null;
@@ -52,7 +52,7 @@ public final class OpeningHours {
         for (String part : value.split(";")) {
             String rule = part.trim();
             if (rule.isEmpty() || rule.startsWith("PH") || rule.startsWith("SH")) {
-                continue; // public / school holidays: no calendar data, ignore
+                continue; // баярын / сургуулийн амралтын өдөр: хуанлийн өгөгдөл байхгүй тул үл тооно
             }
             Matcher m = RULE.matcher(rule);
             if (!m.matches()) {
@@ -61,7 +61,7 @@ public final class OpeningHours {
             List<DayOfWeek> days = m.group("days") == null ? List.of(DayOfWeek.values()) : days(m.group("days"));
             String times = m.group("times");
             for (DayOfWeek day : days) {
-                // A later rule replaces earlier rules for the days it names (OSM semantics)
+                // Дараагийн дүрэм нэрлэсэн өдрүүддээ өмнөх дүрмийг орлоно (OSM-ийн утга)
                 List<int[]> intervals = new ArrayList<>();
                 week.put(day, intervals);
                 spill.remove(day.plus(1));
@@ -78,7 +78,7 @@ public final class OpeningHours {
                     if (end > start && end <= 24 * 60) {
                         intervals.add(new int[] {start, end});
                     } else {
-                        // Past midnight, e.g. 18:00-02:00 or 18:00-26:00
+                        // Шөнө дундыг давсан, жишээ нь 18:00-02:00 эсвэл 18:00-26:00
                         int endNextDay = end > 24 * 60 ? end - 24 * 60 : end;
                         intervals.add(new int[] {start, 24 * 60});
                         spill.computeIfAbsent(day.plus(1), d -> new ArrayList<>()).add(new int[] {0, endNextDay});
@@ -125,7 +125,7 @@ public final class OpeningHours {
         return false;
     }
 
-    /** OPEN / CLOSED at the given time, UNKNOWN when the value is missing or not supported. */
+    /** Өгөгдсөн цагт OPEN / CLOSED; утга байхгүй эсвэл дэмжигдээгүй бол UNKNOWN. */
     public static Status statusAt(String raw, LocalDateTime time) {
         OpeningHours oh = parse(raw);
         if (oh == null) {
@@ -134,7 +134,7 @@ public final class OpeningHours {
         return oh.isOpenAt(time) ? Status.OPEN : Status.CLOSED;
     }
 
-    /** True unless we know the place is closed at {@code time} or closes within {@code minutes} after it. */
+    /** Газар {@code time} үед хаалттай, эсвэл түүнээс хойш {@code minutes} минутын дотор хаагдах нь тодорхой бол false, бусад үед true. */
     public static boolean possiblyOpenFor(String raw, LocalDateTime time, int minutes) {
         OpeningHours oh = parse(raw);
         if (oh == null) {

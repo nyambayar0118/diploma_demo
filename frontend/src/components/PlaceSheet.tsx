@@ -12,11 +12,15 @@ import Icon, { type IconName } from './Icon'
 type Props = {
   placeId: number
   recommendationId?: number
-  /** "Маршрутад нэмэх" while a planned route can still take more stops (АШ15). */
+  /** Төлөвлөсөн маршрутад зогсоол нэмэх боломжтой үед "Маршрутад нэмэх" товч (АШ15). */
   onAddToRoute?: () => void
   onClose: () => void
 }
 
+/**
+ * Газрын дэлгэрэнгүй мэдээлэл (ХСШ04, АШ19): ангилал, ажиллах цаг, хаяг, холбоо барих мэдээлэл, холбоос,
+ * үнэлгээ; хадгалах, нуух, Google Maps-ээр очих, засвар санал болгох үйлдлүүд.
+ */
 export default function PlaceSheet({ placeId, recommendationId, onAddToRoute, onClose }: Props) {
   const { user } = useAuth()
   const [place, setPlace] = useState<PlaceDetails | null>(null)
@@ -115,7 +119,7 @@ export default function PlaceSheet({ placeId, recommendationId, onAddToRoute, on
               </div>
             </div>
             {place.nameTraditional && (
-              // Traditional Mongolian script: vertical, rendered by the browser with a Mongolian font
+              // Монгол бичиг: босоо, хөтөч монгол бичгийн фонтоор зурна
               <div className="mongol-script" lang="mn-Mong">{place.nameTraditional}</div>
             )}
           </div>

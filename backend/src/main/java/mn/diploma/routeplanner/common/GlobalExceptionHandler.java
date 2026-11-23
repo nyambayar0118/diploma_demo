@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
+/** Бүх алдааг {code, message} хэлбэрийн нэгдсэн хариу болгон хувиргана. */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 

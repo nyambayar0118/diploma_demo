@@ -1,13 +1,13 @@
-"""Machine learning scoring service.
+"""Машин сургалтын оноо өгөх сервис.
 
-Skeleton version: only the health endpoint. POST /score and POST /reload are
-added in the ML milestone (design section 3.4, table "Машин сургалтын сервисийн API").
+Одоогоор зөвхөн төлөвийн шалгалтын endpoint. POST /score болон POST /reload-ийг машин сургалтын
+шатанд нэмнэ (зохиомжийн 3.4 хэсэг, "Машин сургалтын сервисийн API" хүснэгт).
 """
 from fastapi import FastAPI
 
 app = FastAPI(title="ML scoring service", version="0.1.0")
 
-# No model is loaded yet; the backend falls back to rule-based ranking (МГШ06).
+# Загвар хараахан ачаалаагүй; сервер дүрэмд суурилсан эрэмбэлэлтийг ашиглана (МГШ06).
 MODEL_VERSION: str | None = None
 
 

@@ -4,7 +4,7 @@ import { api, ApiError, LINK_TYPE_LABELS, type Category, type LinkType, type Pla
 import { BUDGET_LABELS } from '../categoryLabels'
 
 type Props = {
-  /** Edit / link a place, or create a new one at {lat, lng}. */
+  /** Газрыг засах / холбоос нэмэх, эсвэл {lat, lng} цэгт шинэ газар үүсгэх. */
   place?: PlaceDetails
   position?: { lat: number; lng: number }
   onDone: (message: string) => void
@@ -12,8 +12,8 @@ type Props = {
 }
 
 /**
- * Contribution forms (АШ03 new place, АШ04 corrections, АШ18 links). Only changed fields are sent;
- * a moderator reviews the request before anything changes on the map.
+ * Хувь нэмрийн маягт (АШ03 шинэ газар, АШ04 засвар, АШ18 холбоос). Зөвхөн өөрчилсөн талбаруудыг илгээнэ;
+ * газрын зураг дээр өөрчлөгдөхөөс өмнө модератор хүсэлтийг хянана.
  */
 export default function ContributionForm({ place, position, onDone, onCancel }: Props) {
   const creating = !place
@@ -34,7 +34,7 @@ export default function ContributionForm({ place, position, onDone, onCancel }: 
   const set = (key: keyof ProposedData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm({ ...form, [key]: e.target.value })
 
-  /** For an edit, only the fields that differ from the current values. */
+  /** Засварын үед зөвхөн одоогийн утгаас ялгаатай талбарууд. */
   const changes = (): ProposedData => {
     if (creating || !place) return form
     const d: ProposedData = {}

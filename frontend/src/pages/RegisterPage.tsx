@@ -4,6 +4,7 @@ import { api, ApiError, rememberNext, takeNext, type OnboardingStatus } from '..
 import { useAuth } from '../auth'
 import GoogleButton from '../components/GoogleButton'
 
+/** Бүртгүүлэх хуудас: имэйл, нууц үг эсвэл Google хаягаар; дараа нь бүртгэлийн асуулга руу шилжинэ. */
 export default function RegisterPage() {
   const { register, loginWithGoogle } = useAuth()
   const navigate = useNavigate()

@@ -21,7 +21,7 @@ const STATUS_CLASS: Record<string, string> = {
   CANCELLED: 'cancelled',
 }
 
-/** One group plan: options with every member's travel time, sharing, invite link, own Maps link (АШ10, АШ24). */
+/** Нэг бүлгийн төлөвлөгөө: уулзах газар, урилгын холбоос, гишүүд, гишүүн бүрийн Maps холбоос (АШ10, АШ24). */
 export default function GroupPage() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -93,7 +93,7 @@ export default function GroupPage() {
     <div className="page social">
       <PageHeader title="Бүлгийн төлөвлөгөө" back="/groups" />
 
-      {/* Summary */}
+      {/* Хураангуй */}
       <section className="s-card plan-hero">
         <div className="hero-top">
           <span className={`badge status-${STATUS_CLASS[group.status]}`}>{GROUP_STATUS[group.status]}</span>
@@ -130,7 +130,7 @@ export default function GroupPage() {
 
       {error && <div className="s-note error">{error}</div>}
 
-      {/* Invite */}
+      {/* Урилга */}
       {inviteUrl && (
         <section className="s-card">
           <h2>Урилгын холбоос</h2>
@@ -149,7 +149,7 @@ export default function GroupPage() {
         </section>
       )}
 
-      {/* Options are chosen on the map */}
+      {/* Хувилбарыг газрын зураг дээр сонгоно */}
       {planning && (
         <section className="s-card choose-card">
           <span className="intro-icon"><Icon name="layers" size={24} /></span>
@@ -161,7 +161,7 @@ export default function GroupPage() {
         </section>
       )}
 
-      {/* Members */}
+      {/* Гишүүд */}
       <section className="s-card">
         <h2>Гишүүд <span className="count muted-count">{group.members.length}</span></h2>
         <ul className="people">

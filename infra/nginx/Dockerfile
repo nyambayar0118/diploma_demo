@@ -1,4 +1,4 @@
-# Build the React PWA, then serve it with Nginx (which also proxies /api and /tiles)
+# React PWA-г бүтээж, Nginx-ээр түгээнэ (Nginx мөн /api, /tiles хүсэлтийг дамжуулна)
 FROM node:22-alpine AS build
 WORKDIR /app
 COPY frontend/package.json frontend/package-lock.json ./

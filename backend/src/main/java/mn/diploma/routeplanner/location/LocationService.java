@@ -18,13 +18,13 @@ import mn.diploma.routeplanner.common.ApiException;
 import mn.diploma.routeplanner.friend.FriendService;
 
 /**
- * Location module (АШ21, ХШ07): the user's latest position, visible to accepted friends only while the user
- * shares it, has the LOCATION_SHARING consent and the position is fresh. No history is kept.
+ * Байршлын модуль (АШ21, ХШ07): хэрэглэгчийн сүүлийн байршил. Хэрэглэгч хуваалцаж байгаа, LOCATION_SHARING
+ * зөвшөөрөлтэй, байршил шинэ үед л зөвхөн найзууд нь харна. Түүх хадгалахгүй.
  */
 @Service
 public class LocationService {
 
-    /** Older positions are not shown: sharing ends by itself when the app is closed. */
+    /** Үүнээс хуучин байршлыг харуулахгүй: апп хаагдахад хуваалцах нь өөрөө дуусна. */
     static final Duration FRESH_FOR = Duration.ofMinutes(60);
 
     public record MyLocation(boolean shared, Double lat, Double lng, Instant updatedAt) {
@@ -44,7 +44,7 @@ public class LocationService {
         this.friends = friends;
     }
 
-    /** Updates the position and the sharing switch; lat/lng may be omitted to only change the switch. */
+    /** Байршил болон хуваалцах тохиргоог шинэчилнэ; зөвхөн тохиргоог өөрчлөх бол lat/lng-ийг орхиж болно. */
     @Transactional
     public MyLocation update(long userId, Double lat, Double lng, boolean shared) {
         if (shared && !consents.isGranted(userId, ConsentDataType.LOCATION_SHARING)) {
@@ -52,7 +52,7 @@ public class LocationService {
                     "Байршил хуваалцах зөвшөөрөл (LOCATION_SHARING) өгөөгүй байна");
         }
         if (!shared) {
-            // Stop sharing: the position is not needed any more, so it is deleted (ХШ07)
+            // Хуваалцахаа зогсоох: байршил хэрэггүй болсон тул устгана (ХШ07)
             jdbc.update("DELETE FROM user_locations WHERE user_id = ?", userId);
             return new MyLocation(false, null, null, null);
         }
@@ -96,7 +96,7 @@ public class LocationService {
                 ids.toArray(Long[]::new), (int) FRESH_FOR.toMinutes());
     }
 
-    /** A user's shared, fresh position (used for group members' start points), if any. */
+    /** Хэрэглэгчийн хуваалцсан, шинэ байршил (бүлгийн гишүүдийн эхлэх цэгт ашиглана), байгаа бол. */
     @Transactional(readOnly = true)
     public java.util.Optional<FriendLocation> sharedLocation(long userId) {
         return jdbc.query("""
@@ -110,7 +110,7 @@ public class LocationService {
                 .stream().findFirst();
     }
 
-    /** Retention: stale positions are deleted every 15 minutes. */
+    /** Хадгалах хугацаа: хуучирсан байршлыг 15 минут тутам устгана. */
     @Scheduled(fixedDelay = 15 * 60 * 1000, initialDelay = 60 * 1000)
     public int deleteStale() {
         return jdbc.update("DELETE FROM user_locations WHERE updated_at < now() - make_interval(mins => ?)",

@@ -17,9 +17,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 /**
- * СНШ06: e-mails the administrator when a component is down, an endpoint is slower than its target or the
- * server error rate is high. Each problem is mailed at most once per {@link #COOLDOWN}; without SMTP settings
- * (app.alert.smtp.host) alerts are only logged.
+ * СНШ06: бүрэлдэхүүн хэсэг ажиллахгүй болох, API зорилтот хугацаанаас удаан болох эсвэл серверийн алдаа их
+ * гарахад администраторт имэйл илгээнэ. Нэг асуудлын талаар {@link #COOLDOWN} хугацаанд нэгээс илүү имэйл
+ * илгээхгүй; SMTP тохиргоо (app.alert.smtp.host) байхгүй бол анхааруулгыг зөвхөн бүртгэлд бичнэ.
  */
 @Service
 public class AlertService {

@@ -16,8 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 /**
- * Monitoring module (СНШ05, СНШ07): component health checked every minute (kept 24 h for availability, СГШ06),
- * request metrics, and usage numbers of the trial for the admin dashboard.
+ * Хяналтын модуль (СНШ05, СНШ07): бүрэлдэхүүн хэсгүүдийн төлөвийг минут тутам шалгана (ашиглах боломжтой
+ * байдлыг тооцохоор 24 цаг хадгална, СГШ06), хүсэлтийн хэмжүүр, хяналтын хуудсанд туршилтын хэрэглээний тоо.
  */
 @Service
 public class MonitoringService {
@@ -46,7 +46,7 @@ public class MonitoringService {
         this.ml = RestClient.builder().baseUrl(mlBaseUrl).requestFactory(factory).build();
     }
 
-    /** Checks every component now. */
+    /** Бүх бүрэлдэхүүн хэсгийг одоо шалгана. */
     public HealthReport check() {
         ComponentStatus db = timed("database", () -> {
             String v = jdbc.queryForObject("SELECT 'PostGIS ' || postgis_lib_version()", String.class);
@@ -59,7 +59,7 @@ public class MonitoringService {
         });
         ComponentStatus api = new ComponentStatus("backend", true, 0L, "Spring Boot");
         List<ComponentStatus> all = List.of(api, db, mlStatus);
-        // The ML service is optional (rule-based fallback), so only the database decides "up"
+        // Машин сургалтын сервис заавал биш (дүрэмд суурилсан эрэмбэлэлт орлоно) тул "UP" эсэхийг зөвхөн өгөгдлийн сан шийднэ
         boolean up = db.up();
         synchronized (history) {
             history.addLast(up);
@@ -87,7 +87,7 @@ public class MonitoringService {
         }
     }
 
-    /** Trial usage for the dashboard: users, activity, recommendations, routes, visits, satisfaction. */
+    /** Хяналтын хуудсанд туршилтын хэрэглээ: хэрэглэгч, идэвх, санал болголт, маршрут, зочлол, сэтгэл ханамж. */
     public Map<String, Object> usage() {
         Map<String, Object> u = new LinkedHashMap<>();
         u.put("users", jdbc.queryForMap("""

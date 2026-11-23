@@ -7,7 +7,7 @@ import java.util.List;
 
 import mn.diploma.routeplanner.common.TransportMode;
 
-/** A route and its ordered stops (tables routes, route_stops); loaded and saved by {@link RouteRepository}. */
+/** Маршрут болон түүний дараалсан зогсоолууд (routes, route_stops хүснэгт); {@link RouteRepository} ачаалж, хадгална. */
 public class Route {
 
     Long id;
@@ -32,7 +32,7 @@ public class Route {
         this.plannedStart = plannedStart;
     }
 
-    /** Stops can be added, removed or replaced only before the route is opened in Google Maps. */
+    /** Маршрутыг Google Maps-д нээхээс өмнө л зогсоол нэмэх, хасах, солих боломжтой. */
     boolean canModify() {
         return status == RouteStatus.CREATED;
     }

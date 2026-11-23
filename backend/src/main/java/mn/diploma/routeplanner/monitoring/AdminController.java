@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Monitoring module API (admin only, see SecurityConfig): health, metrics and the dashboard data (СНШ05, СНШ07). */
+/** Хяналтын модулийн API (зөвхөн администратор, SecurityConfig-ийг үз): төлөв, хэмжүүр, хяналтын хуудасны өгөгдөл (СНШ05, СНШ07). */
 @RestController
 public class AdminController {
 
@@ -31,7 +31,7 @@ public class AdminController {
         return monitoring.check();
     }
 
-    /** Response times / errors for the last {@code minutes} (default 60) plus trial usage numbers. */
+    /** Сүүлийн {@code minutes} (анхдагч 60) минутын хариу өгөх хугацаа / алдаа болон туршилтын хэрэглээний тоо. */
     @GetMapping("/api/admin/metrics")
     public Map<String, Object> metrics(@RequestParam(defaultValue = "60") int minutes) {
         int window = Math.clamp(minutes, 1, (int) RequestMetrics.WINDOW.toMinutes());
@@ -43,7 +43,7 @@ public class AdminController {
         return result;
     }
 
-    /** User search for role management (PUT /api/admin/users/{id}/role). */
+    /** Эрхийн удирдлагад зориулсан хэрэглэгчийн хайлт (PUT /api/admin/users/{id}/role). */
     @GetMapping("/api/admin/users")
     public List<Map<String, Object>> users(@RequestParam(defaultValue = "") String q) {
         return jdbc.queryForList("""

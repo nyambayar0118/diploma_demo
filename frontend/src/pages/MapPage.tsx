@@ -26,17 +26,21 @@ import Icon from '../components/Icon'
 import { MAIN_CATEGORY_COLORS } from '../places'
 import { useLocationSharing } from '../locationSharing'
 import { currentTheme, useTheme } from '../theme'
-// MapLibre runs tile parsing in a Web Worker loaded from a separate file. Vite bundles the main
-// library into /assets/index-*.js, so the default worker URL points to a file that does not exist
-// (nginx then returns index.html and the map stays blank). Emit the worker as an asset and use it.
+// MapLibre тайлыг тусдаа файлаас ачаалдаг Web Worker-т задална. Vite үндсэн санг /assets/index-*.js-д
+// багцалдаг тул анхдагч worker-ийн URL байхгүй файл руу заана (nginx index.html буцааж, газрын зураг хоосон
+// үлдэнэ). Иймд worker-ийг тусдаа файл болгон гаргаж, түүнийг ашиглана.
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import BottomSheet from '../components/BottomSheet'
 
 maplibregl.setWorkerUrl(workerUrl)
 
-// Ulaanbaatar city centre (Sükhbaatar Square)
+// Улаанбаатар хотын төв (Сүхбаатарын талбай)
 const UB_CENTER: [number, number] = [106.9177, 47.9186]
 
+/**
+ * Үндсэн дэлгэц: газрын зураг, хайлт, ангиллын шүүлтүүр болон газрын мэдээлэл, санал болголт, маршрут, бүлгийн
+ * хувилбарын самбарууд. Сонгосон газар (?place=) болон бүлэг (?group=) URL-д хадгалагдана.
+ */
 export default function MapPage() {
   const { user } = useAuth()
   const mapContainer = useRef<HTMLDivElement>(null)
@@ -49,13 +53,13 @@ export default function MapPage() {
   const [route, setRoute] = useState<RouteView | null>(null)
   const [showRoutePanel, setShowRoutePanel] = useState(false)
   const [mapReady, setMapReady] = useState(false)
-  // Adding a missing place (АШ03): pick the point, then fill the form
+  // Байхгүй газар нэмэх (АШ03): цэгийг сонгоод маягтыг бөглөнө
   const [newPlaceAt, setNewPlaceAt] = useState<{ lat: number; lng: number } | null>(null)
   const [pickingNew, setPickingNew] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [guideOpen, setGuideOpen] = useState(false)
-  // Map look menu (marker shape, dark mode), opened from a button among the map controls
+  // Газрын зургийн харагдацын цэс (тэмдэгтийн хэлбэр, бараан горим), газрын зургийн товчнуудаас нээгдэнэ
   const [styleMenu, setStyleMenu] = useState<{ right: number; bottom: number } | null>(null)
   const [markerStyle, setMarkerStyleState] = useState<MarkerStyle>(savedMarkerStyle)
   const closeStyleMenu = useCallback(() => setStyleMenu(null), [])
@@ -77,7 +81,7 @@ export default function MapPage() {
   const closeMenu = useCallback(() => setMenuOpen(false), [])
   const selectedId = params.get('place') ? Number(params.get('place')) : null
 
-  // The selected place lives in the URL (?place=123), so it can be linked to and survives reloads
+  // Сонгосон газар URL-д (?place=123) хадгалагдана; холбоосоор хуваалцаж, хуудсыг дахин ачаалахад алдагдахгүй
   const select = useCallback((id: number | null) => {
     setParams((prev) => {
       const next = new URLSearchParams(prev)
@@ -86,10 +90,10 @@ export default function MapPage() {
       return next
     })
   }, [setParams])
-  // Group plan options shown on the map (?group=6)
+  // Газрын зураг дээр харуулах бүлгийн төлөвлөгөөний хувилбарууд (?group=6)
   const groupId = params.get('group') ? Number(params.get('group')) : null
 
-  // Recommendation markers (single user or group options) and the one shown in focus
+  // Санал болголтын тэмдэгтүүд (ганц хэрэглэгч эсвэл бүлгийн хувилбар) болон анхаарлын төвд байгаа нь
   const [focusedRec, setFocusedRec] = useState<number | null>(null)
   const recMarkers = useRef<RecMarker[]>([])
   const groupMembers = useRef<MemberMarker[] | null>(null)
@@ -115,15 +119,15 @@ export default function MapPage() {
     if (mapRef.current) showGroupMembers(mapRef.current, members, null)
   }, [])
   const focusRef = useRef(focusRec)
-  // Markers that arrived before the map finished loading
+  // Газрын зураг ачаалж дуусахаас өмнө ирсэн тэмдэгтүүд
   useEffect(() => {
     const map = mapRef.current
     if (!map || !mapReady) return
     if (recMarkers.current.length > 0) showRecommendations(map, recMarkers.current)
     if (groupMembers.current) showGroupMembers(map, groupMembers.current, null)
   }, [mapReady])
-  // react-router gives setParams a new identity on every URL change. The map must be created only once,
-  // so its click handler reads the latest `select` through a ref instead of depending on it.
+  // react-router URL өөрчлөгдөх бүрд setParams-ийг шинээр үүсгэдэг. Газрын зургийг зөвхөн нэг удаа үүсгэх ёстой
+  // тул түүний товшилтын функц хамгийн сүүлийн `select`-ийг ref-ээр дамжуулан уншина.
   const selectRef = useRef(select)
   useEffect(() => {
     selectRef.current = select
@@ -139,7 +143,7 @@ export default function MapPage() {
     let cancelled = false
     basemapStyle(currentTheme()).then((style) => {
       if (cancelled || !mapContainer.current) return
-      // Phones: pinch to zoom, so no zoom buttons; the locate button sits low, within thumb reach
+      // Утас: хоёр хуруугаар томруулдаг тул томруулах товчгүй; байршил тогтоох товч эрхий хуруу хүрэх доод хэсэгт
       const phone = window.matchMedia('(max-width: 640px)').matches
       map = new maplibregl.Map({
         container: mapContainer.current, style, center: UB_CENTER, zoom: 13, attributionControl: false,
@@ -150,7 +154,7 @@ export default function MapPage() {
       map.addControl(new StyleButton((rect) => setStyleMenu((open) => open ? null : {
         right: window.innerWidth - rect.left + 8, bottom: window.innerHeight - rect.bottom,
       })), 'bottom-right')
-      // Added last, so it sits on top of the stack: one tap hides or shows every place dot
+      // Хамгийн сүүлд нэмдэг тул товчнуудын дээд талд байрлана: нэг товшилтоор бүх газрын цэгийг нууж / харуулна
       const toggle = new PlacesToggle(placesAreHidden(), (hidden) => {
         if (!mapRef.current) return
         setPlacesHidden(mapRef.current, hidden)
@@ -163,7 +167,7 @@ export default function MapPage() {
       mapRef.current = m
       m.on('load', () => {
         addPlacesLayer(m, (id) => !picking.current && selectRef.current(id))
-        // A numbered marker: the map moves to it and its row in the panel is highlighted
+        // Дугаартай тэмдэгт: газрын зураг тийш шилжиж, самбар дахь мөр нь тодорно
         onRecommendationClick(m, (id) => !picking.current && focusRef.current(id))
         onRouteStopClick(m, (id) => !picking.current && selectRef.current(id))
         setMapReady(true)
@@ -176,7 +180,7 @@ export default function MapPage() {
     }
   }, [])
 
-  // Dark / light basemap. Our own sources and layers (places, recommendations, route) are carried over.
+  // Бараан / цайвар суурь газрын зураг. Өөрийн эх сурвалж, давхаргууд (газар, санал болголт, маршрут) хадгалагдана.
   const [theme] = useTheme()
   const shownTheme = useRef(currentTheme())
   useEffect(() => {
@@ -184,7 +188,7 @@ export default function MapPage() {
     if (!map || !mapReady || shownTheme.current === theme) return
     shownTheme.current = theme
     basemapStyle(theme).then((style) => {
-      if (typeof style === 'string') return // public fallback style has no dark variant
+      if (typeof style === 'string') return // нийтийн нөөц загварт бараан хувилбар байхгүй
       map.setStyle(style, {
         transformStyle: (previous, next) => {
           if (!previous) return next
@@ -199,7 +203,7 @@ export default function MapPage() {
     })
   }, [theme, mapReady])
 
-  // Location sharing (sends my position while the app is open) and friends' shared positions (АШ21)
+  // Байршил хуваалцах (апп нээлттэй үед миний байршлыг илгээнэ) болон найзуудын хуваалцсан байршил (АШ21)
   useLocationSharing(!!user)
   const friendMarkers = useRef<maplibregl.Marker[]>([])
   useEffect(() => {
@@ -228,7 +232,7 @@ export default function MapPage() {
     }
   }, [user, mapReady])
 
-  // An unfinished route from an earlier visit (e.g. the user went to Google Maps and came back)
+  // Өмнөх удаагийн дуусаагүй маршрут (жишээ нь хэрэглэгч Google Maps руу очоод буцаж ирсэн)
   useEffect(() => {
     if (!user) {
       setRoute(null)
@@ -239,7 +243,7 @@ export default function MapPage() {
       .catch(() => undefined)
   }, [user])
 
-  // Draw the route while its panel is open
+  // Маршрутын самбар нээлттэй үед маршрутыг зурна
   const fitRoute = useRef(true)
   useEffect(() => {
     const map = mapRef.current
@@ -263,13 +267,13 @@ export default function MapPage() {
 
   const visitAnswered = (result: VisitResult) => {
     api<RouteView>(`/api/routes/${result.routeId}`).then((r) => {
-      // When the last stop is answered the route is completed: show it so the user can rate it
+      // Сүүлийн зогсоолд хариулахад маршрут дуусна: хэрэглэгч үнэлэхийн тулд түүнийг харуулна
       if (r.status === 'COMPLETED') openRoute(r)
       else setRoute(r)
     }).catch(() => undefined)
   }
 
-  // While something is in focus the other place dots fade, so it stands out
+  // Ямар нэг зүйл анхаарлын төвд байх үед бусад газрын цэг бүдгэрч, тэр нь тодорно
   const routeShown = showRoutePanel && route != null
   const recsShown = showRecs && recItems.length > 0
   const focusMode = selectedId != null || routeShown || recsShown || groupId != null
@@ -298,7 +302,7 @@ export default function MapPage() {
     setCategory(code)
     if (!mapRef.current) return
     filterPlacesLayer(mapRef.current, code)
-    // Picking a category means the user wants to see places
+    // Ангилал сонгох нь газруудыг харахыг хүсэж буй хэрэг
     if (dotsHidden) {
       setPlacesHidden(mapRef.current, false)
       setDotsHidden(false)
@@ -312,7 +316,7 @@ export default function MapPage() {
   }, [])
 
   const originMarker = useRef<maplibregl.Marker | null>(null)
-  // While the user picks a start point, a tap on a place dot must not open that place
+  // Хэрэглэгч эхлэх цэг сонгож байх үед газрын цэг дээр дарахад тэр газрыг нээх ёсгүй
   const picking = useRef(false)
 
   const showOrigin = useCallback((p: { lat: number; lng: number } | null,
@@ -378,8 +382,8 @@ export default function MapPage() {
 
   return (
     <>
-      {/* Inline style on purpose: maplibre-gl.css sets ".maplibregl-map { position: relative }" on this
-          element, which would override a class and collapse the map to zero height. */}
+      {/* Inline style санаатай: maplibre-gl.css энэ элементэд ".maplibregl-map { position: relative }" өгдөг бөгөөд
+          энэ нь классыг дарж, газрын зургийн өндрийг тэг болгоно. */}
       <div ref={mapContainer} style={{ position: 'absolute', inset: 0 }} />
       <div className="topbar">
         <div className="topbar-row">
@@ -461,7 +465,7 @@ const EYE_OFF = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18
   + '<path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>'
   + '<path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/>'
 
-/** Map control button that hides or shows all place dots. */
+/** Бүх газрын цэгийг нуух эсвэл харуулах газрын зургийн товч. */
 class PlacesToggle implements maplibregl.IControl {
   private container?: HTMLDivElement
   private button?: HTMLButtonElement
@@ -512,7 +516,7 @@ class PlacesToggle implements maplibregl.IControl {
   }
 }
 
-/** Map control button (stacked with zoom / locate) that opens the map look menu. */
+/** Газрын зургийн харагдацын цэсийг нээх товч (томруулах / байршил тогтоох товчтой нэг баганад). */
 class StyleButton implements maplibregl.IControl {
   private container?: HTMLDivElement
   private readonly onOpen: (rect: DOMRect) => void

@@ -1,7 +1,7 @@
-# Tools for the data milestone:
-#   osm2pgsql + psql  -> import OSM places into PostGIS   (data/import.sh)
-#   pmtiles (go-pmtiles) -> cut Ulaanbaatar vector tiles   (data/tiles.sh)
-#   python3 -> download Minu Map places                    (data/minu/import.sh)
+# Өгөгдлийн хэрэгслүүд:
+#   osm2pgsql + psql  -> OSM-ийн газрыг PostGIS руу импортлох       (data/import.sh)
+#   pmtiles (go-pmtiles) -> Улаанбаатарын вектор тайлыг тайрах       (data/tiles.sh)
+#   python3 -> Minu Map-ийн газрыг татах                            (data/minu/import.sh)
 FROM ubuntu:24.04
 ARG PMTILES_VERSION=1.30.1
 RUN apt-get update \

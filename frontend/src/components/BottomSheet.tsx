@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 const PHONE = '(max-width: 640px)'
 
-/** Snap heights as a share of the screen height. */
+/** Тогтох өндрүүд, дэлгэцийн өндрийн хувиар. */
 const SNAPS = { peek: 0.22, half: 0.5, full: 0.92 }
 type Snap = keyof typeof SNAPS
 
@@ -18,8 +18,8 @@ function usePhone() {
 }
 
 /**
- * Side panel on wide screens; on phones a bottom sheet that can be dragged by its grip between
- * three heights (peek, half, almost full screen). Tapping the grip switches between half and full.
+ * Өргөн дэлгэцэнд хажуугийн самбар; утсанд бариулаар нь гурван өндрийн (бага, хагас, бараг бүтэн дэлгэц)
+ * хооронд чирч болох доод хүснэгт. Бариулыг товшиход хагас, бүтэн хоёрын хооронд сэлгэнэ.
  */
 export default function BottomSheet({ className, children, initial = 'half' }:
   { className: string; children: ReactNode; initial?: Snap }) {
@@ -50,12 +50,12 @@ export default function BottomSheet({ className, children, initial = 'half' }:
     drag.current = null
     if (!d) return
     if (!d.moved) {
-      // A tap on the grip
+      // Бариулыг товшсон
       setSnap(snap === 'full' ? 'half' : 'full')
       setDragHeight(null)
       return
     }
-    // Snap to the closest height
+    // Хамгийн ойрын өндөрт тогтооно
     const h = dragHeight ?? heightOf(snap)
     const closest = (Object.keys(SNAPS) as Snap[])
       .reduce((best, s) => (Math.abs(heightOf(s) - h) < Math.abs(heightOf(best) - h) ? s : best), 'half' as Snap)

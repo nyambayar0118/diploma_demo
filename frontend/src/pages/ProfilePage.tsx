@@ -12,7 +12,7 @@ const TRANSPORT_ICONS: Record<string, string> = { WALKING: '🚶', PUBLIC_TRANSP
 
 const hours = (min: number) => (min % 60 === 0 ? `${min / 60} цаг` : `${Math.floor(min / 60)} цаг ${min % 60} мин`)
 
-/** Settings (ХШ03-ХШ08): recommendation preferences (saved automatically), interests, privacy, contributions, account. */
+/** Тохиргоо (ХШ03-ХШ08): санал болголтын тохиргоо (автоматаар хадгална), сонирхол, нууцлал, хувь нэмэр, бүртгэл. */
 export default function ProfilePage() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
@@ -42,7 +42,7 @@ export default function ProfilePage() {
     api<Rewards>('/api/users/me/rewards').then(setRewards).catch(() => undefined)
   }, [])
 
-  // Preferences are saved automatically, shortly after the last change
+  // Тохиргоо сүүлийн өөрчлөлтөөс хойш удалгүй автоматаар хадгалагдана
   const update = (next: Preferences) => {
     setPrefs(next)
     setSaveState('saving')

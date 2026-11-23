@@ -16,7 +16,7 @@ export default defineConfig({
         background_color: '#121722',
         display: 'standalone',
         start_url: '/',
-        // Android needs 192 and 512 PNGs to offer "install"; the maskable one may be cropped to a circle
+        // Android "суулгах" санал болгоход 192, 512 хэмжээтэй PNG хэрэгтэй; maskable дүрсийг дугуй хэлбэрээр тайрч болно
         icons: [
           { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
           { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
@@ -24,13 +24,13 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // API and map tiles must always come from the network
+        // API болон газрын зургийн тайлыг үргэлж сүлжээнээс авна
         navigateFallbackDenylist: [/^\/api\//, /^\/tiles\//],
       },
     }),
   ],
   server: {
-    // `npm run dev` forwards API calls to the backend started by docker compose (through nginx)
+    // `npm run dev` API дуудлагыг docker compose-оор ажилласан сервер рүү (nginx-ээр дамжуулан) шилжүүлнэ
     proxy: {
       '/api': 'http://localhost:8080',
       '/tiles': 'http://localhost:8080',

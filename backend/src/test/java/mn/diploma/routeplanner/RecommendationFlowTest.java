@@ -12,11 +12,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-/** Rule-based recommendations: filters (hidden, closed, time of day), ranking by interest, batch logging. */
+/** Дүрэмд суурилсан санал болголт: шүүлтүүр (нуусан, хаалттай, цагийн тохирц), сонирхлоор эрэмбэлэх, багц бүртгэх. */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class RecommendationFlowTest {
 
-    // An area far from the other tests' places, so they do not interfere
+    // Бусад тестийн газраас хол газар, хоорондоо нөлөөлөхгүйн тулд
     static final double LAT = 47.80;
     static final double LNG = 107.10;
 
@@ -42,7 +42,7 @@ class RecommendationFlowTest {
                         + "\"consents\":[\"INTERESTS\",\"LOCATION\",\"INTERACTION_HISTORY\"]}", token).statusCode());
         assertEquals(200, http.send("PUT", "/api/places/" + cafe2 + "/mark", "{\"type\":\"HIDDEN\"}", token).statusCode());
 
-        // Wednesday 15:00: nightclub unsuitable (prior 0), museum closed, cafe 2 hidden, far cafe outside 5 km
+        // Лхагва 15:00: шөнийн клуб тохирохгүй (цагийн тохирц 0), музей хаалттай, 2-р кафе нуусан, хол кафе 5 км-ээс гадна
         String body = "{\"lat\":%s,\"lng\":%s,\"at\":\"2026-11-18T15:00:00\",\"k\":10}".formatted(LAT, LNG);
         HttpResponse<String> r = http.send("POST", "/api/recommendations", body, token);
         assertEquals(200, r.statusCode(), r.body());
@@ -52,7 +52,7 @@ class RecommendationFlowTest {
         for (long excluded : new long[] {cafe2, nightclub, museum, farCafe}) {
             assertFalse(json.contains("\"placeId\":" + excluded + ","), "should be excluded: " + excluded + " " + json);
         }
-        // The cafe (interest 0.8) ranks above the park (0.2)
+        // Кафе (сонирхол 0.8) цэцэрлэгт хүрээлэнгээс (0.2) дээгүүр эрэмбэлэгдэнэ
         assertTrue(json.indexOf("\"placeId\":" + cafe + ",") < json.indexOf("\"placeId\":" + park + ","), json);
 
         long batchId = Long.parseLong(TestHttp.extract(json, "\"batchId\":(\\d+)"));
@@ -61,7 +61,7 @@ class RecommendationFlowTest {
         assertEquals("RULE_BASED", jdbc.queryForObject(
                 "SELECT ranker_name FROM recommendation_batches WHERE id = ?", String.class, batchId));
 
-        // The client reports ACCEPT with the recommendation id (training label 1)
+        // Клиент санал болголтын id-тай ACCEPT мэдээлнэ (сургалтын шошго 1)
         long recId = Long.parseLong(TestHttp.extract(json, "\"recommendationId\":(\\d+)"));
         assertEquals(202, http.send("POST", "/api/interactions",
                 "{\"placeId\":" + cafe + ",\"type\":\"ACCEPT\",\"recommendationId\":" + recId + "}", token).statusCode());

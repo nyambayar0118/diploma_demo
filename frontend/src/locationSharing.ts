@@ -5,8 +5,8 @@ const SEND_EVERY_MS = 2 * 60 * 1000
 export const SHARING_CHANGED = 'routeplanner:sharing-changed'
 
 /**
- * While the user shares their location (switch on the friends page), the open app sends the position
- * at most every 2 minutes. Closing the app stops the updates; the server hides positions older than 60 min.
+ * Хэрэглэгч байршлаа хуваалцаж байх үед (найзын хуудасны тохиргоо) нээлттэй апп байршлыг хамгийн ихдээ
+ * 2 минут тутам илгээнэ. Апп хаагдахад шинэчлэл зогсоно; сервер 60 минутаас хуучин байршлыг нууна.
  */
 export function useLocationSharing(enabled: boolean) {
   useEffect(() => {

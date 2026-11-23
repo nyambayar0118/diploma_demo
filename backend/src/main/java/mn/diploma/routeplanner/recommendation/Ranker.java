@@ -3,17 +3,17 @@ package mn.diploma.routeplanner.recommendation;
 import java.util.List;
 
 /**
- * Stage 2 of the recommender. Implementations: {@link RuleBasedRanker} now; the LightGBM-based MlRanker in the
- * ML milestone, with fallback to the rule-based ranker when the ML service does not answer in time (МГШ06).
+ * Санал болголтын 2-р шат: эрэмбэлэгч. Хэрэгжүүлэлт: одоогоор {@link RuleBasedRanker}; машин сургалтын шатанд
+ * LightGBM-д суурилсан MlRanker, сервис цагтаа хариулахгүй бол дүрэмд суурилсан эрэмбэлэлт рүү шилжинэ (МГШ06).
  */
 public interface Ranker {
 
-    /** Sets {@code score} on every candidate (higher = better). */
+    /** Нэр дэвшигч бүрд {@code score} онооно (их байх тусам сайн). */
     void score(List<Candidate> candidates, RecommendationContext ctx);
 
     String name();
 
-    /** Model version for the batch log; null for rule-based ranking. */
+    /** Багцын бүртгэлд загварын хувилбар; дүрэмд суурилсан эрэмбэлэлтэд null. */
     default String modelVersion() {
         return null;
     }

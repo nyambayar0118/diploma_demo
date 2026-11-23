@@ -20,28 +20,28 @@ import mn.diploma.routeplanner.place.OpeningHours;
 import mn.diploma.routeplanner.routing.TravelTimeEstimator;
 
 /**
- * Meeting places for a group (АШ10). Each member with the INTERESTS consent scores a place with their own
- * interest weight, the scores are aggregated ({@link GroupAggregator}), and a fairness penalty on the spread of
- * the members' travel times keeps the place reachable for everyone. The batch is logged with the group id and
- * is not used to train the single-user model.
+ * Бүлгийн уулзах газар (АШ10). INTERESTS зөвшөөрөлтэй гишүүн бүр газарт өөрийн сонирхлын жингээр оноо өгч,
+ * оноонуудыг нэгтгэнэ ({@link GroupAggregator}); гишүүдийн зорчих хугацааны зөрүүнд ногдуулах шударга байдлын
+ * торгууль газрыг бүгдэд хүртээмжтэй байлгана. Багцыг бүлгийн id-тай бүртгэх бөгөөд ганц хэрэглэгчийн загварыг
+ * сургахад ашиглахгүй.
  */
 @Service
 public class GroupRecommender {
 
     static final double W_INTEREST = 0.75;
     static final double W_TIME = 0.25;
-    /** Penalty per (longest - shortest travel) / max travel. */
+    /** (хамгийн урт - хамгийн богино зорчих хугацаа) / зөвшөөрөх дээд хугацаанд ногдох торгууль. */
     static final double FAIRNESS_WEIGHT = 0.30;
-    /** Penalty per average travel / max travel (prefer central places). */
+    /** Дундаж зорчих хугацаа / зөвшөөрөх дээд хугацаанд ногдох торгууль (төвд ойр газрыг илүүд үзнэ). */
     static final double TRAVEL_WEIGHT = 0.15;
     static final int MAX_PER_CATEGORY = 2;
 
-    /** A member as seen by the recommender; userId null for guests. */
+    /** Санал болгогчийн харах гишүүн; зочны хувьд userId нь null. */
     public record MemberInput(long memberId, Long userId, boolean usesInterests, double lat, double lng,
                               TransportMode mode) {
     }
 
-    /** {@code again}: places already offered in this group go after the ones not seen yet. */
+    /** {@code again}: энэ бүлэгт өмнө санал болгосон газрууд хараахан хараагүй газруудын ард орно. */
     public record Request(long groupSessionId, long initiatorId, List<MemberInput> members, int availableMinutes,
                           PriceLevel budgetLevel, LocalDateTime at, int k, boolean again) {
     }
@@ -118,7 +118,7 @@ public class GroupRecommender {
             }
             int max = travel.values().stream().mapToInt(Integer::intValue).max().orElse(0);
             int min = travel.values().stream().mapToInt(Integer::intValue).min().orElse(0);
-            if (max > maxTravel) continue; // someone would not make it in time
+            if (max > maxTravel) continue; // хэн нэгэн цагтаа хүрэхгүй
             double mean = travel.values().stream().mapToInt(Integer::intValue).average().orElse(0);
 
             List<Double> memberScores = new ArrayList<>();
@@ -138,7 +138,7 @@ public class GroupRecommender {
         }
         scored.sort(Comparator.comparingDouble(Option::score).reversed());
 
-        // "Again": places offered before in this group are used only when the unseen ones run out
+        // "Дахин": энэ бүлэгт өмнө санал болгосон газрыг зөвхөн шинэ газар дуусах үед ашиглана
         Set<Long> shown = req.again() ? shownBefore(req.groupSessionId()) : Set.of();
         List<Option> chosen = new ArrayList<>();
         Map<String, Integer> perCategory = new HashMap<>();

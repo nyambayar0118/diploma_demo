@@ -12,7 +12,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
-/** Issues the access token after registration / login. Subject = user id, claim "role" = USER/MODERATOR/ADMIN. */
+/** Бүртгүүлэх, нэвтрэх үед хандалтын токен (JWT) олгоно. Subject = хэрэглэгчийн id, "role" = USER/MODERATOR/ADMIN. */
 @Service
 public class JwtService {
 
@@ -41,7 +41,7 @@ public class JwtService {
         return encoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
     }
 
-    /** Id of the logged-in user from the verified token. */
+    /** Шалгагдсан токеноос нэвтэрсэн хэрэглэгчийн id-г авна. */
     public static Long userId(Jwt jwt) {
         return Long.valueOf(jwt.getSubject());
     }

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import mn.diploma.routeplanner.auth.JwtService;
 import mn.diploma.routeplanner.common.ApiException;
 
-/** Interaction module API (design table "Сонирхлын загварчлалын модулиудын API"). */
+/** Үйлдлийн модулийн API (зохиомжийн "Сонирхлын загварчлалын модулиудын API" хүснэгт). */
 @RestController
 public class InteractionController {
 
@@ -39,7 +39,7 @@ public class InteractionController {
         this.interactions = interactions;
     }
 
-    /** Mark state of a place for the logged-in user; {"type": null} for guests or unmarked places. */
+    /** Нэвтэрсэн хэрэглэгчийн хувьд газрын тэмдэглэгээ; зочин эсвэл тэмдэглээгүй газарт {"type": null}. */
     @GetMapping("/api/places/{id}/mark")
     public Map<String, Object> mark(@AuthenticationPrincipal Jwt jwt, @PathVariable long id) {
         Object type = jwt == null ? null : marks.markOf(JwtService.userId(jwt), id).map(Enum::name).orElse(null);
@@ -63,13 +63,13 @@ public class InteractionController {
         return ResponseEntity.ok(marks.savedPlacesAsJson(JwtService.userId(jwt)));
     }
 
-    /** Places the user hid from recommendations (so they can be shown again). */
+    /** Хэрэглэгчийн санал болголтоос нуусан газрууд (дахин харуулах боломжтой). */
     @GetMapping(value = "/api/users/me/hidden", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> hidden(@AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(marks.hiddenPlacesAsJson(JwtService.userId(jwt)));
     }
 
-    /** Client-reported interaction (VIEW, OPEN_IN_MAPS, ACCEPT, REJECT); returns 202 (СГШ08). */
+    /** Клиентээс мэдээлсэн үйлдэл (VIEW, OPEN_IN_MAPS, ACCEPT, REJECT); 202 буцаана (СГШ08). */
     @PostMapping("/api/interactions")
     public ResponseEntity<Void> log(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody InteractionRequest req) {
         if (!req.type().reportableByClient()) {

@@ -1,5 +1,5 @@
 package mn.diploma.routeplanner.routing;
 
-/** A WGS84 point. */
+/** WGS84 солбилцлын системийн цэг. */
 public record LatLng(double lat, double lng) {
 }

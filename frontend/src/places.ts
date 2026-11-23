@@ -1,7 +1,7 @@
 import * as maplibregl from 'maplibre-gl'
 import { iconExpression, provideMarkerImages, savedMarkerStyle, type MarkerStyle } from './markerShapes'
 
-// Colour per main category (place_categories.code of the parent)
+// Үндсэн ангилал бүрийн өнгө (эцэг ангиллын place_categories.code)
 export const MAIN_CATEGORY_COLORS: Record<string, string> = {
   food: '#e8590c',
   entertainment: '#c2255c',
@@ -13,12 +13,12 @@ export const MAIN_CATEGORY_COLORS: Record<string, string> = {
   services: '#868e96',
 }
 
-// Below this zoom the whole city would be requested at once, so places are hidden.
+// Үүнээс бага томруулалтад бүх хотыг нэг дор хүсэх тул газруудыг нууна.
 export const MIN_PLACES_ZOOM = 13
 
 const SOURCE_ID = 'places'
 
-// Place dots can be hidden from the map control; remembered between visits
+// Газрын цэгүүдийг газрын зургийн товчоор нууж болно; дараагийн удаа ч санагдана
 const HIDDEN_KEY = 'routeplanner:placesHidden'
 let placesHidden = (() => {
   try {
@@ -34,19 +34,19 @@ export function placesAreHidden() {
   return placesHidden
 }
 
-/** Shows or hides every place dot (recommendations, routes and groups stay visible). */
+/** Бүх газрын цэгийг харуулах эсвэл нуух (санал болголт, маршрут, бүлгийн тэмдэгт харагдсаар байна). */
 export function setPlacesHidden(map: maplibregl.Map, hidden: boolean) {
   placesHidden = hidden
   try {
     localStorage.setItem(HIDDEN_KEY, hidden ? '1' : '0')
   } catch {
-    // private mode: only for this visit
+    // нууц горим: зөвхөн энэ удаад
   }
   setMarkerStyle(map, currentStyle)
   if (!hidden) refreshPlaces?.()
 }
 
-/** Adds the "places" GeoJSON layer and keeps it in sync with the visible map area. */
+/** "places" GeoJSON давхаргыг нэмж, газрын зургийн харагдах хэсэгтэй тааруулан шинэчилнэ. */
 export function addPlacesLayer(map: maplibregl.Map, onSelect: (placeId: number) => void) {
   map.addSource(SOURCE_ID, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
 
@@ -63,7 +63,7 @@ export function addPlacesLayer(map: maplibregl.Map, onSelect: (placeId: number) 
     minzoom: MIN_PLACES_ZOOM,
     paint: {
       'circle-color': colorByCategory,
-      // Places that are never recommended (services, pitches, playgrounds) are drawn smaller
+      // Хэзээ ч санал болгогддоггүй газрыг (үйлчилгээ, талбай, тоглоомын талбай) жижиг зурна
       'circle-radius': ['case', ['get', 'recommendable'], 6, 3.5],
       'circle-stroke-color': '#ffffff',
       'circle-stroke-width': 1.5,
@@ -72,7 +72,7 @@ export function addPlacesLayer(map: maplibregl.Map, onSelect: (placeId: number) 
     },
   })
 
-  // Other marker shapes (star, pin, diamond) are images; only one of the two layers is visible
+  // Бусад тэмдэгтийн хэлбэр (од, зүү, ромбо) зураг байна; хоёр давхаргын зөвхөн нэг нь харагдана
   provideMarkerImages(map)
   map.addLayer({
     id: 'places-shapes',
@@ -123,8 +123,8 @@ const PLACE_LAYERS = ['places-circles', 'places-shapes']
 const DIMMED = 0.2
 
 /**
- * Fades every place dot except keepId while something else is in focus (a selected place, a route,
- * recommendations or group options), so that content stands out. dimmed false restores them.
+ * Өөр зүйл анхаарлын төвд байх үед (сонгосон газар, маршрут, санал болголт, бүлгийн хувилбар) keepId-аас бусад
+ * газрын цэгийг бүдгэрүүлж, тэр агуулгыг тодруулна. dimmed false бол буцаан сэргээнэ.
  */
 export function setPlacesDimmed(map: maplibregl.Map, dimmed: boolean, keepId: number | null = null) {
   if (!map.getLayer('places-circles') || !map.getLayer('places-shapes')) return
@@ -135,14 +135,14 @@ export function setPlacesDimmed(map: maplibregl.Map, dimmed: boolean, keepId: nu
   map.setPaintProperty('places-circles', 'circle-opacity', opacity)
   map.setPaintProperty('places-circles', 'circle-stroke-opacity', opacity)
   map.setPaintProperty('places-shapes', 'icon-opacity', opacity)
-  // The kept place is drawn a little larger, the rest as usual
+  // Үлдээсэн газрыг арай том, бусдыг ердийнхөөр зурна
   map.setPaintProperty('places-circles', 'circle-radius', keepId != null
     ? ['case', isKept, 9, ['get', 'recommendable'], 6, 3.5]
     : ['case', ['get', 'recommendable'], 6, 3.5])
   map.setPaintProperty('places-circles', 'circle-stroke-width', keepId != null ? ['case', isKept, 3, 1.5] : 1.5)
 }
 
-/** Switches the place markers between dots and an image shape. */
+/** Газрын тэмдэгтийг цэг болон зурган хэлбэрийн хооронд сэлгэнэ. */
 export function setMarkerStyle(map: maplibregl.Map, style: MarkerStyle) {
   currentStyle = style
   if (!map.getLayer('places-circles') || !map.getLayer('places-shapes')) return
@@ -155,7 +155,7 @@ export function setMarkerStyle(map: maplibregl.Map, style: MarkerStyle) {
   }
 }
 
-/** Shows only one main category on the map ('' = all). */
+/** Газрын зураг дээр зөвхөн нэг үндсэн ангиллыг харуулна ('' = бүгд). */
 export function filterPlacesLayer(map: maplibregl.Map, mainCategory: string) {
   for (const layer of PLACE_LAYERS) {
     if (map.getLayer(layer)) map.setFilter(layer, mainCategory ? ['==', ['get', 'mainCategory'], mainCategory] : null)
@@ -169,8 +169,8 @@ const MEMBER_LINES_SOURCE = 'group-member-lines'
 export type RecMarker = { placeId: number; lat: number; lng: number; mainCategory: string }
 
 /**
- * Numbered markers for the current recommendation list (single user or group options). The focused one is
- * drawn larger. Fits the map to all of them unless fit is false.
+ * Одоогийн санал болголтын жагсаалтын дугаартай тэмдэгт (ганц хэрэглэгч эсвэл бүлгийн хувилбар). Анхаарлын
+ * төвд байгааг нь том зурна. fit false биш бол газрын зургийг бүгдэд нь тааруулна.
  */
 export function showRecommendations(map: maplibregl.Map, items: RecMarker[], focusedId: number | null = null,
                                     fit = true) {
@@ -216,7 +216,7 @@ export function showRecommendations(map: maplibregl.Map, items: RecMarker[], foc
   }
 }
 
-/** Room taken by the side panel (desktop) or the bottom sheet (phone), so markers are not hidden under it. */
+/** Хажуугийн самбар (компьютер) эсвэл доод хүснэгтийн (утас) эзлэх зай; тэмдэгт түүн дор нуугдахгүй. */
 function sidePadding() {
   const phone = window.innerWidth <= 640
   return phone
@@ -224,7 +224,7 @@ function sidePadding() {
     : { top: 130, bottom: 60, left: 420, right: 70 }
 }
 
-/** Moves the map to one recommended place, keeping it clear of the panel. */
+/** Газрын зургийг санал болгосон нэг газар руу шилжүүлж, самбарт халхлуулахгүй байрлуулна. */
 export function focusOn(map: maplibregl.Map, lat: number, lng: number) {
   const phone = window.innerWidth <= 640
   map.flyTo({
@@ -236,8 +236,8 @@ export function focusOn(map: maplibregl.Map, lat: number, lng: number) {
 export type MemberMarker = { id: number; name: string; color: string; lat: number; lng: number }
 
 /**
- * Group members' start points (coloured initials) and, when an option is focused, a dashed line from every
- * member to it, so the fairness of a meeting place can be seen. null removes them.
+ * Бүлгийн гишүүдийн эхлэх цэг (өнгөт эхний үсэг), хувилбар сонгосон үед гишүүн бүрээс түүн рүү тасархай
+ * зураас; уулзах газар хэр шударга болохыг харуулна. null бол устгана.
  */
 export function showGroupMembers(map: maplibregl.Map, members: MemberMarker[] | null,
                                  target: { lat: number; lng: number } | null) {
@@ -266,7 +266,7 @@ export function showGroupMembers(map: maplibregl.Map, members: MemberMarker[] | 
   }
   map.addSource(MEMBER_LINES_SOURCE, { type: 'geojson', data: lines })
   map.addSource(MEMBERS_SOURCE, { type: 'geojson', data: points })
-  // Lines go under the numbered option markers
+  // Зураас дугаартай хувилбарын тэмдэгтийн доор зурагдана
   const before = map.getLayer('recs-circles') ? 'recs-circles' : undefined
   map.addLayer({
     id: 'group-member-lines', type: 'line', source: MEMBER_LINES_SOURCE,
@@ -300,8 +300,8 @@ type RouteLike = {
 }
 
 /**
- * The route on the map (ХХШ05): start point, numbered stops and straight dashed lines between them in visiting
- * order. The real path is drawn by Google Maps, so the lines only show the order. null removes the route.
+ * Газрын зураг дээрх маршрут (ХХШ05): эхлэх цэг, дугаартай зогсоолууд, тэдгээрийг зочлох дарааллаар холбосон
+ * шулуун тасархай зураас. Бодит замыг Google Maps зурдаг тул зураас зөвхөн дарааллыг харуулна. null бол устгана.
  */
 export function showRoute(map: maplibregl.Map, route: RouteLike | null, fit = true) {
   const stops = route ? [...route.stops].sort((a, b) => a.order - b.order) : []

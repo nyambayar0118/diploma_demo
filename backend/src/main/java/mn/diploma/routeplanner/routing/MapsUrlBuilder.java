@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component;
 import mn.diploma.routeplanner.common.TransportMode;
 
 /**
- * Google Maps URLs (https://developers.google.com/maps/documentation/urls) for the ordered stops (АШ22).
- * No API key and no request from the server: the client opens the link in the Google Maps app or website.
- * Mobile Maps supports at most 3 waypoints (so at most 4 stops), and transit directions support none,
- * so public transport gets a separate link for every leg.
+ * Дараалуулсан зогсоолуудын Google Maps URL (https://developers.google.com/maps/documentation/urls) (АШ22).
+ * API түлхүүргүй, серверээс хүсэлт илгээхгүй: клиент холбоосыг Google Maps апп эсвэл вебээр нээнэ.
+ * Гар утасны Maps хамгийн ихдээ 3 дамжих цэг дэмждэг (тул хамгийн ихдээ 4 зогсоол), нийтийн тээврийн чиглэлд
+ * дамжих цэг дэмжигддэггүй тул нийтийн тээвэрт хэсэг бүрд тусдаа холбоос үүсгэнэ.
  */
 @Component
 public class MapsUrlBuilder {
@@ -38,7 +38,7 @@ public class MapsUrlBuilder {
         return links;
     }
 
-    /** Directions from wherever the phone is (no origin given: Google Maps uses the current location). */
+    /** Утас хаана байгаагаас эхлэх чиглэл (эхлэх цэг өгөхгүй: Google Maps одоогийн байршлыг ашиглана). */
     public String fromCurrentLocation(LatLng to, TransportMode mode) {
         return BASE + "&destination=" + coord(to) + "&travelmode=" + travelMode(mode);
     }

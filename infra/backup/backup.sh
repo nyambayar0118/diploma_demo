@@ -1,6 +1,6 @@
 #!/bin/sh
-# Daily compressed dump of the database; old dumps are deleted after BACKUP_KEEP_DAYS days.
-# Restore:  gunzip -c backups/routeplanner-<date>.sql.gz | docker compose ... exec -T db psql -U <user> -d <db>
+# Өгөгдлийн сангийн өдөр тутмын шахсан нөөц хуулбар; BACKUP_KEEP_DAYS өдрөөс хуучныг устгана.
+# Сэргээх:  gunzip -c backups/routeplanner-<date>.sql.gz | docker compose ... exec -T db psql -U <user> -d <db>
 set -eu
 while true; do
   file="/backups/${PGDATABASE}-$(date +%Y%m%d-%H%M).sql.gz"

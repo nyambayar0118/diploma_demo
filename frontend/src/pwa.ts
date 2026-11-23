@@ -1,6 +1,6 @@
-// Installing the web app on the phone's home screen (PWA).
-// Chrome / Edge / Samsung Internet fire `beforeinstallprompt`, which we keep to show their install dialog
-// from our own button. Safari (iPhone / iPad) has no such dialog: the user adds it through the Share menu.
+// Веб аппликейшнийг утасны нүүр дэлгэцэнд суулгах (PWA).
+// Chrome / Edge / Samsung Internet `beforeinstallprompt` үйл явдлыг өгдөг; түүнийг хадгалж суулгах цонхыг өөрийн
+// товчоор нээнэ. Safari (iPhone / iPad)-д ийм цонх байхгүй: хэрэглэгч Share цэсээр нэмнэ.
 
 type InstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }
 
@@ -8,7 +8,7 @@ let deferred: InstallPromptEvent | null = null
 export const INSTALL_CHANGED = 'routeplanner:install-changed'
 
 window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault() // we show our own button instead of the browser's mini bar
+  e.preventDefault() // хөтчийн жижиг мөрийн оронд өөрийн товчийг харуулна
   deferred = e as InstallPromptEvent
   window.dispatchEvent(new Event(INSTALL_CHANGED))
 })
@@ -19,12 +19,12 @@ window.addEventListener('appinstalled', () => {
 
 export type Platform = 'installed' | 'in-app' | 'ios' | 'android' | 'desktop'
 
-/** Which instructions fit this device and browser. */
+/** Энэ төхөөрөмж, хөтөчид аль заавар тохирох. */
 export function platform(): Platform {
   const nav = navigator as Navigator & { standalone?: boolean }
   if (window.matchMedia('(display-mode: standalone)').matches || nav.standalone) return 'installed'
   const ua = navigator.userAgent
-  // Messenger, Facebook, Instagram, etc. open links in their own browser, which cannot install apps
+  // Messenger, Facebook, Instagram зэрэг холбоосыг өөрийн дотоод хөтчөөр нээдэг бөгөөд тэндээс апп суулгах боломжгүй
   if (/FBAN|FBAV|FB_IAB|Instagram|Line\/|KAKAOTALK|Snapchat|TikTok|MicroMessenger/i.test(ua)) return 'in-app'
   const iPad = /Macintosh/.test(ua) && navigator.maxTouchPoints > 1
   if (/iPhone|iPad|iPod/.test(ua) || iPad) return 'ios'
@@ -36,7 +36,7 @@ export function canPromptInstall() {
   return deferred != null
 }
 
-/** Shows the browser's own install dialog; true if the user accepted. */
+/** Хөтчийн суулгах цонхыг харуулна; хэрэглэгч зөвшөөрвөл true. */
 export async function promptInstall(): Promise<boolean> {
   if (!deferred) return false
   const e = deferred
@@ -59,6 +59,6 @@ export function dismissBanner() {
   try {
     localStorage.setItem(DISMISSED, '1')
   } catch {
-    /* ignore */
+    /* үл тооно */
   }
 }

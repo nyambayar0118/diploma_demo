@@ -16,9 +16,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**
- * End-to-end test of registration, login, profile, preferences, consents and onboarding
- * against a real PostgreSQL + PostGIS (Flyway migrations included). Needs DB_URL/DB_USER/DB_PASSWORD;
- * in CI a postgis service container provides them.
+ * Бүртгүүлэх, нэвтрэх, профайл, тохиргоо, зөвшөөрөл, бүртгэлийн асуулгыг бодит PostgreSQL + PostGIS дээр
+ * (Flyway шилжилтүүдийн хамт) эхнээс нь дуустал шалгана. DB_URL/DB_USER/DB_PASSWORD хэрэгтэй;
+ * CI-д тэдгээрийг postgis сервисийн контейнер олгоно.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AuthFlowTest {

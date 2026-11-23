@@ -9,22 +9,22 @@ type LatLng = { lat: number; lng: number }
 
 type Props = {
   mapCenter: () => LatLng
-  /** Shows the start point on the map as a draggable marker; calls back when the user moves it. */
+  /** Эхлэх цэгийг чирч болох тэмдэгтээр харуулна; хэрэглэгч зөөхөд мэдэгдэнэ. */
   showOrigin: (p: LatLng | null, onMove: (p: LatLng) => void) => void
-  /** Resolves with the next point the user taps on the map. */
+  /** Хэрэглэгчийн газрын зураг дээр дарах дараагийн цэгийг буцаана. */
   pickOnMap: () => Promise<LatLng>
   onResults: (items: RecommendationItem[]) => void
-  /** The item shown on the map (clicked in the list or on its marker). */
+  /** Газрын зураг дээр харуулж буй санал (жагсаалт эсвэл тэмдэгт дээр дарсан). */
   focusedId: number | null
-  /** Clicking an item: the map moves to it. */
+  /** Саналыг дарахад газрын зураг тийш шилжинэ. */
   onFocus: (item: RecommendationItem) => void
-  /** "Дэлгэрэнгүй": opens the place sheet. */
+  /** "Дэлгэрэнгүй": газрын мэдээллийг нээнэ. */
   onOpen: (item: RecommendationItem) => void
   onRoute: (route: RouteView) => void
   onClose: () => void
-  /** Main categories (with subcategories) for the "what are you looking for" chips. */
+  /** "Юу хайж байна вэ?" сонголтод зориулсан үндсэн ангиллууд (дэд ангиллын хамт). */
   categories: Category[]
-  /** Category chosen on the map's chip row, used as the starting choice. */
+  /** Газрын зургийн ангиллын мөрөнд сонгосон ангилал; анхны сонголт болно. */
   initialCategory?: string
 }
 
@@ -35,8 +35,8 @@ const DURATIONS = [60, 120, 180, 240, 360]
 type Origin = LatLng & { label: string; warning?: string }
 
 /**
- * Device location (needs https or localhost and the browser's permission). Laptops without GPS get a
- * Wi-Fi / IP-based position, which can be kilometres off; then the user can move the marker or pick a point.
+ * Төхөөрөмжийн байршил (https эсвэл localhost, хөтчийн зөвшөөрөл хэрэгтэй). GPS-гүй зөөврийн компьютер Wi-Fi / IP-д
+ * суурилсан, хэдэн км зөрүүтэй байршил авч болно; тэгвэл хэрэглэгч тэмдэгтийг зөөх эсвэл цэг сонгоно.
  */
 function devicePosition() {
   return new Promise<{ lat: number; lng: number; accuracy: number } | null>((resolve) => {
@@ -56,13 +56,13 @@ function distanceText(m: number) {
 export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, onResults, focusedId, onFocus, onOpen,
   onRoute, onClose, categories, initialCategory }: Props) {
   const itemRefs = useRef(new Map<number, HTMLLIElement>())
-  // A marker clicked on the map: bring its row into view
+  // Газрын зураг дээр тэмдэгт дарсан: харгалзах мөрийг харагдуулна
   useEffect(() => {
     if (focusedId != null) itemRefs.current.get(focusedId)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
   }, [focusedId])
   const [minutes, setMinutes] = useState(180)
   const [mode, setMode] = useState<TransportMode>('WALKING')
-  // What to look for: main categories, optionally narrowed to subcategories of one of them (empty = everything)
+  // Юу хайх: үндсэн ангиллууд, хүсвэл аль нэгнийх нь дэд ангиллаар нарийсгана (хоосон = бүгд)
   const [mains, setMains] = useState<string[]>(initialCategory ? [initialCategory] : [])
   const [subs, setSubs] = useState<string[]>([])
   const toggleMain = (code: string) => {
@@ -79,7 +79,7 @@ export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, 
   const [picking, setPicking] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
-  // Places picked for a route (recommendation ids, in the order picked)
+  // Маршрутад сонгосон газрууд (санал болголтын id, сонгосон дарааллаар)
   const [picked, setPicked] = useState<number[]>([])
 
   useEffect(() => {
@@ -109,7 +109,7 @@ export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, 
     })
   }
 
-  // Locate once when the panel opens; remove the marker when it closes
+  // Самбар нээгдэхэд нэг удаа байршил тогтоож, хаагдахад тэмдэгтийг устгана
   useEffect(() => {
     locate()
     return () => showOrigin(null, () => undefined)
@@ -149,7 +149,7 @@ export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, 
       : p.length < MAX_STOPS ? [...p, item.recommendationId] : p)
   }
 
-  /** With no picked places the server chooses 2-3 itself (automatic route). */
+  /** Газар сонгоогүй бол сервер 2-3-ыг өөрөө сонгоно (автомат маршрут). */
   const createRoute = async (auto: boolean) => {
     if (!origin) return
     setBusy(true)

@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Imports Ulaanbaatar places and buildings from OpenStreetMap into PostGIS.
-#   1. downloads the Mongolia extract from Geofabrik (once; delete data/raw/*.pbf to refresh)
-#   2. osm2pgsql loads the raw objects into the "osm" staging schema (data/osm/places.lua)
-#   3. data/sql/load_places.sql maps tags -> categories and fills places / buildings
-# Run through docker compose (see README). Requires the backend to have started once (Flyway tables).
+# Улаанбаатарын газар, барилгыг OpenStreetMap-аас PostGIS руу импортлоно.
+#   1. Монголын хэсгийг Geofabrik-ээс татна (нэг удаа; шинэчлэхийн тулд data/raw/*.pbf-ийг устгана)
+#   2. osm2pgsql түүхий объектуудыг "osm" завсрын схемд ачаална (data/osm/places.lua)
+#   3. data/sql/load_places.sql шошгыг ангилалд харгалзуулж, places / buildings хүснэгтийг бөглөнө
+# docker compose-оор ажиллуулна (README-г үз). Сервер нэг удаа ажилласан байх шаардлагатай (Flyway хүснэгтүүд).
 set -euo pipefail
 
 PBF_URL="${PBF_URL:-https://download.geofabrik.de/asia/mongolia-latest.osm.pbf}"
 PBF_FILE="${PBF_FILE:-/data/raw/mongolia-latest.osm.pbf}"
-# Ulaanbaatar and its surroundings: min lon, min lat, max lon, max lat
+# Улаанбаатар болон орчим: хамгийн бага уртраг, өргөрөг, хамгийн их уртраг, өргөрөг
 BBOX="${BBOX:-106.55,47.75,107.25,48.05}"
 
 mkdir -p /data/raw

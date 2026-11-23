@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import mn.diploma.routeplanner.auth.UserDeletedEvent;
 
-/** ХШ08: the interest profile and survey answers are deleted. */
+/** ХШ08: сонирхлын профайл болон бүртгэлийн асуулгын хариултыг устгана. */
 @Component
 class InterestDataCleanup {
 

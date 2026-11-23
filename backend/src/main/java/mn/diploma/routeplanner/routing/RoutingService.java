@@ -32,14 +32,14 @@ import mn.diploma.routeplanner.routing.RoutingDtos.StopRequest;
 import mn.diploma.routeplanner.routing.RoutingDtos.StopView;
 
 /**
- * Public service of the Routing module (АШ15, АШ22, ДШ05, ХСШ05-07): builds a route from 1-4 places,
- * orders the stops, estimates arrival times and hands the route over to Google Maps.
+ * Маршрутын модулийн нийтийн сервис (АШ15, АШ22, ДШ05, ХСШ05-07): 1-4 газраар маршрут үүсгэж, зогсоолуудыг
+ * дараалуулж, ирэх цагийг тооцоод маршрутыг Google Maps руу шилжүүлнэ.
  */
 @Service
 public class RoutingService {
 
     public static final int MAX_STOPS = 4;
-    /** Stops of an automatic route (ХСШ07: 2-3 by default). */
+    /** Автомат маршрутын зогсоолын тоо (ХСШ07: анхдагч 2-3). */
     static final int AUTO_STOPS = 3;
     static final int AUTO_CANDIDATES = 12;
     static final int LIST_LIMIT = 20;
@@ -95,7 +95,7 @@ public class RoutingService {
         }
         rebuild(route);
         routes.insert(route);
-        // Choosing a recommended place for a route is an explicit acceptance (training label 1)
+        // Санал болгосон газрыг маршрутад сонгох нь илэрхий хүлээн авалт (сургалтын шошго 1)
         for (RouteStop s : route.stops) {
             if (s.recommendationId != null) {
                 interactions.log(userId, s.place.id(), InteractionType.ACCEPT, s.recommendationId, route.id, null, null);
@@ -104,7 +104,7 @@ public class RoutingService {
         return view(route);
     }
 
-    /** Group plan shared (АШ24): every registered member gets a one-stop route to the meeting place. */
+    /** Бүлгийн төлөвлөгөө хуваалцсан (АШ24): бүртгэлтэй гишүүн бүр уулзах газар хүртэл нэг зогсоолтой маршрут авна. */
     @Transactional
     public long createGroupRoute(long ownerId, LatLng start, TransportMode mode, int budget, long placeId,
                                  long groupSessionId) {
@@ -117,7 +117,7 @@ public class RoutingService {
         return route.id;
     }
 
-    /** The group plan was cancelled: its open member routes are cancelled too. */
+    /** Бүлгийн төлөвлөгөө цуцлагдсан: гишүүдийн нээлттэй маршрутууд мөн цуцлагдана. */
     @Transactional
     public void cancelGroupRoutes(long groupSessionId) {
         jdbc.update("UPDATE routes SET status = 'CANCELLED', closed_at = now() "
@@ -141,7 +141,7 @@ public class RoutingService {
             throw new ApiException(HttpStatus.CONFLICT, "ROUTE_LOCKED", "Google Maps-ээр нээсэн маршрутыг өөрчлөх боломжгүй");
         }
         List<Long> changedPlaces = new ArrayList<>();
-        // A route the user put in their own order keeps that order when stops are added or removed
+        // Хэрэглэгчийн өөрөө дараалуулсан маршрут зогсоол нэмэх, хасахад тэр дараалалаа хадгална
         boolean optimize = isShortestOrder(route);
         switch (req.op()) {
             case ADD -> {
@@ -188,7 +188,7 @@ public class RoutingService {
         return view(route);
     }
 
-    /** CREATED -> OPENED_IN_MAPS; the links come with the returned view (АШ22). */
+    /** CREATED -> OPENED_IN_MAPS; холбоосууд буцаах хариунд багтана (АШ22). */
     @Transactional
     public RouteView openInMaps(long userId, long routeId) {
         Route route = owned(userId, routeId);
@@ -229,12 +229,12 @@ public class RoutingService {
         routes.update(route);
     }
 
-    /** Orders the stops by the shortest travel time (ДШ05) and recomputes arrival times and the total duration. */
+    /** Зогсоолуудыг хамгийн бага зорчих хугацаагаар дараалуулж (ДШ05), ирэх цаг болон нийт хугацааг дахин тооцно. */
     void rebuild(Route route) {
         rebuild(route, true);
     }
 
-    /** With {@code optimize = false} the current order is kept (the user reordered the stops by hand). */
+    /** {@code optimize = false} бол одоогийн дарааллыг хадгална (хэрэглэгч гараар дараалуулсан). */
     void rebuild(Route route, boolean optimize) {
         List<LatLng> points = new ArrayList<>();
         points.add(route.start);
@@ -263,7 +263,7 @@ public class RoutingService {
         route.estimatedDurationMinutes = (int) Duration.between(route.plannedStart, t).toMinutes();
     }
 
-    /** Whether the stops are currently in a shortest-travel order (false after a manual reorder). */
+    /** Зогсоолууд одоо хамгийн богино дарааллаар байгаа эсэх (гараар дараалуулсны дараа false). */
     boolean isShortestOrder(Route route) {
         if (route.stops.size() < 2) return true;
         List<RouteStop> current = route.stops.stream().sorted(Comparator.comparingInt(s -> s.stopOrder)).toList();
@@ -339,7 +339,7 @@ public class RoutingService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "STOP_NOT_FOUND", "Зогсоол олдсонгүй"));
     }
 
-    /** The route if it exists and belongs to the user; 404 otherwise (does not reveal other users' routes). */
+    /** Маршрут байгаа бөгөөд хэрэглэгчийнх бол түүнийг; үгүй бол 404 (бусдын маршрутыг ил гаргахгүй). */
     Route owned(long userId, long routeId) {
         return routes.findById(routeId).filter(r -> r.ownerId == userId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "ROUTE_NOT_FOUND", "Маршрут олдсонгүй"));

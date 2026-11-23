@@ -20,7 +20,7 @@ import mn.diploma.routeplanner.friend.FriendService.FriendshipDto;
 import mn.diploma.routeplanner.friend.FriendService.InviteLink;
 import mn.diploma.routeplanner.friend.FriendService.UserRef;
 
-/** Friend module API (design table "Хэрэглэгч ба нууцлалын модулиудын API"). */
+/** Найзын модулийн API (зохиомжийн "Хэрэглэгч ба нууцлалын модулиудын API" хүснэгт). */
 @RestController
 public class FriendController {
 
@@ -65,7 +65,7 @@ public class FriendController {
         return friends.inviteLink(JwtService.userId(jwt));
     }
 
-    /** Who invited me (public, so the page can show it before login). */
+    /** Намайг хэн урьсан (нэвтрэхээс өмнө хуудсанд харуулах тул нийтэд нээлттэй). */
     @GetMapping("/api/friends/invites/{token}")
     public UserRef inviter(@PathVariable String token) {
         return friends.inviter(token);

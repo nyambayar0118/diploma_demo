@@ -24,13 +24,13 @@ import mn.diploma.routeplanner.place.CategoryLookup;
 import mn.diploma.routeplanner.place.CategoryLookup.Subcategory;
 
 /**
- * Interest Profile module: creates the profile from the onboarding survey (ДШ02, cold start).
- * Later milestones update the weights from user interactions (ДШ03).
+ * Сонирхлын профайлын модуль: бүртгэлийн асуулгаас профайлыг үүсгэнэ (ДШ02, хүйтэн эхлэл).
+ * Дараа нь хэрэглэгчийн үйлдлээр сонирхлын жинг шинэчилнэ (ДШ03).
  */
 @Service
 public class InterestProfileService {
 
-    /** Starting weights: picked categories, other categories of the same main category, everything else. */
+    /** Анхны жин: сонгосон ангилал, түүнтэй ижил үндсэн ангиллын бусад ангилал, бусад бүх ангилал. */
     static final double WEIGHT_SELECTED = 0.8;
     static final double WEIGHT_SAME_MAIN = 0.5;
     static final double WEIGHT_OTHER = 0.2;
@@ -108,8 +108,8 @@ public class InterestProfileService {
     }
 
     /**
-     * Signal strength s of each interaction (positive = more interest, negative = less).
-     * The weight moves toward the target t (1 for positive, 0 for negative):  w <- (1 - eta*|s|) * w + eta*|s| * t
+     * Үйлдэл бүрийн хүч s (эерэг = сонирхол нэмэгдэнэ, сөрөг = буурна).
+     * Жин зорилтот утга t руу шилжинэ (эерэг бол 1, сөрөг бол 0):  w <- (1 - eta*|s|) * w + eta*|s| * t
      */
     static final double LEARNING_RATE = 0.1;
     static final Map<InteractionType, Double> SIGNALS = Map.of(
@@ -123,7 +123,7 @@ public class InterestProfileService {
             InteractionType.OPEN_IN_MAPS, 0.8,
             InteractionType.VISIT, 1.0);
 
-    /** Updates the weight of the place's category after each interaction (ДШ03), off the request thread. */
+    /** Үйлдэл бүрийн дараа газрын ангиллын жинг хүсэлтийн урсгалаас гадуур (асинхроноор) шинэчилнэ (ДШ03). */
     @Async
     @TransactionalEventListener(fallbackExecution = true)
     @Transactional(propagation = Propagation.REQUIRES_NEW)

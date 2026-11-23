@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Downloads every company from the Minu Map API (map.minu.mn) into a JSON Lines file.
+"""Minu Map API-аас (map.minu.mn) бүх компанийг JSON Lines файлд татна.
 
-The search endpoint returns all ~44k companies for an empty search, paged with start/end.
-Requests are spaced out (MINU_DELAY seconds, default 1) and progress is saved after each
-page, so an interrupted run continues where it stopped.
+Хайлтын endpoint хоосон хайлтад ~44 мянган компанийг бүгдийг нь start/end-ээр хуудаслан буцаадаг.
+Хүсэлтүүдийн хооронд завсарлага авч (MINU_DELAY секунд, анхдагч 1), хуудас бүрийн дараа явцыг
+хадгалдаг тул тасарсан ажиллагаа зогссон газраасаа үргэлжилнэ.
 
-Environment:
-  MINU_API_TOKEN  required, the token from map.minu.mn/developer ("Token авах")
-  MINU_OUT        output file            (default /data/raw/minu/companies.jsonl)
-  MINU_PAGE       companies per request  (default 100)
-  MINU_DELAY      seconds between calls  (default 1.0)
-  MINU_FRESH=1    ignore an earlier partial download and start over
+Орчны хувьсагч:
+  MINU_API_TOKEN  заавал, map.minu.mn/developer-ээс авсан токен ("Token авах")
+  MINU_OUT        гаралтын файл           (анхдагч /data/raw/minu/companies.jsonl)
+  MINU_PAGE       нэг хүсэлтэд авах тоо   (анхдагч 100)
+  MINU_DELAY      хүсэлт хоорондын секунд (анхдагч 1.0)
+  MINU_FRESH=1    өмнөх хагас татан авалтыг үл тоож шинээр эхэлнэ
 
 Also writes categories.csv next to the output: how many companies each Minu category has,
 which is what minu_category_mappings is tuned against.
@@ -59,7 +59,7 @@ def call(start, end, attempt=1):
         print(f"   {e}, retrying in {wait}s", flush=True)
         time.sleep(wait)
         return call(start, end, attempt + 1)
-    # Response shape: [[{"numfound": N, "documents": [...]}], [], []]
+    # Хариуны бүтэц: [[{"numfound": N, "documents": [...]}], [], []]
     block = body[0][0] if body and body[0] else {"numfound": 0, "documents": []}
     return int(block.get("numfound", 0)), block.get("documents", [])
 
@@ -95,7 +95,7 @@ def main():
             print(f"   {start}/{total}", flush=True)
             time.sleep(DELAY)
 
-    # Category report (deduplicated by companyId)
+    # Ангиллын тайлан (companyId-аар давхардлыг арилгасан)
     seen, counts = set(), collections.Counter()
     with open(OUT, encoding="utf-8") as f:
         for line in f:

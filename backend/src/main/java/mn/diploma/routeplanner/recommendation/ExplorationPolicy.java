@@ -11,9 +11,9 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 /**
- * Stage 3: builds the final list. At most {@link #MAX_PER_CATEGORY} places per subcategory (variety), and about
- * 15% of the slots go to categories the user has shown little interest in (weight below 0.5), so the system keeps
- * learning about them and the user is not locked into a filter bubble.
+ * 3-р шат: эцсийн жагсаалтыг бүрдүүлнэ. Дэд ангилал бүрээс хамгийн ихдээ {@link #MAX_PER_CATEGORY} газар (олон
+ * янз байдал), байрын 15% орчмыг хэрэглэгчийн сонирхол багатай ангилалд (жин 0.5-аас бага) өгнө. Ингэснээр систем
+ * тэдгээрийн талаар суралцсаар, хэрэглэгч сонирхлын хөөсөнд түгжигдэхгүй (судалгааны санал болголт, exploration).
  */
 @Component
 public class ExplorationPolicy {
@@ -36,7 +36,7 @@ public class ExplorationPolicy {
             }
         }
 
-        // Exploration: best-placed candidates from low-interest categories not in the list yet, one per category
+        // Судалгааны санал болголт: жагсаалтад ороогүй, сонирхол багатай ангилал бүрээс хамгийн өндөр оноотой нэг нэр дэвшигч
         Set<String> usedCategories = new HashSet<>();
         main.forEach(c -> usedCategories.add(c.category));
         List<Candidate> explore = new ArrayList<>();
@@ -48,13 +48,13 @@ public class ExplorationPolicy {
             }
         }
 
-        // Spread exploration items through the list instead of putting them all at the end
+        // Судалгааны санал болголтыг бүгдийг төгсгөлд нь биш, жагсаалтын дундуур тараана
         List<Candidate> result = new ArrayList<>(main);
         for (int i = 0; i < explore.size(); i++) {
             int position = Math.min(result.size(), (i + 1) * (k / (explore.size() + 1)));
             result.add(position, explore.get(i));
         }
-        // If exploration found nothing, fill the free slots with the next best candidates
+        // Судалгааны газар олдоогүй бол сул байрыг дараагийн шилдэг нэр дэвшигчээр дүүргэнэ
         for (Candidate c : ranked) {
             if (result.size() >= k) break;
             if (!result.contains(c)) result.add(c);

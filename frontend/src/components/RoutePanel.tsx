@@ -19,7 +19,7 @@ const STATUS_LABELS: Record<RouteView['status'], string> = {
   CANCELLED: 'Цуцалсан',
 }
 
-/** Route view (ХХШ05): ordered stops with arrival times, Google Maps hand-over, completion and feedback. */
+/** Маршрутын харагдац (ХХШ05): ирэх цагтай дараалсан зогсоолууд, Google Maps руу шилжүүлэх, дуусгах, үнэлгээ. */
 export default function RoutePanel({ route, onChange, onSelectPlace, onClose }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -36,7 +36,7 @@ export default function RoutePanel({ route, onChange, onSelectPlace, onClose }: 
     }
   }
 
-  // Shown in the new order right away while the server recomputes the times
+  // Сервер цагийг дахин тооцох зуур шинэ дарааллыг шууд харуулна
   const [optimistic, setOptimistic] = useState<RouteView['stops'] | null>(null)
   const stops = optimistic ?? route.stops
 
@@ -59,7 +59,7 @@ export default function RoutePanel({ route, onChange, onSelectPlace, onClose }: 
     method: 'PATCH', body: { op: 'REMOVE', stopId },
   }))
 
-  // window.open must run inside the click handler or the browser blocks it as a pop-up
+  // window.open-ийг товшилтын функц дотор дуудахгүй бол хөтөч гарч ирэх цонх гэж хаана
   const openLink = (link: MapsLink) => {
     window.open(link.url, '_blank', 'noopener')
     if (route.status === 'CREATED') {

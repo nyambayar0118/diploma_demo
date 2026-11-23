@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 import mn.diploma.routeplanner.common.TransportMode;
 
 /**
- * Approximate travel time without calling any external API (ХСШ05, ХСШ06):
- *   t = c * d_haversine / v_mode + overhead_mode,  c = 1.3 (circuity factor, Ballou et al. 2002).
- * The factor and speeds are calibrated later against Google Maps for sample point pairs.
+ * Гадны API дуудахгүйгээр зорчих хугацааг ойролцоогоор тооцно (ХСШ05, ХСШ06):
+ *   t = c * d_haversine / v_mode + overhead_mode,  c = 1.3 (тойруу замын итгэлцүүр, Ballou et al. 2002).
+ * Итгэлцүүр болон хурдыг дараа нь жишээ цэгийн хосуудаар Google Maps-тэй харьцуулан тохируулна.
  */
 @Service
 public class TravelTimeEstimator {
@@ -17,14 +17,14 @@ public class TravelTimeEstimator {
     static final double DETOUR_FACTOR = 1.3;
     private static final double EARTH_RADIUS_M = 6_371_000;
 
-    /** Average door-to-door speed in km/h (public transport includes waiting and transfers). */
+    /** Хаалганаас хаалга хүртэлх дундаж хурд, км/ц (нийтийн тээвэрт хүлээх, суудал солих хугацаа багтсан). */
     private static final Map<TransportMode, Double> SPEED_KMH = Map.of(
             TransportMode.WALKING, 4.5,
             TransportMode.BICYCLE, 12.0,
             TransportMode.PUBLIC_TRANSPORT, 13.0,
             TransportMode.DRIVING, 22.0);
 
-    /** Fixed minutes per trip: waiting for a bus, parking the car. */
+    /** Аялал бүрийн тогтмол нэмэлт минут: автобус хүлээх, машин зогсоох. */
     private static final Map<TransportMode, Integer> OVERHEAD_MIN = Map.of(
             TransportMode.WALKING, 0,
             TransportMode.BICYCLE, 1,
@@ -37,7 +37,7 @@ public class TravelTimeEstimator {
         return (int) Math.ceil(minutes);
     }
 
-    /** Travel minutes between every pair of points. */
+    /** Цэгийн хос бүрийн хоорондох зорчих хугацаа, минутаар. */
     public TravelTimeMatrix estimate(java.util.List<LatLng> points, TransportMode mode) {
         int n = points.size();
         int[][] m = new int[n][n];

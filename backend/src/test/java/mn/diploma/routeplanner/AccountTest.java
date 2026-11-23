@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-/** Account deletion (ХШ08) and role management by an admin. */
+/** Бүртгэл устгах (ХШ08) болон администраторын эрхийн удирдлага. */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = "app.admin-emails=admin-test@example.com")
 class AccountTest {
@@ -54,7 +54,7 @@ class AccountTest {
         }
         assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM user_interactions WHERE user_id = ?", Integer.class, userId));
 
-        // The e-mail can be used again for a new account
+        // Имэйлийг шинэ бүртгэлд дахин ашиглаж болно
         assertEquals(201, http.send("POST", "/api/auth/register", """
                 {"email":"%s","password":"secret123","displayName":"Шинэ","username":"new_%s"}
                 """.formatted(email, suffix), null).statusCode());

@@ -1,6 +1,6 @@
 package mn.diploma.routeplanner.recommendation;
 
-/** A place that passed the rule-based filters, with its features and (after ranking) its score. */
+/** Дүрмээр шүүгдсэн нэр дэвшигч газар, шинж чанарууд болон (эрэмбэлсний дараа) онооны хамт. */
 public class Candidate {
 
     final long placeId;

@@ -1,6 +1,6 @@
 package mn.diploma.routeplanner.routing;
 
-/** Route life cycle (requirements, state diagram "Маршрутын төлөв"). */
+/** Маршрутын амьдралын мөчлөг (шаардлагын бүлэг, "Маршрутын төлөв" төлөвийн диаграм). */
 public enum RouteStatus {
     CREATED, OPENED_IN_MAPS, COMPLETED, CANCELLED;
 

@@ -1,7 +1,7 @@
 import type * as maplibregl from 'maplibre-gl'
 import { MAIN_CATEGORY_COLORS } from './places'
 
-/** How places are drawn on the map (map style menu). */
+/** Газрыг газрын зураг дээр ямар хэлбэрээр зурах (харагдацын цэс). */
 export type MarkerStyle = 'dot' | 'star' | 'pin' | 'diamond'
 export const MARKER_STYLES: { id: MarkerStyle; label: string }[] = [
   { id: 'dot', label: 'Цэг' },
@@ -16,7 +16,7 @@ export function savedMarkerStyle(): MarkerStyle {
     const v = localStorage.getItem(KEY)
     if (MARKER_STYLES.some((s) => s.id === v)) return v as MarkerStyle
   } catch {
-    /* ignore */
+    /* үл тооно */
   }
   return 'dot'
 }
@@ -24,13 +24,13 @@ export function saveMarkerStyle(style: MarkerStyle) {
   try {
     localStorage.setItem(KEY, style)
   } catch {
-    /* ignore */
+    /* үл тооно */
   }
 }
 
-const RATIO = 2 // sharp on high-density screens
+const RATIO = 2 // нягтрал өндөр дэлгэцэнд тод харагдана
 
-/** Outline of a shape in a size×size box (pin: point at the bottom centre). */
+/** size×size хүрээнд дүрсийн хүрээ (зүү: үзүүр нь доод голд). */
 function trace(ctx: CanvasRenderingContext2D, style: MarkerStyle, size: number) {
   const c = size / 2
   ctx.beginPath()
@@ -66,7 +66,7 @@ function trace(ctx: CanvasRenderingContext2D, style: MarkerStyle, size: number) 
   }
 }
 
-/** A coloured shape with a white outline, as ImageData for map.addImage. */
+/** Цагаан хүрээтэй өнгөт дүрс, map.addImage-д зориулсан ImageData. */
 export function drawMarker(style: MarkerStyle, color: string, cssSize: number): ImageData {
   const size = Math.round(cssSize * RATIO)
   const canvas = document.createElement('canvas')
@@ -89,7 +89,7 @@ export function drawMarker(style: MarkerStyle, color: string, cssSize: number): 
   return ctx.getImageData(0, 0, size, size)
 }
 
-/** Data URL for previews in the menu. */
+/** Цэсэн дэх урьдчилан харах зурагт зориулсан data URL. */
 export function markerPreview(style: MarkerStyle, color: string, cssSize = 22): string {
   const img = drawMarker(style, color, cssSize)
   const canvas = document.createElement('canvas')
@@ -99,18 +99,18 @@ export function markerPreview(style: MarkerStyle, color: string, cssSize = 22): 
   return canvas.toDataURL()
 }
 
-// Sizes in CSS pixels: recommendable places are bigger than the rest
+// CSS пикселээрх хэмжээ: санал болгож болох газрууд бусдаасаа том
 const SIZES = { l: 18, s: 11 } as const
 
-/** Image id the symbol layer asks for: shape-<style>-<mainCategory>-<l|s> */
+/** Symbol давхаргын хүсэх зургийн id: shape-<style>-<mainCategory>-<l|s> */
 export function iconExpression(style: MarkerStyle): maplibregl.ExpressionSpecification {
   return ['concat', `shape-${style}-`, ['coalesce', ['get', 'mainCategory'], 'other'], '-',
     ['case', ['get', 'recommendable'], 'l', 's']] as unknown as maplibregl.ExpressionSpecification
 }
 
 /**
- * Draws marker images when the map first needs them (also after a style switch such as dark mode,
- * which drops added images).
+ * Газрын зурагт анх хэрэгтэй болоход тэмдэгтийн зургийг зурна (бараан горим зэрэг загвар солиход
+ * нэмсэн зургууд устдаг тул тэр үед ч дахин зурна).
  */
 export function provideMarkerImages(map: maplibregl.Map) {
   map.on('styleimagemissing', (e: { id: string }) => {

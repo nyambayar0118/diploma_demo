@@ -74,7 +74,7 @@ public class User {
         return u;
     }
 
-    /** ХШ08: personal data is removed; the row stays so anonymous history keeps its foreign keys. */
+    /** ХШ08: хувийн мэдээллийг устгана; нэргүй түүхийн гадаад түлхүүрүүд хадгалагдахын тулд мөр үлдэнэ. */
     void anonymise(Instant now) {
         email = "deleted-" + id + "@deleted.invalid";
         passwordHash = null;

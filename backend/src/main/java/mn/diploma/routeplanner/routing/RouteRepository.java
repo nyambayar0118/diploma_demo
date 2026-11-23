@@ -18,7 +18,7 @@ import org.springframework.stereotype.Repository;
 import mn.diploma.routeplanner.common.TransportMode;
 import mn.diploma.routeplanner.routing.RouteStop.PlaceInfo;
 
-/** JDBC persistence of routes (PostGIS start point, so plain SQL instead of JPA). */
+/** Маршрутыг JDBC-ээр хадгална (эхлэх цэг нь PostGIS-ийн цэг тул JPA-ийн оронд энгийн SQL). */
 @Repository
 public class RouteRepository {
 
@@ -40,7 +40,7 @@ public class RouteRepository {
         this.jdbc = jdbc;
     }
 
-    /** Active places by id (inactive or unknown ids are missing from the result). */
+    /** Идэвхтэй газрууд id-аар (идэвхгүй эсвэл үл мэдэгдэх id үр дүнд орохгүй). */
     public Map<Long, PlaceInfo> activePlaces(Collection<Long> ids) {
         Map<Long, PlaceInfo> result = new LinkedHashMap<>();
         if (ids.isEmpty()) return result;
@@ -56,7 +56,7 @@ public class RouteRepository {
         return result;
     }
 
-    /** The recommendation id if it belongs to this user and place, otherwise null (never trust the client). */
+    /** Санал болголтын id энэ хэрэглэгч, газарт хамаарах бол түүнийг, үгүй бол null (клиентэд итгэхгүй). */
     public Long ownRecommendation(long userId, Long recommendationId, long placeId) {
         if (recommendationId == null) return null;
         return jdbc.query("""
@@ -83,7 +83,7 @@ public class RouteRepository {
                 """, r.estimatedDurationMinutes, r.status.name(), ts(r.openedAt), ts(r.closedAt), r.id);
     }
 
-    /** Replaces all stops (only done while the route is CREATED, so no visit answers are lost). */
+    /** Бүх зогсоолыг солино (зөвхөн CREATED төлөвтэй үед хийдэг тул зочлолын хариулт алдагдахгүй). */
     public void replaceStops(Route r) {
         jdbc.update("DELETE FROM route_stops WHERE route_id = ?", r.id);
         insertStops(r);
@@ -116,7 +116,7 @@ public class RouteRepository {
                 .stream().findFirst();
     }
 
-    /** Newest first. */
+    /** Хамгийн шинэ нь эхэндээ. */
     public List<Route> findByOwner(long ownerId, int limit) {
         return load(ROUTE_SELECT + "WHERE r.owner_id = ? ORDER BY r.created_at DESC, r.id DESC LIMIT ?", ownerId, limit);
     }
@@ -127,7 +127,7 @@ public class RouteRepository {
     }
 
     /**
-     * Closes routes whose day has passed (local time): opened ones become COMPLETED, never opened ones CANCELLED.
+     * Өдөр нь өнгөрсөн маршрутыг хаана (орон нутгийн цагаар): нээсэн нь COMPLETED, огт нээгээгүй нь CANCELLED болно.
      */
     public int closeExpired(LocalDateTime nowLocal) {
         return jdbc.update("""

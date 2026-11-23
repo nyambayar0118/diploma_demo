@@ -21,9 +21,9 @@ import mn.diploma.routeplanner.contribution.ContributionDtos.PlaceSnapshot;
 import mn.diploma.routeplanner.contribution.ContributionDtos.ProposedData;
 
 /**
- * Contributions (АШ03, АШ04, АШ06, АШ18): users propose a new place, corrections or a link; a moderator
- * approves (the change is applied and points are granted) or rejects with a reason. Approved field edits
- * are recorded in places.user_edited_fields so the OSM re-import keeps them (СНШ10).
+ * Хувь нэмэр (АШ03, АШ04, АШ06, АШ18): хэрэглэгч шинэ газар, засвар эсвэл холбоос санал болгоно; модератор
+ * баталгаажуулна (өөрчлөлтийг хэрэглэж, урамшууллын оноо олгоно) эсвэл шалтгаантай татгалзана. Баталгаажсан
+ * талбарын засварыг places.user_edited_fields-д тэмдэглэдэг тул OSM-ийг дахин импортлоход хадгалагдана (СНШ10).
  */
 @Service
 public class ContributionService {
@@ -129,7 +129,7 @@ public class ContributionService {
         return byId(requestId).orElseThrow();
     }
 
-    /** Applies an approved request to the place data; returns the place id. */
+    /** Баталгаажсан хүсэлтийг газрын мэдээлэлд хэрэглэнэ; газрын id-г буцаана. */
     private long applyChanges(ChangeRequestView r) {
         ProposedData d = r.data();
         switch (r.type()) {
@@ -232,7 +232,7 @@ public class ContributionService {
                 reviewed == null ? null : reviewed.toInstant(), rs.getObject("points", Integer.class));
     }
 
-    /** Current values of the place, so the moderator sees what would change. */
+    /** Газрын одоогийн утгууд; модератор юу өөрчлөгдөхийг харьцуулж харна. */
     private PlaceSnapshot snapshot(long placeId) {
         return jdbc.query("""
                 SELECT p.id, p.name_cyrillic, p.name_latin, c.code, c.name_mn, ST_Y(p.location), ST_X(p.location),

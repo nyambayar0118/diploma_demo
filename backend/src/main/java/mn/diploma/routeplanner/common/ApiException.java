@@ -2,7 +2,7 @@ package mn.diploma.routeplanner.common;
 
 import org.springframework.http.HttpStatus;
 
-/** Business error returned to the client as {code, message} with the given HTTP status. */
+/** Клиентэд өгөгдсөн HTTP төлөвтэйгээр {code, message} хэлбэрээр буцаах бизнес логикийн алдаа. */
 public class ApiException extends RuntimeException {
 
     private final HttpStatus status;

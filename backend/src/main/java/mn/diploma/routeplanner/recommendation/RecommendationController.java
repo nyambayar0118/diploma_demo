@@ -20,11 +20,11 @@ import mn.diploma.routeplanner.common.PriceLevel;
 import mn.diploma.routeplanner.common.TransportMode;
 import mn.diploma.routeplanner.recommendation.RecommendationService.Batch;
 
-/** Recommendation module API (design table "Санал болголтын модулийн API"). */
+/** Санал болголтын модулийн API (зохиомжийн "Санал болголтын модулийн API" хүснэгт). */
 @RestController
 public class RecommendationController {
 
-    /** Missing fields fall back to the user's preferences; {@code at} is for planning a later time (АШ25). */
+    /** Өгөөгүй талбарт хэрэглэгчийн тохиргоог ашиглана; {@code at} нь дараа цагийг төлөвлөхөд (АШ25). */
     public record RecommendationRequest(
             @NotNull @DecimalMin("-90") @DecimalMax("90") Double lat,
             @NotNull @DecimalMin("-180") @DecimalMax("180") Double lng,
@@ -33,7 +33,7 @@ public class RecommendationController {
             TransportMode transportMode,
             @Min(1) @Max(30) Integer k,
             LocalDateTime at,
-            /** Main or subcategory codes ("food", "museum"); empty or missing = all. */
+            /** Үндсэн эсвэл дэд ангиллын код ("food", "museum"); хоосон эсвэл өгөөгүй бол бүгд. */
             @jakarta.validation.constraints.Size(max = 40) List<@jakarta.validation.constraints.Size(max = 40) String> categories) {
     }
 

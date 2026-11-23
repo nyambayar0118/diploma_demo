@@ -5,11 +5,11 @@ import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-/** Public service of the Place module: category data needed by other modules. */
+/** Газрын модулийн нийтийн сервис: бусад модульд хэрэгтэй ангиллын мэдээлэл. */
 @Service
 public class CategoryLookup {
 
-    /** A recommendable subcategory and the main category it belongs to. */
+    /** Санал болгож болох дэд ангилал болон түүний харьяалагдах үндсэн ангилал. */
     public record Subcategory(long id, String code, long mainId, String mainCode) {
     }
 
@@ -19,7 +19,7 @@ public class CategoryLookup {
         this.jdbc = jdbc;
     }
 
-    /** Category id of an active place, if the place exists. */
+    /** Идэвхтэй газрын ангиллын id, газар байгаа бол. */
     public java.util.Optional<Long> categoryIdOfPlace(long placeId) {
         return jdbc.query("SELECT category_id FROM places WHERE id = ? AND is_active",
                 (rs, i) -> rs.getLong(1), placeId).stream().findFirst();

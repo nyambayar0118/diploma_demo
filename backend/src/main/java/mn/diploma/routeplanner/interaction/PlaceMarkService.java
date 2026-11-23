@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import mn.diploma.routeplanner.common.ApiException;
 import mn.diploma.routeplanner.place.PlaceQueryRepository;
 
-/** Save / hide places (АШ13). Hidden places are never recommended again. */
+/** Газар хадгалах / нуух (АШ13). Нуусан газрыг дахин санал болгохгүй. */
 @Service
 public class PlaceMarkService {
 

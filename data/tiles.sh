@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Cuts the Ulaanbaatar area out of the latest Protomaps daily world basemap build
-# (OpenStreetMap data) into data/tiles/ulaanbaatar.pmtiles. Only the needed tiles are
-# downloaded (HTTP range requests), typically a few tens of MB.
+# Protomaps-ийн хамгийн сүүлийн өдөр тутмын дэлхийн суурь газрын зургаас (OpenStreetMap өгөгдөл)
+# Улаанбаатарын хэсгийг data/tiles/ulaanbaatar.pmtiles болгон тайрна. Зөвхөн хэрэгтэй тайлуудыг
+# татна (HTTP range хүсэлт), ихэвчлэн хэдэн арван МБ.
 set -euo pipefail
 
 BBOX="${BBOX:-106.55,47.75,107.25,48.05}"
 MAXZOOM="${MAXZOOM:-15}"
 OUT="/data/tiles/ulaanbaatar.pmtiles"
 
-# Daily builds are named YYYYMMDD.pmtiles and kept for a limited time: try the last 10 days.
+# Өдөр тутмын хувилбар YYYYMMDD.pmtiles нэртэй, хязгаартай хугацаанд хадгалагддаг: сүүлийн 10 өдрийг оролдоно.
 BUILD_URL=""
 for i in $(seq 1 10); do
   d=$(date -u -d "-$i day" +%Y%m%d)

@@ -9,19 +9,19 @@ import mn.diploma.routeplanner.place.OpeningHours;
 import mn.diploma.routeplanner.routing.TravelTimeEstimator;
 
 /**
- * Stage 1 of the recommender: rule-based candidate filtering (design 3.2, Recommendation module).
- * Keeps recommendable places within the search radius that the user has not hidden, fit the budget,
- * suit the time of day, are open long enough and can be reached in a reasonable share of the available time.
+ * Санал болголтын 1-р шат: нэр дэвшигч газрыг дүрмээр шүүх (зохиомж 3.2, Санал болголтын модуль).
+ * Хайлтын радиус доторх, хэрэглэгчийн нуугаагүй, төсөвт багтах, цагийн тохирцтой, хангалттай удаан нээлттэй,
+ * боломжит хугацааны зохих хэсэгт хүрч болох санал болгож болох газруудыг үлдээнэ.
  */
 @Component
 public class CandidateGenerator {
 
     static final int MAX_CANDIDATES = 600;
-    /** Minimum minutes a place must stay open after arrival. */
+    /** Очсоноос хойш газар нээлттэй байх хамгийн бага хугацаа, минутаар. */
     static final int MIN_OPEN_MINUTES = 45;
-    /** Weight assumed for categories without a stored interest weight. */
+    /** Сонирхлын жин хадгалагдаагүй ангилалд өгөх жин. */
     static final double DEFAULT_WEIGHT = 0.2;
-    /** Weight used for every category when the INTERESTS consent is missing. */
+    /** INTERESTS зөвшөөрөл байхгүй үед бүх ангилалд өгөх жин. */
     static final double NEUTRAL_WEIGHT = 0.5;
 
     private static final String SQL = """
@@ -79,7 +79,7 @@ public class CandidateGenerator {
                 .map(row -> (Candidate) row[0])
                 .toList();
 
-        // One-way travel should take at most a third of the available time (the rest is for the visit itself)
+        // Нэг талын зорчих хугацаа боломжит хугацааны гуравны нэгээс хэтрэхгүй (үлдсэн нь зочлолд)
         int maxTravel = Math.max(15, ctx.availableMinutes() / 3);
         return rows.stream()
                 .peek(c -> c.travelMinutes = travelTimes.minutesBetween(ctx.lat(), ctx.lng(), c.lat, c.lng,

@@ -1,8 +1,8 @@
 package mn.diploma.routeplanner.auth;
 
 /**
- * Published inside the account-deletion transaction (ХШ08). Every module that keeps personal data
- * removes or anonymises its rows in a synchronous listener, so deletion is all-or-nothing.
+ * Бүртгэл устгах транзакц дотор нийтлэгдэнэ (ХШ08). Хувийн мэдээлэл хадгалдаг модуль бүр синхрон
+ * сонсогчоор өөрийн мөрүүдийг устгаж эсвэл нэргүй болгоно; ингэснээр устгал бүхэлдээ амжилттай эсвэл огт хийгдэхгүй.
  */
 public record UserDeletedEvent(long userId) {
 }

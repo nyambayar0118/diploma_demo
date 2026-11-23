@@ -3,15 +3,15 @@ import { useRef, useState, type ReactNode } from 'react'
 type Drag = { from: number; to: number; dy: number; settling: boolean }
 
 /**
- * A vertical list whose items can be dragged by a handle (mouse or touch). While dragging, the other items
- * slide out of the way to show the empty slot; on release the item glides into it, then onReorder is called.
+ * Бариулаар нь (хулгана эсвэл хүрэлтээр) чирч болох босоо жагсаалт. Чирэх үед бусад мөр зай тавьж хоосон байрыг
+ * харуулна; суллахад мөр тийшээ гулсаж ороод onReorder дуудагдана.
  */
 export default function SortableList<T>({ items, keyOf, enabled, onReorder, renderItem, className }: {
   items: T[]
   keyOf: (item: T) => string | number
   enabled: boolean
   onReorder: (from: number, to: number) => void
-  /** `handle` must be rendered inside the item; it starts the drag. */
+  /** `handle`-ийг мөр дотор зурах ёстой; чирэлтийг тэр эхлүүлнэ. */
   renderItem: (item: T, index: number, handle: ReactNode, dragging: boolean) => ReactNode
   className?: string
 }) {
@@ -34,7 +34,7 @@ export default function SortableList<T>({ items, keyOf, enabled, onReorder, rend
     const dy = e.clientY - s.y
     const r = s.rects[drag.from]
     const center = r.top + r.height / 2 + dy
-    // New slot = how many of the other items have their middle above the dragged item's middle
+    // Шинэ байр = бусад мөрийн хэд нь чирж буй мөрийн голоос дээр голтой байгаа тоо
     let to = 0
     s.rects.forEach((o, i) => {
       if (i !== drag.from && o.top + o.height / 2 < center) to++
@@ -51,13 +51,13 @@ export default function SortableList<T>({ items, keyOf, enabled, onReorder, rend
       setDrag(null)
       return
     }
-    // Glide into the empty slot, then commit the new order
+    // Хоосон байр руу гулсаж ороод шинэ дарааллыг баталгаажуулна
     const between = from < to ? s.rects.slice(from + 1, to + 1) : s.rects.slice(to, from)
     const target = between.reduce((sum, r) => sum + r.height, 0) * (from < to ? 1 : -1)
     setDrag({ ...drag, dy: target, settling: true })
     window.setTimeout(() => {
       start.current = null
-      setInstant(true) // positions change in the DOM now: no transition for this frame
+      setInstant(true) // байрлал DOM-д одоо өөрчлөгдөнө: энэ кадрт шилжилтгүй
       setDrag(null)
       onReorder(from, to)
       requestAnimationFrame(() => requestAnimationFrame(() => setInstant(false)))

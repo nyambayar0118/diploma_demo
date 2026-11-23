@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClient;
 
 /**
- * GET /api/health: status of the core server, the database (with PostGIS)
- * and the ML service. Used by the walking skeleton's map page; the full
- * admin endpoints (/api/admin/health, /api/admin/metrics) come later.
+ * GET /api/health: үндсэн сервер, өгөгдлийн сан (PostGIS-тэй) болон машин сургалтын
+ * сервисийн төлөв. Нийтэд нээлттэй энгийн шалгалт; дэлгэрэнгүй мэдээллийг
+ * администраторын /api/admin/health, /api/admin/metrics өгнө.
  */
 @RestController
 public class HealthController {

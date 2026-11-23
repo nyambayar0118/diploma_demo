@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+/** Газрын тэмдэглэгээний репозитори. */
 public interface PlaceMarkRepository extends JpaRepository<PlaceMark, Long> {
 
     Optional<PlaceMark> findByUserIdAndPlaceId(Long userId, Long placeId);

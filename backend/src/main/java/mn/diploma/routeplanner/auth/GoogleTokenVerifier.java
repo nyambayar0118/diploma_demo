@@ -16,13 +16,13 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
 
 /**
- * Verifies the ID token that Google Identity Services gives the browser ("Sign in with Google", АШ01):
- * RS256 signature against Google's public keys, issuer, expiry and that it was issued for our client id.
+ * Google Identity Services-ээс хөтчид өгсөн ID токеныг шалгана ("Google-ээр нэвтрэх", АШ01):
+ * Google-ийн нийтийн түлхүүрээр RS256 гарын үсэг, олгогч (iss), хугацаа, манай client id-д олгосон эсэх.
  */
 @Component
 public class GoogleTokenVerifier {
 
-    /** What we use from a verified Google ID token. */
+    /** Шалгагдсан Google ID токеноос ашиглах мэдээлэл. */
     public record GoogleUser(String subject, String email, boolean emailVerified, String name) {
     }
 
@@ -44,7 +44,7 @@ public class GoogleTokenVerifier {
         return clientId;
     }
 
-    /** The user if the token is valid, empty otherwise. */
+    /** Токен хүчинтэй бол хэрэглэгч, үгүй бол хоосон. */
     public Optional<GoogleUser> verify(String idToken) {
         if (!isEnabled()) return Optional.empty();
         try {

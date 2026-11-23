@@ -25,7 +25,7 @@ import mn.diploma.routeplanner.routing.RoutingDtos.PositionRequest;
 import mn.diploma.routeplanner.routing.RoutingDtos.RouteView;
 import mn.diploma.routeplanner.routing.RoutingDtos.VisitResult;
 
-/** Routing module API (design table "Маршрутын модулийн API"). */
+/** Маршрутын модулийн API (зохиомжийн "Маршрутын модулийн API" хүснэгт). */
 @RestController
 public class RouteController {
 
@@ -44,7 +44,7 @@ public class RouteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(routing.createRoute(JwtService.userId(jwt), req));
     }
 
-    /** The user's latest routes, newest first. */
+    /** Хэрэглэгчийн сүүлийн маршрутууд, хамгийн шинэ нь эхэндээ. */
     @GetMapping("/api/routes")
     public List<RouteView> list(@AuthenticationPrincipal Jwt jwt) {
         return routing.list(JwtService.userId(jwt));
@@ -84,7 +84,7 @@ public class RouteController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    /** 200 with the question, or 204 when there is nothing to ask. */
+    /** Асуулттай бол 200, асуух зүйлгүй бол 204. */
     @GetMapping("/api/visits/pending")
     public ResponseEntity<PendingVisit> pending(@AuthenticationPrincipal Jwt jwt,
                                                 @RequestParam(required = false) Double lat,

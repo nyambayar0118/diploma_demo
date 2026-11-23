@@ -1,7 +1,7 @@
-# Production overrides: HTTPS through Caddy (automatic Let's Encrypt certificates), restarts, daily backups.
-# Used together with the base file, from the repo root:
+# Үйлдвэрлэлийн тохиргоо: Caddy-гаар HTTPS (Let's Encrypt гэрчилгээг автоматаар), дахин эхлүүлэх, өдөр тутмын нөөц.
+# Үндсэн файлтай хамт, төслийн үндсэн хавтаснаас ашиглана:
 #   docker compose -f infra/docker-compose.yml -f infra/docker-compose.prod.yml --env-file .env up -d --build
-# See docs/DEPLOY.md.
+# docs/DEPLOY.md-г үз.
 
 services:
   caddy:
@@ -15,14 +15,14 @@ services:
       DOMAIN: ${DOMAIN:?Set DOMAIN in .env, e.g. myplanner.duckdns.org}
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data        # certificates: keep this volume, Let's Encrypt limits re-issuing
+      - caddy-data:/data        # гэрчилгээ: энэ volume-ийг устгахгүй, Let's Encrypt дахин олгохыг хязгаарладаг
       - caddy-config:/config
     depends_on:
       - web
 
   web:
     restart: unless-stopped
-    ports: !reset []          # only Caddy is reachable from outside
+    ports: !reset []          # гаднаас зөвхөн Caddy-д хандана
 
   backend:
     restart: unless-stopped
@@ -37,7 +37,7 @@ services:
     restart: unless-stopped
     ports: !reset []
 
-  # Daily pg_dump into ./backups (kept for BACKUP_KEEP_DAYS days)
+  # Өдөр бүр ./backups хавтсанд pg_dump (BACKUP_KEEP_DAYS өдөр хадгална)
   backup:
     image: postgis/postgis:17-3.5
     restart: unless-stopped
@@ -55,8 +55,8 @@ services:
       db:
         condition: service_healthy
 
-  # Keeps <subdomain>.duckdns.org pointing at this machine's public IP (home server only):
-  #   ... up -d --build --profile duckdns   (or set COMPOSE_PROFILES=duckdns in .env)
+  # <subdomain>.duckdns.org-ийг энэ машины нийтийн IP рүү заасан хэвээр байлгана (зөвхөн гэрийн сервер):
+  #   ... up -d --build --profile duckdns   (эсвэл .env-д COMPOSE_PROFILES=duckdns)
   duckdns:
     image: curlimages/curl:8.11.1
     profiles: ["duckdns"]

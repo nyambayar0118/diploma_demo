@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import mn.diploma.routeplanner.routing.LatLng;
 import mn.diploma.routeplanner.routing.MapsUrlBuilder;
 
-/** Each member's own Google Maps link to the meeting place (АШ24). */
+/** Гишүүн бүрийн уулзах газар хүртэлх өөрийн Google Maps холбоос (АШ24). */
 @Component
 public class MemberLinkService {
 

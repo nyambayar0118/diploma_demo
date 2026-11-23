@@ -22,7 +22,7 @@ const ROUTE_STATUS: Record<RouteView['status'], string> = {
   CREATED: 'Төлөвлөсөн', OPENED_IN_MAPS: 'Явж байна', COMPLETED: 'Дууссан', CANCELLED: 'Цуцалсан',
 }
 
-/** Side menu: the user's own lists (saved, hidden, routes) and every page outside the map. */
+/** Хажуугийн цэс: хэрэглэгчийн жагсаалтууд (хадгалсан, нуусан, маршрут) болон газрын зургаас бусад бүх хуудас. */
 export default function SideMenu({ open, onClose, onSelectPlace, onOpenRoute, onAddPlace, onInstall }: Props) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
@@ -33,7 +33,7 @@ export default function SideMenu({ open, onClose, onSelectPlace, onOpenRoute, on
   const [routes, setRoutes] = useState<RouteView[] | null>(null)
   const [points, setPoints] = useState<number | null>(null)
 
-  // Fresh numbers every time the menu opens
+  // Цэс нээгдэх бүрд тоог шинэчилнэ
   useEffect(() => {
     if (!open) {
       setView('menu')
@@ -46,7 +46,7 @@ export default function SideMenu({ open, onClose, onSelectPlace, onOpenRoute, on
     api<Rewards>('/api/users/me/rewards').then((r) => setPoints(r.total)).catch(() => undefined)
   }, [open, user])
 
-  // Escape closes the menu
+  // Escape цэсийг хаана
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()

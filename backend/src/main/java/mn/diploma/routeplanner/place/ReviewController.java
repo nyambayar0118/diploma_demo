@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import mn.diploma.routeplanner.auth.JwtService;
 import mn.diploma.routeplanner.place.ReviewService.ReviewDto;
 
-/** Reviews API (design table "Газрын модулийн API"); /api/moderation/** needs MODERATOR or ADMIN. */
+/** Үнэлгээ, сэтгэгдлийн API (зохиомжийн "Газрын модулийн API" хүснэгт); /api/moderation/**-д MODERATOR эсвэл ADMIN эрх хэрэгтэй. */
 @RestController
 public class ReviewController {
 

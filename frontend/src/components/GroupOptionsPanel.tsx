@@ -8,17 +8,17 @@ import BottomSheet from './BottomSheet'
 type Props = {
   groupId: number
   focusedId: number | null
-  /** Clicking an option: the map moves to it. */
+  /** Хувилбарыг дарахад газрын зураг тийш шилжинэ. */
   onFocus: (option: GroupOption) => void
-  /** Option markers to draw (empty clears them). */
+  /** Зурах хувилбарын тэмдэгтүүд (хоосон бол арилгана). */
   onResults: (markers: RecMarker[]) => void
-  /** Members' start points to draw (null clears them). */
+  /** Зурах гишүүдийн эхлэх цэг (null бол арилгана). */
   onMembers: (members: MemberMarker[] | null) => void
 }
 
 /**
- * Meeting place options of a group plan, shown next to the map (АШ10): clicking one moves the map there and
- * draws every member's way to it. "Сонгох" fixes the place and goes back to the plan page.
+ * Бүлгийн төлөвлөгөөний уулзах газрын хувилбарууд газрын зургийн хажууд (АШ10): нэгийг дарахад газрын зураг тийш
+ * шилжиж, гишүүн бүрээс очих замыг зурна. "Сонгох" газрыг тогтоож, төлөвлөгөөний хуудас руу буцна.
  */
 export default function GroupOptionsPanel({ groupId, focusedId, onFocus, onResults, onMembers }: Props) {
   const navigate = useNavigate()
@@ -44,7 +44,7 @@ export default function GroupOptionsPanel({ groupId, focusedId, onFocus, onResul
     }
   }
 
-  // Load the plan, draw the members, then ask for the first options
+  // Төлөвлөгөөг ачаалж, гишүүдийг зурсны дараа эхний хувилбаруудыг хүснэ
   useEffect(() => {
     let alive = true
     api<GroupView>(`/api/groups/${groupId}`).then((g) => {

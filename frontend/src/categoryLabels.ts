@@ -1,3 +1,4 @@
+// Тооллын төрлүүдийн монгол нэр (тээврийн хэрэгсэл, төсөв).
 export const TRANSPORT_LABELS: Record<string, string> = {
   WALKING: 'Явган',
   PUBLIC_TRANSPORT: 'Нийтийн тээвэр',

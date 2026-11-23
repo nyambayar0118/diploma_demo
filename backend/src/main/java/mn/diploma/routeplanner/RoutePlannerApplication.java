@@ -6,11 +6,11 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * Core server of the system (design chapter 3.1): a modular monolith.
- * Each top-level package under {@code mn.diploma.routeplanner} is one module
+ * Системийн үндсэн сервер (зохиомжийн бүлэг 3.1): модульчлагдсан монолит.
+ * {@code mn.diploma.routeplanner} доорх дээд түвшний багц бүр нэг модуль болно
  * (auth, friend, location, interaction, interest, place, contribution,
- * recommendation, routing, group, monitoring). Modules call each other only
- * through their public service interfaces.
+ * recommendation, routing, group, monitoring). Модулиуд бие биеэ зөвхөн
+ * нийтэд нээлттэй сервисийн интерфейсээр дамжуулан дуудна.
  */
 @SpringBootApplication
 @EnableAsync

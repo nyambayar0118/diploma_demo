@@ -15,13 +15,13 @@ import jakarta.validation.constraints.Size;
 import mn.diploma.routeplanner.common.PriceLevel;
 import mn.diploma.routeplanner.common.TransportMode;
 
-/** Request and response bodies of the Group module API. */
+/** Бүлгийн модулийн API-ийн хүсэлт, хариуны бүтэц. */
 public final class GroupDtos {
 
     private GroupDtos() {
     }
 
-    /** A start point the initiator pins for a friend (overrides the friend's shared location). */
+    /** Санаачлагчийн найздаа тэмдэглэсэн эхлэх цэг (найзын хуваалцсан байршлыг орлоно). */
     public record MemberStart(@NotNull Long userId,
                               @DecimalMin("-90") @DecimalMax("90") Double lat,
                               @DecimalMin("-180") @DecimalMax("180") Double lng,
@@ -40,7 +40,7 @@ public final class GroupDtos {
 
     public enum MemberOperation { ADD, REMOVE, SET_START }
 
-    /** ADD: userId (a friend); REMOVE: memberId; SET_START: memberId with lat / lng and / or transportMode. */
+    /** ADD: userId (найз); REMOVE: memberId; SET_START: memberId, lat / lng болон / эсвэл transportMode. */
     public record ModifyMembersRequest(@NotNull MemberOperation op, Long userId, Long memberId,
                                        @DecimalMin("-90") @DecimalMax("90") Double lat,
                                        @DecimalMin("-180") @DecimalMax("180") Double lng,
@@ -59,7 +59,7 @@ public final class GroupDtos {
     public record PlaceRef(long id, String name, String categoryName, String mainCategory, double lat, double lng) {
     }
 
-    /** Start coordinates are shown only to the member themself and to the initiator (not of guests). */
+    /** Эхлэх цэгийн солбилцлыг зөвхөн тухайн гишүүн өөрөө болон санаачлагч харна (зочных харагдахгүй). */
     public record MemberView(long id, MemberRole role, Long userId, String name, boolean guest, StartSource startSource,
                              Double startLat, Double startLng, TransportMode transportMode, boolean usesInterests,
                              Integer travelMinutes, boolean joinedViaLink, String mapsUrl, boolean me) {

@@ -1,3 +1,4 @@
+# Тасралтгүй нэгтгэл (CI): push бүрд серверийн тестийг PostGIS-тэй орчинд ажиллуулж, клиентийг бүтээнэ.
 name: CI
 
 on:
@@ -6,6 +7,7 @@ on:
   pull_request:
 
 jobs:
+  # Сервер: PostGIS сервисийн контейнертэй эхнээс нь дуустал тестүүд
   backend:
     runs-on: ubuntu-latest
     services:
@@ -33,6 +35,7 @@ jobs:
         working-directory: backend
         run: mvn -B -ntp verify
 
+  # Клиент: TypeScript-ийн төрлийн шалгалт болон бүтээлт
   frontend:
     runs-on: ubuntu-latest
     steps:
@@ -48,6 +51,7 @@ jobs:
           npm ci
           npm run build
 
+  # Машин сургалтын сервис: хамаарлыг суулгаж, ажиллаж эхэлж байгааг шалгана
   ml:
     runs-on: ubuntu-latest
     steps:

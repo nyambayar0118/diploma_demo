@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { canPromptInstall, INSTALL_CHANGED, platform, promptInstall } from '../pwa'
 
-/** iOS Share icon (square with an arrow), drawn like Safari's. */
+/** iOS-ийн Share дүрс (сумтай дөрвөлжин), Safari-д байдагтай адил. */
 const ShareIos = () => (
   <svg className="inline-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
        strokeLinecap="round" strokeLinejoin="round" aria-label="Хуваалцах">
@@ -19,7 +19,7 @@ function Steps({ items }: { items: ReactNode[] }) {
   )
 }
 
-/** How to add the web app to the home screen, for the user's own phone and browser. */
+/** Хэрэглэгчийн утас, хөтөчид тохирсон, веб аппыг нүүр дэлгэцэд нэмэх заавар. */
 export default function InstallGuide({ onClose }: { onClose: () => void }) {
   const [p] = useState(platform)
   const [canPrompt, setCanPrompt] = useState(canPromptInstall)

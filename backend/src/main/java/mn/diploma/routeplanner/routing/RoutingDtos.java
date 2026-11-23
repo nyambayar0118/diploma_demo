@@ -15,7 +15,7 @@ import jakarta.validation.constraints.Size;
 import mn.diploma.routeplanner.common.TransportMode;
 import mn.diploma.routeplanner.place.OpeningHours;
 
-/** Request and response bodies of the Routing module API. */
+/** Маршрутын модулийн API-ийн хүсэлт, хариуны бүтэц. */
 public final class RoutingDtos {
 
     private RoutingDtos() {
@@ -25,8 +25,8 @@ public final class RoutingDtos {
     }
 
     /**
-     * Without stops the server picks 2-3 of the top recommendations itself (automatic route).
-     * Missing mode / budget fall back to the user's preferences; {@code startAt} plans a later time (local time).
+     * Зогсоол өгөөгүй бол сервер шилдэг санал болголтоос 2-3-ыг өөрөө сонгоно (автомат маршрут).
+     * Тээвэр / төсөв өгөөгүй бол хэрэглэгчийн тохиргоог ашиглана; {@code startAt} нь дараа цагийг төлөвлөнө (орон нутгийн цаг).
      */
     public record CreateRouteRequest(
             @NotNull @DecimalMin("-90") @DecimalMax("90") Double lat,
@@ -35,15 +35,15 @@ public final class RoutingDtos {
             @Min(30) @Max(720) Integer timeBudgetMinutes,
             LocalDateTime startAt,
             @Size(max = RoutingService.MAX_STOPS) List<@Valid StopRequest> stops,
-            /** Automatic route only: limit the picked places to these main or subcategory codes. */
+            /** Зөвхөн автомат маршрутад: сонгох газрыг эдгээр үндсэн эсвэл дэд ангиллаар хязгаарлана. */
             @Size(max = 40) List<@Size(max = 40) String> categories) {
     }
 
     public enum StopOperation { ADD, REMOVE, REPLACE, REORDER, OPTIMIZE }
 
     /**
-     * ADD: placeId (+ recommendationId); REMOVE: stopId; REPLACE: stopId and the new placeId;
-     * REORDER: stopIds in the order the user wants (kept as given); OPTIMIZE: back to the shortest order.
+     * ADD: placeId (+ recommendationId); REMOVE: stopId; REPLACE: stopId болон шинэ placeId;
+     * REORDER: хэрэглэгчийн хүссэн дараалал дахь stopIds (өгснөөр нь хадгална); OPTIMIZE: хамгийн богино дараалал руу буцаана.
      */
     public record ModifyStopsRequest(@NotNull StopOperation op, Long stopId, Long placeId, Long recommendationId,
                                      @Size(max = RoutingService.MAX_STOPS) List<Long> stopIds) {
@@ -70,7 +70,7 @@ public final class RoutingDtos {
                             boolean feedbackGiven, Long groupSessionId, boolean shortestOrder) {
     }
 
-    /** The "Очсон уу?" question: the stop to ask about and whether the user is standing near it. */
+    /** "Очсон уу?" асуулт: асуух зогсоол болон хэрэглэгч түүний ойролцоо байгаа эсэх. */
     public record PendingVisit(long stopId, long routeId, int stopOrder, int stopCount, long placeId, String name,
                                boolean nearby) {
     }

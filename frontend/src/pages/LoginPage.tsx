@@ -4,6 +4,7 @@ import { api, ApiError, rememberNext, takeNext, type OnboardingStatus } from '..
 import { useAuth } from '../auth'
 import GoogleButton from '../components/GoogleButton'
 
+/** Нэвтрэх хуудас: имэйл, нууц үг эсвэл Google хаягаар. */
 export default function LoginPage() {
   const { login, loginWithGoogle } = useAuth()
   const navigate = useNavigate()

@@ -1,6 +1,6 @@
 package mn.diploma.routeplanner.auth;
 
-/** Personal data the user can allow the system to use (ХШ04, ХШ05), with purpose and retention. */
+/** Хэрэглэгчийн ашиглахыг зөвшөөрч болох хувийн мэдээллийн төрөл, зорилго, хадгалах хугацааны хамт (ХШ04, ХШ05). */
 public enum ConsentDataType {
     INTERESTS("Сонирхолд нийцсэн газар санал болгох", 365),
     LOCATION("Ойролцоох газрыг санал болгох, маршрутын хугацааг тооцох", 30),

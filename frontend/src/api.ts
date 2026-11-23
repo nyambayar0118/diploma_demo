@@ -1,4 +1,4 @@
-// Small fetch wrapper: JSON in/out, JWT from localStorage, API errors as ApiError {code, message}.
+// Серверт хүсэлт илгээх жижиг туслах: JSON оролт/гаралт, JWT-г localStorage-оос авна, API алдааг ApiError {code, message} болгоно.
 
 const TOKEN_KEY = 'routeplanner.token'
 
@@ -25,11 +25,11 @@ export function setToken(token: string | null) {
     if (token) localStorage.setItem(TOKEN_KEY, token)
     else localStorage.removeItem(TOKEN_KEY)
   } catch {
-    /* storage unavailable: the user just has to log in again next time */
+    /* хадгалах сан ашиглах боломжгүй: дараа нь дахин нэвтрэхэд л болно */
   }
 }
 
-/** Fired when the server rejects the token (expired / invalid), so the app can log out. */
+/** Сервер токеныг (хугацаа дууссан / хүчингүй) татгалзахад дуудагдана; апп хэрэглэгчийг гаргана. */
 export const UNAUTHORIZED_EVENT = 'routeplanner:unauthorized'
 
 export async function api<T>(path: string, options: { method?: string; body?: unknown } = {}): Promise<T> {
@@ -53,7 +53,7 @@ export async function api<T>(path: string, options: { method?: string; body?: un
       code = body.code ?? code
       message = body.message ?? message
     } catch {
-      /* body was not JSON */
+      /* хариу JSON биш байсан */
     }
     throw new ApiError(res.status, code, message)
   }
@@ -61,7 +61,7 @@ export async function api<T>(path: string, options: { method?: string; body?: un
   return res.json() as Promise<T>
 }
 
-// ---- Types shared with the backend ----
+// ---- Сервертэй хуваалцах өгөгдлийн төрлүүд ----
 
 export type User = {
   id: number
@@ -126,7 +126,7 @@ export type PlaceDetails = PlaceSummary & {
   reviewCount: number
   links?: { url: string; type: string; title: string | null; platform: string | null }[]
   source?: 'OSM' | 'USER' | 'MINU'
-  /** Some of the details come from Minu Map */
+  /** Мэдээллийн зарим нь Minu Map-аас ирсэн */
   fromMinu?: boolean
 }
 
@@ -136,7 +136,7 @@ export function googleMapsUrl(lat: number, lng: number) {
   return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
 }
 
-/** Fire-and-forget interaction log (only for logged-in users). */
+/** Хариу хүлээхгүйгээр үйлдэл бүртгэнэ (зөвхөн нэвтэрсэн хэрэглэгч). */
 export function logInteraction(placeId: number, type: 'VIEW' | 'OPEN_IN_MAPS' | 'ACCEPT' | 'REJECT',
                                recommendationId?: number) {
   if (!getToken()) return
@@ -170,7 +170,7 @@ export type RecommendationBatch = {
   items: RecommendationItem[]
 }
 
-// ---- Routes ----
+// ---- Маршрут ----
 export type RouteStatus = 'CREATED' | 'OPENED_IN_MAPS' | 'COMPLETED' | 'CANCELLED'
 export type MapsLink = { url: string; mode: TransportMode; legIndex: number }
 
@@ -208,7 +208,7 @@ export type RouteView = {
   mapsLinks: MapsLink[]
   feedbackGiven: boolean
   groupSessionId: number | null
-  /** False after the user reordered the stops by hand. */
+  /** Хэрэглэгч зогсоолыг гараар дараалуулсны дараа false. */
   shortestOrder: boolean
 }
 
@@ -239,7 +239,7 @@ export function durationText(minutes: number) {
   return h === 0 ? `${m} мин` : m === 0 ? `${h} цаг` : `${h} цаг ${m} мин`
 }
 
-// ---- Friends and location sharing ----
+// ---- Найз, байршил хуваалцах ----
 export type UserRef = { id: number; username: string; displayName: string }
 export type Friendship = { id: number; direction: 'FRIEND' | 'INCOMING' | 'OUTGOING'; user: UserRef; since: string }
 export type MyLocation = { shared: boolean; lat: number | null; lng: number | null; updatedAt: string | null }
@@ -251,9 +251,9 @@ export function agoText(iso: string) {
   return min < 1 ? 'дөнгөж сая' : min < 60 ? `${min} мин өмнө` : `${Math.round(min / 60)} цагийн өмнө`
 }
 
-// ---- Where to go after login / onboarding (e.g. back to an invite link) ----
+// ---- Нэвтрэх / бүртгэлийн асуулгын дараа хаашаа шилжих (жишээ нь урилгын холбоос руу буцах) ----
 const NEXT_KEY = 'routeplanner:next'
-/** Remembers ?next=/path from the login / register URL (only same-site paths). */
+/** Нэвтрэх / бүртгүүлэх URL-ийн ?next=/path-ийг санана (зөвхөн энэ сайтын зам). */
 export function rememberNext(search: string) {
   const next = new URLSearchParams(search).get('next')
   if (next && next.startsWith('/') && !next.startsWith('//')) sessionStorage.setItem(NEXT_KEY, next)
@@ -264,7 +264,7 @@ export function takeNext(): string {
   return next ?? '/'
 }
 
-// ---- Group planning ----
+// ---- Бүлгийн төлөвлөгөө ----
 export type GroupStatus = 'RECOMMENDED' | 'SHARED' | 'COMPLETED' | 'CANCELLED'
 export type PlaceRef = { id: number; name: string; categoryName: string; mainCategory: string; lat: number; lng: number }
 export type GroupMember = {
@@ -307,7 +307,7 @@ export type GroupOptions = { batchId: number; aggregator: string; options: Group
 export type JoinInfo = { status: GroupStatus; initiatorName: string; memberCount: number; meetingPlace: PlaceRef | null; expiresAt: string | null; valid: boolean }
 export type JoinResult = { memberId: number; name: string; meetingPlace: PlaceRef; mapsUrl: string; travelMinutes: number | null; routeId: number | null }
 
-/** Device position (needs https or localhost); null when unavailable or refused. */
+/** Төхөөрөмжийн байршил (https эсвэл localhost хэрэгтэй); боломжгүй эсвэл татгалзсан бол null. */
 export function currentPosition(timeout = 10000) {
   return new Promise<{ lat: number; lng: number } | null>((resolve) => {
     if (!navigator.geolocation) return resolve(null)
@@ -319,7 +319,7 @@ export function currentPosition(timeout = 10000) {
   })
 }
 
-// ---- Contributions ----
+// ---- Хувь нэмэр ----
 export type RequestType = 'CREATE_PLACE' | 'UPDATE_PLACE' | 'ADD_LINK'
 export type LinkType = 'WEBSITE' | 'FACEBOOK' | 'INSTAGRAM' | 'REVIEW_ARTICLE' | 'OTHER'
 export type ProposedData = Partial<{

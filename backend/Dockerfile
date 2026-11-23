@@ -1,4 +1,4 @@
-# Build with Maven inside Docker, so no local Maven installation is needed
+# Docker дотор Maven-ээр бүтээдэг тул компьютерт Maven суулгах шаардлагагүй
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /src
 COPY pom.xml .

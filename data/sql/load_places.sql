@@ -1,10 +1,10 @@
--- Copies the osm2pgsql staging tables (schema osm) into the system tables.
--- Safe to run repeatedly: existing rows are updated, places that disappeared from OSM
--- (or no longer match a category) are deactivated instead of deleted.
+-- osm2pgsql-ийн завсрын хүснэгтүүдийг (osm схем) системийн хүснэгтүүд рүү хуулна.
+-- Дахин дахин ажиллуулахад аюулгүй: байгаа мөрүүдийг шинэчилж, OSM-оос алга болсон
+-- (эсвэл аль ч ангилалд таарахаа больсон) газрыг устгалгүй идэвхгүй болгоно.
 \set ON_ERROR_STOP on
 BEGIN;
 
--- 1. Places: pick the best-matching category per OSM object (highest mapping priority)
+-- 1. Газар: OSM объект бүрд хамгийн сайн таарах ангиллыг сонгоно (харгалзуулалтын хамгийн өндөр ач холбогдол)
 CREATE TEMP TABLE matched ON COMMIT DROP AS
 SELECT DISTINCT ON (p.osm_type, p.osm_id)
        CASE p.osm_type WHEN 'N' THEN 'NODE' WHEN 'W' THEN 'WAY' ELSE 'RELATION' END AS osm_type,
@@ -28,7 +28,7 @@ SELECT osm_type, osm_id, 'OSM', TRUE,
        left(tags ->> 'opening_hours', 500), tags, TRUE, now()
 FROM matched
 ON CONFLICT ON CONSTRAINT places_osm_unique DO UPDATE SET
-    -- СНШ10: a field a moderator approved a user edit for keeps the user's value
+    -- СНШ10: модератор хэрэглэгчийн засварыг баталгаажуулсан талбар хэрэглэгчийн утгаа хадгална
     name_cyrillic     = CASE WHEN 'name_cyrillic' = ANY (places.user_edited_fields) THEN places.name_cyrillic ELSE EXCLUDED.name_cyrillic END,
     name_latin        = CASE WHEN 'name_latin' = ANY (places.user_edited_fields) THEN places.name_latin ELSE EXCLUDED.name_latin END,
     category_id       = CASE WHEN 'category_id' = ANY (places.user_edited_fields) THEN places.category_id ELSE EXCLUDED.category_id END,
@@ -39,7 +39,7 @@ ON CONFLICT ON CONSTRAINT places_osm_unique DO UPDATE SET
     district_or_sum   = EXCLUDED.district_or_sum,
     khoroo_or_bag     = EXCLUDED.khoroo_or_bag,
     street            = CASE WHEN 'street' = ANY (places.user_edited_fields) THEN places.street ELSE EXCLUDED.street END,
-    -- hours filled in from Minu Map stay when OSM has none
+    -- OSM-д ажиллах цаг байхгүй бол Minu Map-аас бөглөсөн цаг хэвээр үлдэнэ
     opening_hours_raw = CASE WHEN 'opening_hours_raw' = ANY (places.user_edited_fields) THEN places.opening_hours_raw
                              ELSE coalesce(EXCLUDED.opening_hours_raw, CASE WHEN places.minu_id IS NOT NULL THEN places.opening_hours_raw END) END,
     osm_tags          = EXCLUDED.osm_tags,
@@ -50,7 +50,7 @@ UPDATE places p SET is_active = FALSE
 WHERE p.source = 'OSM' AND p.is_active
   AND NOT EXISTS (SELECT 1 FROM matched m WHERE m.osm_type = p.osm_type AND m.osm_id = p.osm_id);
 
--- 2. Buildings: keep named buildings and buildings that contain at least one place (ДШ07)
+-- 2. Барилга: нэртэй болон дор хаяж нэг газар агуулсан барилгыг үлдээнэ (ДШ07)
 INSERT INTO buildings (osm_type, osm_id, name, type, location, area,
                        country, city_or_aimag, district_or_sum, khoroo_or_bag, street)
 SELECT CASE b.osm_type WHEN 'W' THEN 'WAY' ELSE 'RELATION' END, b.osm_id,
@@ -73,14 +73,14 @@ ON CONFLICT (osm_type, osm_id) DO UPDATE SET
     district_or_sum = EXCLUDED.district_or_sum, khoroo_or_bag = EXCLUDED.khoroo_or_bag,
     street = EXCLUDED.street;
 
--- 3. Link each place to the smallest building that contains it (point-in-polygon)
+-- 3. Газар бүрийг түүнийг агуулсан хамгийн жижиг барилгатай холбоно (цэг олон өнцөгт дотор)
 UPDATE places p SET building_id = (
     SELECT b.id FROM buildings b
     WHERE ST_Contains(b.area, p.location)
     ORDER BY ST_Area(b.area) LIMIT 1)
 WHERE p.source = 'OSM';
 
--- 4. Places without their own address take the building's address
+-- 4. Өөрийн хаяггүй газар барилгын хаягийг авна
 UPDATE places p SET
     street          = coalesce(nullif(p.street, ''), b.street),
     district_or_sum = coalesce(p.district_or_sum, b.district_or_sum),
@@ -92,7 +92,7 @@ UPDATE places SET street = NULL WHERE street = '';
 
 COMMIT;
 
--- Summary
+-- Хураангуй
 SELECT main.name_mn AS "Ангилал", count(p.id) AS "Газрын тоо",
        count(p.id) FILTER (WHERE sub.is_recommendable) AS "Санал болгох"
 FROM place_categories main

@@ -11,7 +11,7 @@ import mn.diploma.routeplanner.auth.UserDeletedEvent;
 import mn.diploma.routeplanner.contribution.ContributionDtos.RewardView;
 import mn.diploma.routeplanner.contribution.ContributionDtos.RewardsView;
 
-/** Reward points for approved contributions (АШ05). users.reward_points holds the running total. */
+/** Баталгаажсан хувь нэмэрт олгох урамшууллын оноо (АШ05). users.reward_points-д нийт оноог хадгална. */
 @Service
 public class RewardService {
 

@@ -1,6 +1,6 @@
 package mn.diploma.routeplanner.routing;
 
-/** Estimated travel minutes between every pair of points (index 0 is usually the start). */
+/** Цэгийн хос бүрийн хоорондох тооцоолсон зорчих хугацаа (зайн матриц), минутаар (0-р индекс ихэвчлэн эхлэх цэг). */
 public record TravelTimeMatrix(int[][] minutes) {
 
     public int between(int from, int to) {

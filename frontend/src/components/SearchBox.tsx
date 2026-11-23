@@ -13,6 +13,7 @@ function formatDistance(m?: number | null) {
   return m < 1000 ? `${Math.round(m)} м` : `${(m / 1000).toFixed(1)} км`
 }
 
+/** Газрыг нэрээр нь кирилл эсвэл латин үсгээр хайх талбар (АШ01, АШ02); бичих явцад санал болгоно. */
 export default function SearchBox({ category, center, onSelect }: Props) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<PlaceSummary[]>([])
@@ -26,7 +27,7 @@ export default function SearchBox({ category, center, onSelect }: Props) {
       setResults([])
       return
     }
-    // Wait until the user pauses typing
+    // Хэрэглэгч бичихээ түр зогсоотол хүлээнэ
     timer.current = window.setTimeout(() => {
       const c = center()
       const params = new URLSearchParams({ q, lat: c.lat.toFixed(5), lng: c.lng.toFixed(5) })

@@ -26,7 +26,7 @@ import mn.diploma.routeplanner.group.GroupDtos.ModifyMembersRequest;
 import mn.diploma.routeplanner.group.GroupDtos.OptionsView;
 import mn.diploma.routeplanner.group.GroupDtos.ShareRequest;
 
-/** Group module API (design table "Бүлгийн төлөвлөгөөний модулийн API"). */
+/** Бүлгийн модулийн API (зохиомжийн "Бүлгийн төлөвлөгөөний модулийн API" хүснэгт). */
 @RestController
 public class GroupController {
 
@@ -74,13 +74,13 @@ public class GroupController {
         return ResponseEntity.noContent().build();
     }
 
-    /** Public: what the invite link is about. */
+    /** Нийтэд нээлттэй: урилгын холбоос юуны тухай болохыг харуулна. */
     @GetMapping("/api/groups/join/{token}")
     public JoinInfo joinInfo(@PathVariable String token) {
         return groups.joinInfo(token);
     }
 
-    /** Public: join as a guest, or as a member when logged in. */
+    /** Нийтэд нээлттэй: зочноор, нэвтэрсэн бол гишүүнээр нэгдэнэ. */
     @PostMapping("/api/groups/join/{token}")
     public JoinResult join(@AuthenticationPrincipal Jwt jwt, @PathVariable String token,
                            @Valid @RequestBody JoinRequest req) {

@@ -14,11 +14,11 @@ import org.springframework.stereotype.Repository;
 import mn.diploma.routeplanner.common.PriceLevel;
 import mn.diploma.routeplanner.common.TransportMode;
 
-/** JDBC persistence of group sessions and members (PostGIS start points). */
+/** Бүлгийн төлөвлөгөө, гишүүдийг JDBC-ээр хадгална (эхлэх цэг нь PostGIS-ийн цэг). */
 @Repository
 public class GroupRepository {
 
-    /** A group plan with its members. */
+    /** Гишүүдийнхээ хамт бүлгийн төлөвлөгөө. */
     public static class Session {
         long id;
         GroupStatus status;
@@ -44,7 +44,7 @@ public class GroupRepository {
         }
     }
 
-    /** A registered member (userId) or a guest (guestName). */
+    /** Бүртгэлтэй гишүүн (userId) эсвэл зочин (guestName). */
     public static class Member {
         long id;
         Long userId;
@@ -116,7 +116,7 @@ public class GroupRepository {
                 """, placeId, token, Timestamp.from(expires), sessionId);
     }
 
-    /** Closes the plan; the invite link stops working. */
+    /** Төлөвлөгөөг хаана; урилгын холбоос ажиллахаа болино. */
     public void close(long sessionId, GroupStatus status) {
         jdbc.update("""
                 UPDATE group_sessions SET status = ?, invite_token = NULL, invite_expires_at = NULL, closed_at = now()

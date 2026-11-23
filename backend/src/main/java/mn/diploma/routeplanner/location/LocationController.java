@@ -17,7 +17,7 @@ import mn.diploma.routeplanner.auth.JwtService;
 import mn.diploma.routeplanner.location.LocationService.FriendLocation;
 import mn.diploma.routeplanner.location.LocationService.MyLocation;
 
-/** Location module API. */
+/** Байршлын модулийн API. */
 @RestController
 public class LocationController {
 

@@ -1,16 +1,17 @@
+// Цайвар / бараан горим: хэрэглэгчийн сонголтыг хадгалж, хуудасны өнгөний хувьсагчийг сэлгэнэ.
 import { useEffect, useState } from 'react'
 
 export type Theme = 'light' | 'dark'
 const KEY = 'routeplanner.theme'
 export const THEME_CHANGED = 'routeplanner:theme-changed'
 
-/** Saved choice, otherwise the phone / computer setting. */
+/** Хадгалсан сонголт, үгүй бол утас / компьютерийн тохиргоо. */
 export function currentTheme(): Theme {
   try {
     const saved = localStorage.getItem(KEY)
     if (saved === 'light' || saved === 'dark') return saved
   } catch {
-    /* storage unavailable */
+    /* хадгалах сан ашиглах боломжгүй */
   }
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
@@ -24,7 +25,7 @@ export function setTheme(theme: Theme) {
   try {
     localStorage.setItem(KEY, theme)
   } catch {
-    /* storage unavailable: still switch for this visit */
+    /* хадгалах сан ашиглах боломжгүй: энэ удаад л сэлгэнэ */
   }
   applyTheme(theme)
   window.dispatchEvent(new Event(THEME_CHANGED))

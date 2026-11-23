@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import mn.diploma.routeplanner.auth.AuthDtos.ConsentDto;
 
-/** Public service of the Auth module: other modules ask here before using personal data (ХШ05). */
+/** Нэвтрэлтийн модулийн нийтийн сервис: бусад модуль хувийн мэдээлэл ашиглахаасаа өмнө зөвшөөрлийг эндээс шалгана (ХШ05). */
 @Service
 public class ConsentService {
 

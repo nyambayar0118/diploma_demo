@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import mn.diploma.routeplanner.auth.UserDeletedEvent;
 
-/** ХШ08: saved / hidden places are deleted; the interaction log is kept without user and location. */
+/** ХШ08: хадгалсан / нуусан газруудыг устгана; үйлдлийн бүртгэлийг хэрэглэгч, байршилгүйгээр үлдээнэ. */
 @Component
 class InteractionDataCleanup {
 

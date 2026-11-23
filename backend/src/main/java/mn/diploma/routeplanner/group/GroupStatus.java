@@ -1,6 +1,6 @@
 package mn.diploma.routeplanner.group;
 
-/** Group plan life cycle (state diagram "Бүлгийн төлөвлөгөөний төлөв"). */
+/** Бүлгийн төлөвлөгөөний амьдралын мөчлөг ("Бүлгийн төлөвлөгөөний төлөв" төлөвийн диаграм). */
 public enum GroupStatus {
     RECOMMENDED, SHARED, COMPLETED, CANCELLED
 }

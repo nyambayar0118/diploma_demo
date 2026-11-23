@@ -9,9 +9,9 @@ import mn.diploma.routeplanner.auth.ConsentDataType;
 import mn.diploma.routeplanner.auth.ConsentService;
 
 /**
- * Public service of the Interaction module: records what users do (АШ13, ДШ03).
- * The log row is written only with the INTERACTION_HISTORY consent (ХШ05); the event is published
- * in any case so the interest profile can still adapt (that needs the INTERESTS consent instead).
+ * Үйлдлийн модулийн нийтийн сервис: хэрэглэгчийн хийсэн үйлдлийг бүртгэнэ (АШ13, ДШ03).
+ * Бүртгэлийн мөрийг зөвхөн INTERACTION_HISTORY зөвшөөрөлтэй үед бичнэ (ХШ05); үйл явдлыг ямар ч үед
+ * нийтэлдэг тул сонирхлын профайл шинэчлэгдэх боломжтой (үүнд INTERESTS зөвшөөрөл хэрэгтэй).
  */
 @Service
 public class InteractionService {

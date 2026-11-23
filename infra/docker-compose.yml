@@ -1,4 +1,4 @@
-# Whole system on one machine (СНШ08). Run from the repo root:
+# Бүх систем нэг машин дээр (СНШ08). Төслийн үндсэн хавтаснаас ажиллуулна:
 #   docker compose -f infra/docker-compose.yml --env-file .env up --build
 name: routeplanner
 
@@ -12,7 +12,7 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
-      - "127.0.0.1:5432:5432"   # only reachable from this computer (for IntelliJ / DBeaver)
+      - "127.0.0.1:5432:5432"   # зөвхөн энэ компьютероос хандана (IntelliJ / DBeaver-т)
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -58,7 +58,7 @@ services:
     depends_on:
       - backend
 
-  # One-off OSM import (data milestone). Run with:
+  # OSM-ийг нэг удаа импортлох. Ажиллуулах:
   #   docker compose -f infra/docker-compose.yml --env-file .env run --rm osm-import
   osm-import:
     build: ../data
@@ -75,7 +75,7 @@ services:
       db:
         condition: service_healthy
 
-  # Minu Map places on top of the OSM import (needs MINU_API_TOKEN in .env). Run with:
+  # OSM-ийн импорт дээр Minu Map-ийн газар нэмэх (.env-д MINU_API_TOKEN хэрэгтэй). Ажиллуулах:
   #   docker compose -f infra/docker-compose.yml --env-file .env run --rm --build minu-import
   minu-import:
     build: ../data
@@ -94,7 +94,7 @@ services:
       db:
         condition: service_healthy
 
-  # Our own basemap: cut Ulaanbaatar vector tiles (data milestone, part 2). Run with:
+  # Өөрийн суурь газрын зураг: Улаанбаатарын вектор тайлыг тайрах. Ажиллуулах:
   #   docker compose -f infra/docker-compose.yml run --rm --build tiles
   tiles:
     build: ../data

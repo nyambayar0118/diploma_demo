@@ -43,9 +43,9 @@ import mn.diploma.routeplanner.routing.RoutingService;
 import mn.diploma.routeplanner.routing.TravelTimeEstimator;
 
 /**
- * Group planning (АШ10, АШ24): the initiator picks friends (added without an approval step), gets 3-5 meeting
- * places that suit everyone's interests and are fair to reach, shares one, and every member gets their own
- * Google Maps link. People without an account join through the invite link as guests.
+ * Бүлгийн төлөвлөгөө (АШ10, АШ24): санаачлагч найзуудаа сонгож (зөвшөөрөл хүлээхгүйгээр нэмнэ), бүгдийн
+ * сонирхолд нийцсэн, хүрэхэд шударга 3-5 уулзах газрын санал авч, нэгийг нь хуваалцана; гишүүн бүр өөрийн
+ * Google Maps-ийн холбоосыг авна. Бүртгэлгүй хүмүүс урилгын холбоосоор зочноор нэгдэнэ.
  */
 @Service
 public class GroupPlanningService {
@@ -165,7 +165,7 @@ public class GroupPlanningService {
         return view(userId, load(sessionId));
     }
 
-    /** 3-5 meeting places with every member's travel time (logged as a group recommendation batch). */
+    /** Гишүүн бүрийн зорчих хугацаатай 3-5 уулзах газар (бүлгийн санал болголтын багц болгон бүртгэнэ). */
     @Transactional
     public OptionsView getOptions(long userId, long sessionId, boolean again) {
         Session s = load(sessionId);
@@ -184,8 +184,8 @@ public class GroupPlanningService {
     }
 
     /**
-     * RECOMMENDED -> SHARED: fixes the meeting place, computes everyone's travel time, creates an invite link
-     * and a one-stop route for every registered member.
+     * RECOMMENDED -> SHARED: уулзах газрыг тогтоож, бүх гишүүний зорчих хугацааг тооцож, урилгын холбоос болон
+     * бүртгэлтэй гишүүн бүрд нэг зогсоолтой маршрут үүсгэнэ.
      */
     @Transactional
     public GroupView share(long userId, long sessionId, long placeId) {
@@ -225,8 +225,8 @@ public class GroupPlanningService {
     }
 
     /**
-     * Joining through the invite link (АШ24). A logged-in user joins as a member (and gets a route);
-     * anyone else joins as a guest whose interests are not used. Both get their own Maps link.
+     * Урилгын холбоосоор нэгдэх (АШ24). Нэвтэрсэн хэрэглэгч гишүүнээр нэгдэж маршрут авна; бусад нь зочноор
+     * нэгдэх бөгөөд сонирхлыг нь тооцохгүй. Аль аль нь өөрийн Maps холбоосыг авна.
      */
     @Transactional
     public JoinResult join(String token, Long userId, JoinRequest req) {
@@ -284,7 +284,7 @@ public class GroupPlanningService {
         return new JoinResult(fresh.id, fresh.displayName, place, links.linkFor(fresh, dest), minutes, routeId);
     }
 
-    /** SHARED plans of past days become COMPLETED, unshared ones older than a day CANCELLED. */
+    /** Өнгөрсөн өдрүүдийн SHARED төлөвлөгөө COMPLETED, нэг өдрөөс хуучин хуваалцаагүй нь CANCELLED болно. */
     @Scheduled(cron = "0 20 * * * *", zone = "Asia/Ulaanbaatar")
     public int closeExpired() {
         return groups.closeExpired();
@@ -348,7 +348,7 @@ public class GroupPlanningService {
         return groups.findById(sessionId).orElseThrow(GroupPlanningService::notFound);
     }
 
-    /** The initiator's plan, still being planned (members and options can change). */
+    /** Санаачлагчийн төлөвлөж буй төлөвлөгөө (гишүүд, хувилбарууд өөрчлөгдөж болно). */
     private Session ownedOpen(long userId, long sessionId) {
         Session s = load(sessionId);
         if (s.initiator().userId == null || s.initiator().userId != userId) throw notFound();
@@ -375,7 +375,7 @@ public class GroupPlanningService {
         return new ApiException(HttpStatus.NOT_FOUND, "INVITE_INVALID", "Урилгын холбоос хүчингүй эсвэл хугацаа нь дууссан");
     }
 
-    /** ХШ08: the user leaves every group; plans they started are cancelled. */
+    /** ХШ08: хэрэглэгч бүх бүлгээс гарна; өөрийн эхлүүлсэн төлөвлөгөөнүүд цуцлагдана. */
     @EventListener
     void onUserDeleted(UserDeletedEvent e) {
         jdbc.update("""

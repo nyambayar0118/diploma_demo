@@ -1,6 +1,6 @@
 package mn.diploma.routeplanner.common;
 
-/** Price level of a place and budget level of a user (shared by several modules). */
+/** Газрын үнийн түвшин болон хэрэглэгчийн төсвийн түвшин (хэд хэдэн модуль хуваалцан ашиглана). */
 public enum PriceLevel {
     FREE, LOW, MEDIUM, HIGH
 }

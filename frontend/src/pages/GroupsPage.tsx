@@ -23,10 +23,10 @@ const STATUS_CLASS: Record<string, string> = {
 
 const HOURS = [1, 2, 3, 4, 6]
 
-// Ulaanbaatar centre, used when the device position is not available
+// Улаанбаатарын төв; төхөөрөмжийн байршил тодорхойгүй үед ашиглана
 const UB = { lat: 47.9186, lng: 106.9177 }
 
-/** My group plans and a form to start a new one with friends (АШ10). */
+/** Миний бүлгийн төлөвлөгөөнүүд болон найзуудтайгаа шинээр эхлүүлэх маягт (АШ10). */
 export default function GroupsPage() {
   const navigate = useNavigate()
   const { user } = useAuth()

@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-/** Closes routes whose day has passed (state diagram: "маршрутын өдөр өнгөрөхөд"). Runs every hour. */
+/** Өдөр нь өнгөрсөн маршрутуудыг хаана (төлөвийн диаграм: "маршрутын өдөр өнгөрөхөд"). Цаг тутам ажиллана. */
 @Component
 public class RouteExpiryJob {
 

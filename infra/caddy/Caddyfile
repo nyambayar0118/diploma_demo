@@ -1,4 +1,4 @@
-# Caddy terminates HTTPS (Let's Encrypt, renewed automatically) and forwards everything to the Nginx gateway.
+# Caddy HTTPS-ийг хүлээн авч (Let's Encrypt гэрчилгээ, автоматаар шинэчилнэ), бүх хүсэлтийг Nginx нэвтрэх цэг рүү дамжуулна.
 
 {$DOMAIN} {
 	encode zstd gzip

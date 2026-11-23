@@ -14,7 +14,7 @@ import mn.diploma.routeplanner.place.OpeningHours.Status;
 
 class OpeningHoursTest {
 
-    // 2026-11-16 is a Monday
+    // 2026-11-16 бол даваа гараг
     @ParameterizedTest
     @CsvSource(delimiter = '|', value = {
             "Mo-Fr 09:00-18:00; Sa 10:00-16:00; Su off | 2026-11-16T10:00 | OPEN",

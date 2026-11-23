@@ -13,7 +13,7 @@ import jakarta.persistence.Table;
 import mn.diploma.routeplanner.common.PriceLevel;
 import mn.diploma.routeplanner.common.TransportMode;
 
-/** Defaults come from the user survey: 5 km radius, 2–4 hours, 2–3 stops (ХСШ07). */
+/** Анхдагч утгууд хэрэглэгчийн судалгаанаас: 5 км радиус, 2–4 цаг, 2–3 зогсоол (ХСШ07). */
 @Entity
 @Table(name = "user_preferences")
 public class UserPreferences {
