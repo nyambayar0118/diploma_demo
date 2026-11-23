@@ -108,16 +108,23 @@ export function filterPlacesLayer(map: maplibregl.Map, mainCategory: string) {
 }
 
 const RECS_SOURCE = 'recommendations'
+const MEMBERS_SOURCE = 'group-members'
+const MEMBER_LINES_SOURCE = 'group-member-lines'
 
-/** Numbered markers for the current recommendation list; fits the map to them. */
-export function showRecommendations(map: maplibregl.Map,
-                                    items: { placeId: number; lat: number; lng: number; mainCategory: string }[]) {
+export type RecMarker = { placeId: number; lat: number; lng: number; mainCategory: string }
+
+/**
+ * Numbered markers for the current recommendation list (single user or group options). The focused one is
+ * drawn larger. Fits the map to all of them unless fit is false.
+ */
+export function showRecommendations(map: maplibregl.Map, items: RecMarker[], focusedId: number | null = null,
+                                    fit = true) {
   const data = {
     type: 'FeatureCollection' as const,
     features: items.map((it, i) => ({
       type: 'Feature' as const,
       geometry: { type: 'Point' as const, coordinates: [it.lng, it.lat] },
-      properties: { id: it.placeId, n: String(i + 1), mainCategory: it.mainCategory },
+      properties: { id: it.placeId, n: String(i + 1), mainCategory: it.mainCategory, focused: it.placeId === focusedId },
     })),
   }
   const source = map.getSource(RECS_SOURCE) as maplibregl.GeoJSONSource | undefined
@@ -128,23 +135,97 @@ export function showRecommendations(map: maplibregl.Map,
     map.addLayer({
       id: 'recs-circles', type: 'circle', source: RECS_SOURCE,
       paint: {
-        'circle-radius': 12,
+        'circle-radius': ['case', ['get', 'focused'], 17, 12],
         'circle-color': ['match', ['get', 'mainCategory'], ...Object.entries(MAIN_CATEGORY_COLORS).flat(), '#495057'] as unknown as maplibregl.ExpressionSpecification,
         'circle-stroke-color': '#ffffff',
-        'circle-stroke-width': 2.5,
+        'circle-stroke-width': ['case', ['get', 'focused'], 4, 2.5],
+        'circle-radius-transition': { duration: 200 },
       },
     })
     map.addLayer({
       id: 'recs-labels', type: 'symbol', source: RECS_SOURCE,
-      layout: { 'text-field': ['get', 'n'], 'text-font': ['Noto Sans Regular'], 'text-size': 12, 'text-allow-overlap': true },
+      layout: {
+        'text-field': ['get', 'n'], 'text-font': ['Noto Sans Regular'], 'text-allow-overlap': true,
+        'text-size': ['case', ['get', 'focused'], 15, 12],
+        'symbol-sort-key': ['case', ['get', 'focused'], 1, 0],
+      },
       paint: { 'text-color': '#ffffff' },
     })
+    map.on('mouseenter', 'recs-circles', () => { map.getCanvas().style.cursor = 'pointer' })
+    map.on('mouseleave', 'recs-circles', () => { map.getCanvas().style.cursor = '' })
   }
-  if (items.length > 0) {
+  if (fit && items.length > 0) {
     const bounds = new maplibregl.LngLatBounds()
     items.forEach((it) => bounds.extend([it.lng, it.lat]))
-    map.fitBounds(bounds, { padding: { top: 80, bottom: 80, left: window.innerWidth > 640 ? 420 : 40, right: 60 }, maxZoom: 16 })
+    map.fitBounds(bounds, { padding: sidePadding(), maxZoom: 16 })
   }
+}
+
+/** Room taken by the side panel (desktop) or the bottom sheet (phone), so markers are not hidden under it. */
+function sidePadding() {
+  const phone = window.innerWidth <= 640
+  return phone
+    ? { top: 120, bottom: Math.round(window.innerHeight * 0.5) + 20, left: 40, right: 40 }
+    : { top: 130, bottom: 60, left: 420, right: 70 }
+}
+
+/** Moves the map to one recommended place, keeping it clear of the panel. */
+export function focusOn(map: maplibregl.Map, lat: number, lng: number) {
+  const phone = window.innerWidth <= 640
+  map.flyTo({
+    center: [lng, lat], zoom: Math.max(map.getZoom(), 15), duration: 700,
+    offset: phone ? [0, -Math.round(window.innerHeight * 0.22)] : [200, 30],
+  })
+}
+
+export type MemberMarker = { id: number; name: string; color: string; lat: number; lng: number }
+
+/**
+ * Group members' start points (coloured initials) and, when an option is focused, a dashed line from every
+ * member to it, so the fairness of a meeting place can be seen. null removes them.
+ */
+export function showGroupMembers(map: maplibregl.Map, members: MemberMarker[] | null,
+                                 target: { lat: number; lng: number } | null) {
+  const list = members ?? []
+  const points = {
+    type: 'FeatureCollection' as const,
+    features: list.map((m) => ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [m.lng, m.lat] },
+      properties: { initial: m.name.trim().charAt(0).toUpperCase(), color: m.color, name: m.name },
+    })),
+  }
+  const lines = {
+    type: 'FeatureCollection' as const,
+    features: target ? list.map((m) => ({
+      type: 'Feature' as const,
+      geometry: { type: 'LineString' as const, coordinates: [[m.lng, m.lat], [target.lng, target.lat]] },
+      properties: { color: m.color },
+    })) : [],
+  }
+  const src = map.getSource(MEMBERS_SOURCE) as maplibregl.GeoJSONSource | undefined
+  if (src) {
+    src.setData(points)
+    ;(map.getSource(MEMBER_LINES_SOURCE) as maplibregl.GeoJSONSource).setData(lines)
+    return
+  }
+  map.addSource(MEMBER_LINES_SOURCE, { type: 'geojson', data: lines })
+  map.addSource(MEMBERS_SOURCE, { type: 'geojson', data: points })
+  // Lines go under the numbered option markers
+  const before = map.getLayer('recs-circles') ? 'recs-circles' : undefined
+  map.addLayer({
+    id: 'group-member-lines', type: 'line', source: MEMBER_LINES_SOURCE,
+    paint: { 'line-color': ['get', 'color'], 'line-width': 2.5, 'line-dasharray': [2, 2], 'line-opacity': 0.85 },
+  }, before)
+  map.addLayer({
+    id: 'group-members', type: 'circle', source: MEMBERS_SOURCE,
+    paint: { 'circle-radius': 13, 'circle-color': ['get', 'color'], 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 3 },
+  })
+  map.addLayer({
+    id: 'group-member-initials', type: 'symbol', source: MEMBERS_SOURCE,
+    layout: { 'text-field': ['get', 'initial'], 'text-font': ['Noto Sans Regular'], 'text-size': 13, 'text-allow-overlap': true },
+    paint: { 'text-color': '#ffffff' },
+  })
 }
 
 export function onRecommendationClick(map: maplibregl.Map, onSelect: (placeId: number) => void) {

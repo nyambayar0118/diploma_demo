@@ -55,7 +55,7 @@ export default function GroupsPage() {
         method: 'POST',
         body: { friendIds: picked, lat: pos.lat, lng: pos.lng, transportMode: mode, timeBudgetMinutes: minutes },
       })
-      navigate(`/groups/${g.id}`)
+      navigate(`/?group=${g.id}`)
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Сервертэй холбогдсонгүй')
     } finally {

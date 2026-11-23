@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { api, ApiError, logInteraction, type Category, type Preferences, type RecommendationBatch, type RecommendationItem,
   type RouteView, type TransportMode } from '../api'
 import { TRANSPORT_LABELS } from '../categoryLabels'
@@ -14,6 +14,11 @@ type Props = {
   /** Resolves with the next point the user taps on the map. */
   pickOnMap: () => Promise<LatLng>
   onResults: (items: RecommendationItem[]) => void
+  /** The item shown on the map (clicked in the list or on its marker). */
+  focusedId: number | null
+  /** Clicking an item: the map moves to it. */
+  onFocus: (item: RecommendationItem) => void
+  /** "Дэлгэрэнгүй": opens the place sheet. */
   onOpen: (item: RecommendationItem) => void
   onRoute: (route: RouteView) => void
   onClose: () => void
@@ -48,8 +53,13 @@ function distanceText(m: number) {
   return m < 1000 ? `${m} м` : `${(m / 1000).toFixed(1)} км`
 }
 
-export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, onResults, onOpen, onRoute, onClose,
-  categories, initialCategory }: Props) {
+export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, onResults, focusedId, onFocus, onOpen,
+  onRoute, onClose, categories, initialCategory }: Props) {
+  const itemRefs = useRef(new Map<number, HTMLLIElement>())
+  // A marker clicked on the map: bring its row into view
+  useEffect(() => {
+    if (focusedId != null) itemRefs.current.get(focusedId)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }, [focusedId])
   const [minutes, setMinutes] = useState(180)
   const [mode, setMode] = useState<TransportMode>('WALKING')
   // What to look for: main categories, optionally narrowed to subcategories of one of them (empty = everything)
@@ -170,6 +180,11 @@ export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, 
     onResults(rest)
   }
 
+  const focus = (item: RecommendationItem) => {
+    if (focusedId !== item.placeId) logInteraction(item.placeId, 'VIEW', item.recommendationId)
+    onFocus(item)
+  }
+
   const open = (item: RecommendationItem) => {
     logInteraction(item.placeId, 'ACCEPT', item.recommendationId)
     onOpen(item)
@@ -240,15 +255,23 @@ export default function RecommendationPanel({ mapCenter, showOrigin, pickOnMap, 
           )}
           <ol className="rec-list">
             {items.map((it, i) => (
-              <li key={it.recommendationId}>
-                <button type="button" className="rec-main" onClick={() => open(it)}>
+              <li key={it.recommendationId} className={focusedId === it.placeId ? 'focused' : ''}
+                  ref={(el) => { if (el) itemRefs.current.set(it.placeId, el); else itemRefs.current.delete(it.placeId) }}>
+                <div className="rec-main" role="button" tabIndex={0} onClick={() => focus(it)}
+                     onKeyDown={(e) => { if (e.key === 'Enter') focus(it) }}>
                   <span className="rec-num" style={{ background: MAIN_CATEGORY_COLORS[it.mainCategory] ?? '#888' }}>{i + 1}</span>
                   <span className="r-main">
                     <span className="r-name">{it.name}</span>
                     <span className="r-sub">{it.categoryName} · {distanceText(it.distanceM)} · ~{it.travelMinutes} мин</span>
                     <span className={`rec-reason ${it.exploration ? 'explore' : ''}`}>{it.reason}</span>
+                    {focusedId === it.placeId && (
+                      <span className="rec-more">
+                        <button type="button" className="btn small-btn secondary"
+                                onClick={(e) => { e.stopPropagation(); open(it) }}>Дэлгэрэнгүй</button>
+                      </span>
+                    )}
                   </span>
-                </button>
+                </div>
                 <button type="button" className={`rec-add ${picked.includes(it.recommendationId) ? 'on' : ''}`}
                         title={picked.includes(it.recommendationId) ? 'Маршрутаас хасах' : 'Маршрутад нэмэх'}
                         disabled={!picked.includes(it.recommendationId) && picked.length >= MAX_STOPS}

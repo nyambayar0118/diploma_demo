@@ -4,13 +4,15 @@ import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { agoText, api, ApiError, isActiveRoute, type Category, type FriendLocation, type PlaceSummary, type RecommendationItem, type RouteView,
   type VisitResult } from '../api'
-import { addPlacesLayer, filterPlacesLayer, onRecommendationClick, onRouteStopClick, showRecommendations,
+import { addPlacesLayer, filterPlacesLayer, focusOn, onRecommendationClick, onRouteStopClick, showGroupMembers, showRecommendations,
+  type MemberMarker, type RecMarker,
   showRoute } from '../places'
 import { basemapStyle } from '../basemap'
 import { useAuth } from '../auth'
 import SearchBox from '../components/SearchBox'
 import PlaceSheet from '../components/PlaceSheet'
 import RecommendationPanel from '../components/RecommendationPanel'
+import GroupOptionsPanel from '../components/GroupOptionsPanel'
 import RoutePanel from '../components/RoutePanel'
 import VisitPrompt from '../components/VisitPrompt'
 import ContributionForm from '../components/ContributionForm'
@@ -68,8 +70,49 @@ export default function MapPage() {
 
   // The selected place lives in the URL (?place=123), so it can be linked to and survives reloads
   const select = useCallback((id: number | null) => {
-    setParams(id == null ? {} : { place: String(id) })
+    setParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (id == null) next.delete('place')
+      else next.set('place', String(id))
+      return next
+    })
   }, [setParams])
+  // Group plan options shown on the map (?group=6)
+  const groupId = params.get('group') ? Number(params.get('group')) : null
+
+  // Recommendation markers (single user or group options) and the one shown in focus
+  const [focusedRec, setFocusedRec] = useState<number | null>(null)
+  const recMarkers = useRef<RecMarker[]>([])
+  const groupMembers = useRef<MemberMarker[] | null>(null)
+  const drawRecs = useCallback((markers: RecMarker[]) => {
+    recMarkers.current = markers
+    setFocusedRec(null)
+    const map = mapRef.current
+    if (!map) return
+    showRecommendations(map, markers)
+    if (groupMembers.current) showGroupMembers(map, groupMembers.current, null)
+  }, [])
+  const focusRec = useCallback((placeId: number) => {
+    const m = recMarkers.current.find((r) => r.placeId === placeId)
+    const map = mapRef.current
+    if (!m || !map) return
+    setFocusedRec(placeId)
+    showRecommendations(map, recMarkers.current, placeId, false)
+    if (groupMembers.current) showGroupMembers(map, groupMembers.current, m)
+    focusOn(map, m.lat, m.lng)
+  }, [])
+  const drawMembers = useCallback((members: MemberMarker[] | null) => {
+    groupMembers.current = members
+    if (mapRef.current) showGroupMembers(mapRef.current, members, null)
+  }, [])
+  const focusRef = useRef(focusRec)
+  // Markers that arrived before the map finished loading
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !mapReady) return
+    if (recMarkers.current.length > 0) showRecommendations(map, recMarkers.current)
+    if (groupMembers.current) showGroupMembers(map, groupMembers.current, null)
+  }, [mapReady])
   // react-router gives setParams a new identity on every URL change. The map must be created only once,
   // so its click handler reads the latest `select` through a ref instead of depending on it.
   const selectRef = useRef(select)
@@ -102,7 +145,8 @@ export default function MapPage() {
       mapRef.current = m
       m.on('load', () => {
         addPlacesLayer(m, (id) => !picking.current && selectRef.current(id))
-        onRecommendationClick(m, (id) => !picking.current && selectRef.current(id))
+        // A numbered marker: the map moves to it and its row in the panel is highlighted
+        onRecommendationClick(m, (id) => !picking.current && focusRef.current(id))
         onRouteStopClick(m, (id) => !picking.current && selectRef.current(id))
         setMapReady(true)
       })
@@ -269,7 +313,7 @@ export default function MapPage() {
 
   const updateRecs = (items: RecommendationItem[]) => {
     setRecItems(items)
-    if (mapRef.current) showRecommendations(mapRef.current, items)
+    drawRecs(items.map((it) => ({ placeId: it.placeId, lat: it.lat, lng: it.lng, mainCategory: it.mainCategory })))
   }
 
   const routeChanged = (r: RouteView | null) => {
@@ -327,7 +371,7 @@ export default function MapPage() {
       {styleMenu && (
         <MapStyleMenu anchor={styleMenu} markerStyle={markerStyle} onMarkerStyle={changeMarkerStyle} onClose={closeStyleMenu} />
       )}
-      {!showRecs && !showRoutePanel && selectedId == null && !newPlaceAt && (
+      {!showRecs && !showRoutePanel && groupId == null && selectedId == null && !newPlaceAt && (
         <InstallBanner onOpenGuide={() => setGuideOpen(true)} />
       )}
       {user && <VisitPrompt onAnswered={visitAnswered} />}
@@ -342,16 +386,21 @@ export default function MapPage() {
                             onDone={(m) => { setNewPlaceAt(null); setNotice(m) }} />
         </BottomSheet>
       )}
-      {showRecs && (
+      {groupId != null && user && (
+        <GroupOptionsPanel key={groupId} groupId={groupId} focusedId={focusedRec}
+                           onFocus={(o) => focusRec(o.place.id)} onResults={drawRecs} onMembers={drawMembers} />
+      )}
+      {showRecs && groupId == null && (
         <RecommendationPanel mapCenter={center} showOrigin={showOrigin} pickOnMap={pickOnMap}
+                             focusedId={focusedRec} onFocus={(it) => focusRec(it.placeId)}
                              onResults={updateRecs} onClose={closeRecs} onRoute={routeCreated}
                              categories={categories} initialCategory={category || undefined}
                              onOpen={(it) => select(it.placeId)} />
       )}
-      {showRoutePanel && route && !showRecs && (
+      {showRoutePanel && route && !showRecs && groupId == null && (
         <RoutePanel route={route} onChange={routeChanged} onSelectPlace={(id) => select(id)} onClose={closeRoutePanel} />
       )}
-      {!showRecs && !showRoutePanel && selectedId == null && (
+      {!showRecs && !showRoutePanel && groupId == null && selectedId == null && (
         user ? (
           <div className="fabs">
             {isActiveRoute(route) && (

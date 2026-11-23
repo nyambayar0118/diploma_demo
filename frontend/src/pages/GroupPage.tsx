@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router'
 import PageHeader from '../components/PageHeader'
 import Avatar, { AvatarStack } from '../components/Avatar'
 import Icon from '../components/Icon'
-import { api, ApiError, type GroupMember, type GroupOptions, type GroupView, type TransportMode } from '../api'
+import { api, ApiError, type GroupMember, type GroupView, type TransportMode } from '../api'
 import { TRANSPORT_LABELS } from '../categoryLabels'
 import { MAIN_CATEGORY_COLORS } from '../places'
 import { GROUP_STATUS } from './GroupsPage'
@@ -26,8 +26,6 @@ export default function GroupPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [group, setGroup] = useState<GroupView | null>(null)
-  const [options, setOptions] = useState<GroupOptions | null>(null)
-  const [round, setRound] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -50,28 +48,14 @@ export default function GroupPage() {
     }
   }
 
-  // The first request gives the best places; asking again skips the ones already offered in this plan
-  const loadOptions = () => run(async () => {
-    const again = options !== null
-    setOptions(await api<GroupOptions>(`/api/groups/${id}/options${again ? '?again=true' : ''}`))
-    setRound((r) => r + 1)
-  })
-
-  const share = (placeId: number) => run(async () => {
-    setGroup(await api<GroupView>(`/api/groups/${id}/share`, { method: 'POST', body: { placeId } }))
-    setOptions(null)
-  })
-
   const changeMode = (m: GroupMember, transportMode: TransportMode) => run(async () => {
     setGroup(await api<GroupView>(`/api/groups/${id}/members`, {
       method: 'PATCH', body: { op: 'SET_START', memberId: m.id, transportMode },
     }))
-    setOptions(null)
   })
 
   const remove = (m: GroupMember) => window.confirm(`${m.name}-г төлөвлөгөөнөөс хасах уу?`) && run(async () => {
     setGroup(await api<GroupView>(`/api/groups/${id}/members`, { method: 'PATCH', body: { op: 'REMOVE', memberId: m.id } }))
-    setOptions(null)
   })
 
   const cancel = () => window.confirm('Төлөвлөгөөг цуцлах уу?') && run(async () => {
@@ -102,7 +86,6 @@ export default function GroupPage() {
   const mine = group.members.find((m) => m.me)
   const planning = group.status === 'RECOMMENDED' && group.initiator
   const open = group.status === 'RECOMMENDED' || group.status === 'SHARED'
-  const memberById = (memberId: string) => group.members.find((m) => String(m.id) === memberId)
   const place = group.meetingPlace
   const color = place ? MAIN_CATEGORY_COLORS[place.mainCategory] ?? '#888' : undefined
 
@@ -166,56 +149,15 @@ export default function GroupPage() {
         </section>
       )}
 
-      {/* Options */}
+      {/* Options are chosen on the map */}
       {planning && (
-        <section className="s-card">
-          <div className="row">
-            <h2 style={{ margin: 0 }}>Уулзах газрын хувилбар</h2>
-            {options && <span className="r-sub">{round > 1 ? `${round}-р санал` : ''}</span>}
-          </div>
-          <p className="s-desc" style={{ marginTop: 4 }}>
-            Бүгдийн сонирхлыг нэгтгэж, хэн нэгэн хэт хол явахгүй байхаар эрэмбэлнэ. Дахин санал болгоход өмнө харуулсан газрууд хойно орно.
-          </p>
-          {options && options.options.length === 0 && (
-            <div className="empty">
-              <Icon name="pin" size={28} />
-              <p>Бүгд цагтаа хүрэх тохирох газар олдсонгүй. Хугацаагаа нэмэх эсвэл тээврийн хэрэгслээ өөрчилнө үү.</p>
-            </div>
-          )}
-          {options && options.options.length > 0 && (
-            <ol className="opt-list">
-              {options.options.map((o, i) => {
-                const c = MAIN_CATEGORY_COLORS[o.place.mainCategory] ?? '#888'
-                const times = Object.entries(o.travelMinutesByMember)
-                return (
-                  <li key={o.recommendationId} className="opt">
-                    <span className="opt-num" style={{ background: c }}>{i + 1}</span>
-                    <span className="r-main">
-                      <span className="r-name">{o.place.name}</span>
-                      <span className="r-sub">{o.place.categoryName} · хамгийн удаан ~{o.maxTravelMinutes} мин</span>
-                      <span className="opt-times">
-                        {times.map(([mid, t]) => {
-                          const m = memberById(mid)
-                          return (
-                            <span key={mid} className="opt-time" title={m?.name}>
-                              <Avatar name={m?.name ?? '?'} size={18} />{t}′
-                            </span>
-                          )
-                        })}
-                      </span>
-                    </span>
-                    <span className="opt-side">
-                      <Link className="ghost-btn" to={`/?place=${o.place.id}`} title="Газрын зураг дээр">Харах</Link>
-                      <button className="btn small-btn" disabled={busy} onClick={() => share(o.place.id)}>Сонгох</button>
-                    </span>
-                  </li>
-                )
-              })}
-            </ol>
-          )}
-          <button className={`btn ${options ? 'secondary' : ''} block`} disabled={busy} onClick={loadOptions}>
-            {busy ? 'Тооцоолж байна…' : options ? '↻ Өөр газрууд санал болгох' : 'Хувилбар авах'}
-          </button>
+        <section className="s-card choose-card">
+          <span className="intro-icon"><Icon name="layers" size={24} /></span>
+          <span className="r-main">
+            <span className="t-title">Уулзах газраа сонгох</span>
+            <span className="t-desc">Бүгдэд тохирох газруудыг газрын зураг дээр, гишүүн бүрээс очих замтай нь харуулна.</span>
+          </span>
+          <Link className="btn" to={`/?group=${group.id}`}>Газрын зураг дээр харах</Link>
         </section>
       )}
 

@@ -940,3 +940,29 @@ input, select, textarea { color: var(--c-text); background-color: var(--c-input)
   .people li { flex-wrap: wrap; }
   .member-side { margin-left: 52px; }
 }
+
+/* ---------- Recommendations next to the map: focused item ---------- */
+.rec-list li { transition: background 0.15s; }
+.rec-list li.focused { background: var(--c-info-bg); border-radius: 10px; border-top-color: transparent; }
+.rec-list li.focused + li { border-top-color: transparent; }
+.rec-list li.focused .rec-num { box-shadow: 0 0 0 3px var(--c-surface), 0 0 0 5px var(--c-primary); }
+.rec-main { cursor: pointer; }
+.rec-more { display: flex; gap: 6px; margin-top: 8px; animation: opt-in 0.2s ease both; }
+
+.group-panel .sheet-title { padding-right: 40px; }
+.gp-members { display: flex; align-items: center; gap: 10px; margin: 6px 0 4px; }
+.gp-members .r-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gp-hint { font-size: 12px; color: var(--c-muted); margin: 8px 0 10px; }
+.opt { cursor: pointer; }
+.opt.focused { border-color: var(--c-primary); background: var(--c-info-bg); box-shadow: 0 0 0 1px var(--c-primary); }
+.opt.focused .opt-time { background: var(--c-surface); }
+.group-panel .btn.block { margin-top: 4px; }
+
+.choose-card { display: flex; align-items: center; gap: 14px; }
+.choose-card .t-title { font-weight: 600; font-size: 15px; }
+.choose-card .t-desc { font-size: 13px; color: var(--c-muted); }
+.choose-card .btn { flex: none; }
+@media (max-width: 640px) {
+  .choose-card { flex-wrap: wrap; }
+  .choose-card .btn { width: 100%; text-align: center; }
+}
