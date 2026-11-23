@@ -4,8 +4,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -39,8 +41,9 @@ public class GroupRecommender {
                               TransportMode mode) {
     }
 
+    /** {@code again}: places already offered in this group go after the ones not seen yet. */
     public record Request(long groupSessionId, long initiatorId, List<MemberInput> members, int availableMinutes,
-                          PriceLevel budgetLevel, LocalDateTime at, int k) {
+                          PriceLevel budgetLevel, LocalDateTime at, int k, boolean again) {
     }
 
     public record Option(long recommendationId, long placeId, String name, String nameLatin, String category,
@@ -92,6 +95,7 @@ public class GroupRecommender {
                        OR array_position(ARRAY['FREE', 'LOW', 'MEDIUM', 'HIGH'], p.price_level::text)
                           <= array_position(ARRAY['FREE', 'LOW', 'MEDIUM', 'HIGH'], ?::text))
                   AND coalesce(t.suitability, 0.5) > 0
+                ORDER BY p.location <-> ST_SetSRID(ST_MakePoint(?, ?), 4326)
                 LIMIT 800
                 """, (rs, i) -> new Object[] {
                         new Place(rs.getLong("id"), rs.getString("name_cyrillic"), rs.getString("name_latin"),
@@ -99,7 +103,7 @@ public class GroupRecommender {
                                 rs.getString("main_code"), rs.getDouble("lat"), rs.getDouble("lng"), rs.getDouble("prior")),
                         rs.getString("opening_hours_raw")},
                 TimeOfDay.of(req.at()).name(), TimeOfDay.dayType(req.at()), cLng, cLat, radius,
-                userIds.toArray(Long[]::new), req.budgetLevel().name());
+                userIds.toArray(Long[]::new), req.budgetLevel().name(), cLng, cLat);
 
         Map<Long, Map<Long, Double>> weights = weights(members);
         int maxTravel = Math.max(20, req.availableMinutes() / 3);
@@ -134,14 +138,32 @@ public class GroupRecommender {
         }
         scored.sort(Comparator.comparingDouble(Option::score).reversed());
 
+        // "Again": places offered before in this group are used only when the unseen ones run out
+        Set<Long> shown = req.again() ? shownBefore(req.groupSessionId()) : Set.of();
         List<Option> chosen = new ArrayList<>();
         Map<String, Integer> perCategory = new HashMap<>();
-        for (Option o : scored) {
-            if (chosen.size() >= req.k()) break;
-            if (perCategory.merge(o.category(), 1, Integer::sum) > MAX_PER_CATEGORY) continue;
-            chosen.add(o);
+        pick(scored.stream().filter(o -> !shown.contains(o.placeId())).toList(), chosen, perCategory, req.k());
+        if (chosen.size() < req.k()) {
+            pick(scored.stream().filter(o -> shown.contains(o.placeId())).toList(), chosen, perCategory, req.k());
         }
         return log(req, chosen);
+    }
+
+    private static void pick(List<Option> ranked, List<Option> chosen, Map<String, Integer> perCategory, int k) {
+        for (Option o : ranked) {
+            if (chosen.size() >= k) return;
+            if (perCategory.getOrDefault(o.category(), 0) >= MAX_PER_CATEGORY) continue;
+            perCategory.merge(o.category(), 1, Integer::sum);
+            chosen.add(o);
+        }
+    }
+
+    private Set<Long> shownBefore(long groupSessionId) {
+        return new HashSet<>(jdbc.queryForList("""
+                SELECT DISTINCT r.place_id FROM recommendations r
+                JOIN recommendation_batches b ON b.id = r.batch_id
+                WHERE b.group_session_id = ?
+                """, Long.class, groupSessionId));
     }
 
     private Map<Long, Map<Long, Double>> weights(List<MemberInput> members) {

@@ -69,6 +69,14 @@ class GroupFlowTest {
                 "SELECT ranker_name FROM recommendation_batches WHERE group_session_id = ? LIMIT 1", String.class, groupId));
         assertEquals(404, http.send("GET", "/api/groups/" + groupId + "/options", null, b).statusCode());
 
+        // Asking again: a place not offered yet comes first; earlier ones only fill the remaining slots
+        java.util.Set<Long> firstIds = new java.util.HashSet<>();
+        for (JsonNode o : options.get("options")) firstIds.add(o.get("place").get("id").asLong());
+        place("Шинэ кафе", "cafe", 0.002);
+        JsonNode again = json(http.send("GET", "/api/groups/" + groupId + "/options?again=true", null, a), 200);
+        long firstAgain = again.get("options").get(0).get("place").get("id").asLong();
+        assertFalse(firstIds.contains(firstAgain), again.toString());
+
         // Members see the plan; others do not
         assertEquals(200, http.send("GET", "/api/groups/" + groupId, null, b).statusCode());
         assertEquals(404, http.send("GET", "/api/groups/" + groupId, null, c).statusCode());

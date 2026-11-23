@@ -167,7 +167,7 @@ public class GroupPlanningService {
 
     /** 3-5 meeting places with every member's travel time (logged as a group recommendation batch). */
     @Transactional
-    public OptionsView getOptions(long userId, long sessionId) {
+    public OptionsView getOptions(long userId, long sessionId, boolean again) {
         Session s = load(sessionId);
         if (s.initiator().userId == null || s.initiator().userId != userId) throw notFound();
         List<GroupRecommender.MemberInput> inputs = s.members.stream().filter(Member::hasStart)
@@ -175,7 +175,7 @@ public class GroupPlanningService {
                         m.transportMode))
                 .toList();
         GroupRecommender.Result result = recommender.recommend(new GroupRecommender.Request(sessionId, userId, inputs,
-                s.timeBudgetMinutes, s.budgetLevel, LocalDateTime.now(RecommendationService.ZONE), OPTIONS));
+                s.timeBudgetMinutes, s.budgetLevel, LocalDateTime.now(RecommendationService.ZONE), OPTIONS, again));
         return new OptionsView(result.batchId(), result.aggregator(), result.options().stream()
                 .map(o -> new OptionView(o.recommendationId(),
                         new PlaceRef(o.placeId(), o.name(), o.categoryName(), o.mainCategory(), o.lat(), o.lng()),
