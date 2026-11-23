@@ -18,6 +18,34 @@ export const MIN_PLACES_ZOOM = 13
 
 const SOURCE_ID = 'places'
 
+// Place dots can be hidden from the map control; remembered between visits
+const HIDDEN_KEY = 'routeplanner:placesHidden'
+let placesHidden = (() => {
+  try {
+    return localStorage.getItem(HIDDEN_KEY) === '1'
+  } catch {
+    return false
+  }
+})()
+let refreshPlaces: (() => void) | null = null
+let currentStyle: MarkerStyle = savedMarkerStyle()
+
+export function placesAreHidden() {
+  return placesHidden
+}
+
+/** Shows or hides every place dot (recommendations, routes and groups stay visible). */
+export function setPlacesHidden(map: maplibregl.Map, hidden: boolean) {
+  placesHidden = hidden
+  try {
+    localStorage.setItem(HIDDEN_KEY, hidden ? '1' : '0')
+  } catch {
+    // private mode: only for this visit
+  }
+  setMarkerStyle(map, currentStyle)
+  if (!hidden) refreshPlaces?.()
+}
+
 /** Adds the "places" GeoJSON layer and keeps it in sync with the visible map area. */
 export function addPlacesLayer(map: maplibregl.Map, onSelect: (placeId: number) => void) {
   map.addSource(SOURCE_ID, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
@@ -61,7 +89,7 @@ export function addPlacesLayer(map: maplibregl.Map, onSelect: (placeId: number) 
 
   let controller: AbortController | null = null
   const refresh = () => {
-    if (map.getZoom() < MIN_PLACES_ZOOM) return
+    if (map.getZoom() < MIN_PLACES_ZOOM || placesHidden) return
     controller?.abort()
     controller = new AbortController()
     const b = map.getBounds()
@@ -74,6 +102,7 @@ export function addPlacesLayer(map: maplibregl.Map, onSelect: (placeId: number) 
       })
   }
   map.on('moveend', refresh)
+  refreshPlaces = refresh
   refresh()
 
   for (const layer of PLACE_LAYERS) {
@@ -90,10 +119,11 @@ const PLACE_LAYERS = ['places-circles', 'places-shapes']
 
 /** Switches the place markers between dots and an image shape. */
 export function setMarkerStyle(map: maplibregl.Map, style: MarkerStyle) {
+  currentStyle = style
   if (!map.getLayer('places-circles') || !map.getLayer('places-shapes')) return
   const dots = style === 'dot'
-  map.setLayoutProperty('places-circles', 'visibility', dots ? 'visible' : 'none')
-  map.setLayoutProperty('places-shapes', 'visibility', dots ? 'none' : 'visible')
+  map.setLayoutProperty('places-circles', 'visibility', dots && !placesHidden ? 'visible' : 'none')
+  map.setLayoutProperty('places-shapes', 'visibility', !dots && !placesHidden ? 'visible' : 'none')
   if (!dots) {
     map.setLayoutProperty('places-shapes', 'icon-image', iconExpression(style))
     map.setLayoutProperty('places-shapes', 'icon-anchor', style === 'pin' ? 'bottom' : 'center')

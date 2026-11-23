@@ -966,3 +966,7 @@ input, select, textarea { color: var(--c-text); background-color: var(--c-input)
   .choose-card { flex-wrap: wrap; }
   .choose-card .btn { width: 100%; text-align: center; }
 }
+
+/* Hide / show place dots */
+.places-toggle.off { color: var(--c-primary) !important; background: var(--c-info-bg) !important; }
+.toast.flash { pointer-events: none; animation: opt-in 0.2s ease both; }

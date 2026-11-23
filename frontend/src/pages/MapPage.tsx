@@ -21,7 +21,7 @@ import InstallGuide from '../components/InstallGuide'
 import InstallBanner from '../components/InstallBanner'
 import MapStyleMenu from '../components/MapStyleMenu'
 import { saveMarkerStyle, savedMarkerStyle, type MarkerStyle } from '../markerShapes'
-import { setMarkerStyle } from '../places'
+import { placesAreHidden, setMarkerStyle, setPlacesHidden } from '../places'
 import Icon from '../components/Icon'
 import { MAIN_CATEGORY_COLORS } from '../places'
 import { useLocationSharing } from '../locationSharing'
@@ -63,6 +63,15 @@ export default function MapPage() {
     setMarkerStyleState(s)
     saveMarkerStyle(s)
     if (mapRef.current) setMarkerStyle(mapRef.current, s)
+  }
+  const [dotsHidden, setDotsHidden] = useState(placesAreHidden)
+  const placesToggle = useRef<PlacesToggle | null>(null)
+  const flashTimer = useRef<number | undefined>(undefined)
+  const [flashText, setFlashText] = useState<string | null>(null)
+  const flash = (text: string) => {
+    setFlashText(text)
+    window.clearTimeout(flashTimer.current)
+    flashTimer.current = window.setTimeout(() => setFlashText(null), 1600)
   }
   const closeGuide = useCallback(() => setGuideOpen(false), [])
   const closeMenu = useCallback(() => setMenuOpen(false), [])
@@ -141,6 +150,15 @@ export default function MapPage() {
       map.addControl(new StyleButton((rect) => setStyleMenu((open) => open ? null : {
         right: window.innerWidth - rect.left + 8, bottom: window.innerHeight - rect.bottom,
       })), 'bottom-right')
+      // Added last, so it sits on top of the stack: one tap hides or shows every place dot
+      const toggle = new PlacesToggle(placesAreHidden(), (hidden) => {
+        if (!mapRef.current) return
+        setPlacesHidden(mapRef.current, hidden)
+        setDotsHidden(hidden)
+        flash(hidden ? 'Газрын цэгүүдийг нуулаа' : 'Газрын цэгүүдийг харууллаа')
+      })
+      placesToggle.current = toggle
+      map.addControl(toggle, 'bottom-right')
       const m = map
       mapRef.current = m
       m.on('load', () => {
@@ -269,7 +287,14 @@ export default function MapPage() {
 
   const changeCategory = (code: string) => {
     setCategory(code)
-    if (mapRef.current) filterPlacesLayer(mapRef.current, code)
+    if (!mapRef.current) return
+    filterPlacesLayer(mapRef.current, code)
+    // Picking a category means the user wants to see places
+    if (dotsHidden) {
+      setPlacesHidden(mapRef.current, false)
+      setDotsHidden(false)
+      placesToggle.current?.setHidden(false)
+    }
   }
 
   const center = useCallback(() => {
@@ -376,6 +401,7 @@ export default function MapPage() {
       )}
       {user && <VisitPrompt onAnswered={visitAnswered} />}
       {pickingNew && <div className="toast">Шинэ газрын байршлыг газрын зураг дээр дарж сонгоно уу</div>}
+      {flashText && <div className="toast flash">{flashText}</div>}
       {notice && (
         <div className="toast ok" onClick={() => setNotice(null)}>{notice}</div>
       )}
@@ -419,6 +445,62 @@ export default function MapPage() {
       )}
     </>
   )
+}
+
+const EYE = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>'
+const EYE_OFF = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>'
+  + '<path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>'
+  + '<path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/>'
+
+/** Map control button that hides or shows all place dots. */
+class PlacesToggle implements maplibregl.IControl {
+  private container?: HTMLDivElement
+  private button?: HTMLButtonElement
+  private hidden: boolean
+  private readonly onToggle: (hidden: boolean) => void
+
+  constructor(hidden: boolean, onToggle: (hidden: boolean) => void) {
+    this.hidden = hidden
+    this.onToggle = onToggle
+  }
+
+  onAdd() {
+    const div = document.createElement('div')
+    div.className = 'maplibregl-ctrl maplibregl-ctrl-group'
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.className = 'style-ctrl places-toggle'
+    button.addEventListener('pointerdown', (e) => e.stopPropagation())
+    button.addEventListener('click', () => {
+      this.setHidden(!this.hidden)
+      this.onToggle(this.hidden)
+    })
+    div.appendChild(button)
+    this.container = div
+    this.button = button
+    this.render()
+    return div
+  }
+
+  setHidden(hidden: boolean) {
+    this.hidden = hidden
+    this.render()
+  }
+
+  private render() {
+    if (!this.button) return
+    const label = this.hidden ? 'Газрын цэгүүдийг харуулах' : 'Газрын цэгүүдийг нуух'
+    this.button.title = label
+    this.button.setAttribute('aria-label', label)
+    this.button.setAttribute('aria-pressed', String(this.hidden))
+    this.button.classList.toggle('off', this.hidden)
+    this.button.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"'
+      + ` stroke-linecap="round" stroke-linejoin="round">${this.hidden ? EYE_OFF : EYE}</svg>`
+  }
+
+  onRemove() {
+    this.container?.remove()
+  }
 }
 
 /** Map control button (stacked with zoom / locate) that opens the map look menu. */
