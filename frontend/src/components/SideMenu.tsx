@@ -135,7 +135,7 @@ export default function SideMenu({ open, onClose, onSelectPlace, onOpenRoute, on
                 <input type="checkbox" className="switch" checked={theme === 'dark'}
                        onChange={(e) => setTheme(e.target.checked ? 'dark' : 'light')} />
               </label>
-              <div className="drawer-credit">Газрын мэдээлэл © OpenStreetMap-ийн хувь нэмэрлэгчид</div>
+              <div className="drawer-credit">Газрын мэдээлэл © OpenStreetMap-ийн хувь нэмэрлэгчид, © Minu Map</div>
             </div>
           </>
         ) : (

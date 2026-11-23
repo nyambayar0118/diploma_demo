@@ -19,7 +19,7 @@ function ownStyle(theme: 'light' | 'dark'): maplibregl.StyleSpecification {
       protomaps: {
         type: 'vector',
         url: `pmtiles://${location.origin}${PMTILES_PATH}`,
-        attribution: '<a href="https://protomaps.com">Protomaps</a> © <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>',
+        attribution: '<a href="https://protomaps.com">Protomaps</a> © <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> · © <a href="https://map.minu.mn">Minu Map</a>',
       },
     },
     // Labels prefer name:mn and fall back to the default name

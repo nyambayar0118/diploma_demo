@@ -41,6 +41,15 @@ Always on and has a public IP. Any provider works; 2 vCPU / 2–4 GB RAM / 40 GB
    ```bash
    docker compose -f infra/docker-compose.yml -f infra/docker-compose.prod.yml --env-file .env up -d --build
    ```
+   **Minu Map places** (optional, after the backend has started once so Flyway created V15).
+   Put `MINU_API_TOKEN=...` in `.env`, then:
+   ```bash
+   docker compose -f infra/docker-compose.yml --env-file .env run --rm --build minu-import
+   ```
+   The first run downloads all Minu companies (~8 min, one request per second) into
+   `data/raw/minu/`; later runs reuse that file. To refresh it: add `-e MINU_REFETCH=1`.
+   Run it again after every `osm-import`. The summary at the end lists the most common Minu
+   categories that map to nothing; add patterns for them to `minu_category_mappings` if needed.
 6. Open `https://<name>.duckdns.org`. The first start takes ~30 s while Caddy gets the certificate.
 
 The firewall must allow ports 80 and 443 (`ufw allow 80,443/tcp` if ufw is on).

@@ -125,6 +125,9 @@ export type PlaceDetails = PlaceSummary & {
   averageRating: number
   reviewCount: number
   links?: { url: string; type: string; title: string | null; platform: string | null }[]
+  source?: 'OSM' | 'USER' | 'MINU'
+  /** Some of the details come from Minu Map */
+  fromMinu?: boolean
 }
 
 export type MarkType = 'SAVED' | 'HIDDEN'

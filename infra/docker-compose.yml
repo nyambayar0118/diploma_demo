@@ -75,6 +75,25 @@ services:
       db:
         condition: service_healthy
 
+  # Minu Map places on top of the OSM import (needs MINU_API_TOKEN in .env). Run with:
+  #   docker compose -f infra/docker-compose.yml --env-file .env run --rm --build minu-import
+  minu-import:
+    build: ../data
+    profiles: ["tools"]
+    command: ["/data/minu/import.sh"]
+    environment:
+      PGHOST: db
+      PGDATABASE: ${DB_NAME:-routeplanner}
+      PGUSER: ${DB_USER:-routeplanner}
+      PGPASSWORD: ${DB_PASSWORD:-routeplanner}
+      MINU_API_TOKEN: ${MINU_API_TOKEN:-}
+      MINU_REFETCH: ${MINU_REFETCH:-0}
+    volumes:
+      - ../data:/data
+    depends_on:
+      db:
+        condition: service_healthy
+
   # Our own basemap: cut Ulaanbaatar vector tiles (data milestone, part 2). Run with:
   #   docker compose -f infra/docker-compose.yml run --rm --build tiles
   tiles:

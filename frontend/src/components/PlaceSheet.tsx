@@ -186,7 +186,12 @@ export default function PlaceSheet({ placeId, recommendationId, onAddToRoute, on
                               onDone={(m) => { setContributing(false); setThanks(m) }} />
           )}
           <Reviews placeId={place.id} user={user} />
-          <p className="muted small">© OpenStreetMap-ийн хувь нэмэрлэгчид</p>
+          <p className="muted small">
+            {place.source === 'MINU' ? '© Minu Map'
+              : place.source === 'USER' ? 'Хэрэглэгчийн нэмсэн газар'
+              : place.fromMinu ? '© OpenStreetMap-ийн хувь нэмэрлэгчид, © Minu Map'
+              : '© OpenStreetMap-ийн хувь нэмэрлэгчид'}
+          </p>
         </>
       )}
     </BottomSheet>

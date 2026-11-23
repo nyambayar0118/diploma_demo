@@ -39,7 +39,9 @@ ON CONFLICT ON CONSTRAINT places_osm_unique DO UPDATE SET
     district_or_sum   = EXCLUDED.district_or_sum,
     khoroo_or_bag     = EXCLUDED.khoroo_or_bag,
     street            = CASE WHEN 'street' = ANY (places.user_edited_fields) THEN places.street ELSE EXCLUDED.street END,
-    opening_hours_raw = CASE WHEN 'opening_hours_raw' = ANY (places.user_edited_fields) THEN places.opening_hours_raw ELSE EXCLUDED.opening_hours_raw END,
+    -- hours filled in from Minu Map stay when OSM has none
+    opening_hours_raw = CASE WHEN 'opening_hours_raw' = ANY (places.user_edited_fields) THEN places.opening_hours_raw
+                             ELSE coalesce(EXCLUDED.opening_hours_raw, CASE WHEN places.minu_id IS NOT NULL THEN places.opening_hours_raw END) END,
     osm_tags          = EXCLUDED.osm_tags,
     is_active         = CASE WHEN 'is_active' = ANY (places.user_edited_fields) THEN places.is_active ELSE TRUE END,
     last_synced_at    = EXCLUDED.last_synced_at;

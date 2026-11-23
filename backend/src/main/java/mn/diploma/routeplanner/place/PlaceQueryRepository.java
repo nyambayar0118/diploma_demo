@@ -97,7 +97,7 @@ public class PlaceQueryRepository {
                 'openingHours', p.opening_hours_raw,
                 'priceLevel', p.price_level,
                 'averageRating', p.average_rating, 'reviewCount', p.review_count,
-                'source', p.source)::text
+                'source', p.source, 'fromMinu', p.minu_id IS NOT NULL)::text
             FROM places p
             JOIN place_categories c ON c.id = p.category_id
             JOIN place_categories m ON m.id = c.parent_id
