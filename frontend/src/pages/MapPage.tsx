@@ -21,7 +21,7 @@ import InstallGuide from '../components/InstallGuide'
 import InstallBanner from '../components/InstallBanner'
 import MapStyleMenu from '../components/MapStyleMenu'
 import { saveMarkerStyle, savedMarkerStyle, type MarkerStyle } from '../markerShapes'
-import { placesAreHidden, setMarkerStyle, setPlacesHidden } from '../places'
+import { placesAreHidden, setMarkerStyle, setPlacesDimmed, setPlacesHidden } from '../places'
 import Icon from '../components/Icon'
 import { MAIN_CATEGORY_COLORS } from '../places'
 import { useLocationSharing } from '../locationSharing'
@@ -268,6 +268,15 @@ export default function MapPage() {
       else setRoute(r)
     }).catch(() => undefined)
   }
+
+  // While something is in focus the other place dots fade, so it stands out
+  const routeShown = showRoutePanel && route != null
+  const recsShown = showRecs && recItems.length > 0
+  const focusMode = selectedId != null || routeShown || recsShown || groupId != null
+  useEffect(() => {
+    if (!mapRef.current || !mapReady) return
+    setPlacesDimmed(mapRef.current, focusMode, selectedId)
+  }, [mapReady, focusMode, selectedId, theme])
 
   const routeHasPlace = route?.stops.some((s) => s.placeId === selectedId) ?? false
   const canAddToRoute = route?.status === 'CREATED' && route.stops.length < 4 && !routeHasPlace

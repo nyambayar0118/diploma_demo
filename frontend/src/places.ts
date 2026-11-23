@@ -67,6 +67,8 @@ export function addPlacesLayer(map: maplibregl.Map, onSelect: (placeId: number) 
       'circle-radius': ['case', ['get', 'recommendable'], 6, 3.5],
       'circle-stroke-color': '#ffffff',
       'circle-stroke-width': 1.5,
+      'circle-opacity-transition': { duration: 250 },
+      'circle-stroke-opacity-transition': { duration: 250 },
     },
   })
 
@@ -84,6 +86,7 @@ export function addPlacesLayer(map: maplibregl.Map, onSelect: (placeId: number) 
       'icon-ignore-placement': true,
       'symbol-sort-key': ['case', ['get', 'recommendable'], 1, 0],
     },
+    paint: { 'icon-opacity-transition': { duration: 250 } },
   })
   setMarkerStyle(map, savedMarkerStyle())
 
@@ -116,6 +119,28 @@ export function addPlacesLayer(map: maplibregl.Map, onSelect: (placeId: number) 
 }
 
 const PLACE_LAYERS = ['places-circles', 'places-shapes']
+
+const DIMMED = 0.2
+
+/**
+ * Fades every place dot except keepId while something else is in focus (a selected place, a route,
+ * recommendations or group options), so that content stands out. dimmed false restores them.
+ */
+export function setPlacesDimmed(map: maplibregl.Map, dimmed: boolean, keepId: number | null = null) {
+  if (!map.getLayer('places-circles') || !map.getLayer('places-shapes')) return
+  const isKept: maplibregl.ExpressionSpecification = ['==', ['get', 'id'], keepId ?? -1]
+  const opacity: maplibregl.DataDrivenPropertyValueSpecification<number> = dimmed
+    ? ['case', isKept, 1, DIMMED]
+    : 1
+  map.setPaintProperty('places-circles', 'circle-opacity', opacity)
+  map.setPaintProperty('places-circles', 'circle-stroke-opacity', opacity)
+  map.setPaintProperty('places-shapes', 'icon-opacity', opacity)
+  // The kept place is drawn a little larger, the rest as usual
+  map.setPaintProperty('places-circles', 'circle-radius', keepId != null
+    ? ['case', isKept, 9, ['get', 'recommendable'], 6, 3.5]
+    : ['case', ['get', 'recommendable'], 6, 3.5])
+  map.setPaintProperty('places-circles', 'circle-stroke-width', keepId != null ? ['case', isKept, 3, 1.5] : 1.5)
+}
 
 /** Switches the place markers between dots and an image shape. */
 export function setMarkerStyle(map: maplibregl.Map, style: MarkerStyle) {
