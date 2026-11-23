@@ -123,6 +123,9 @@ JOIN LATERAL (
            ST_Distance(p.location::geography, mc.location::geography) AS dist
     FROM places p
     WHERE p.source <> 'MINU' AND p.is_active
+      -- box test first so the spatial index on places.location is used (0.0012° ≈ 90-130 m here),
+      -- then the exact 75 m check on the few places inside the box
+      AND p.location && ST_Expand(mc.location, 0.0012)
       AND ST_DWithin(p.location::geography, mc.location::geography, 75)
 ) p ON p.score >= 0.35;
 
